@@ -10,26 +10,26 @@ export const PREP: Record<SpotKind, string> = {
 
 /** Oblique ways to point at a spot kind without naming it (used from difficulty 2 up). */
 export const IMPLY: Record<SpotKind, readonly string[]> = {
-  drawer: ['somewhere with a handle that slides', 'somewhere that rattles when pulled'],
-  cabinet: ['somewhere behind a door', 'somewhere shut away with a click'],
-  fridge: ['somewhere cold', 'somewhere that hums at midnight'],
-  sofa: ['somewhere soft and lumpy', 'somewhere made for flopping'],
+  drawer: ['somewhere with a handle', 'somewhere that slides shut'],
+  cabinet: ['somewhere behind a door', 'somewhere with a click'],
+  fridge: ['somewhere cold', 'somewhere that hums'],
+  sofa: ['somewhere soft and lumpy', 'somewhere for flopping'],
   table: ['somewhere flat for elbows', 'somewhere with a tabletop'],
   shelf: ['somewhere above knee height', 'somewhere up on a ledge'],
   bed: ['somewhere under a duvet', 'somewhere with pillows'],
-  wardrobe: ['somewhere full of hangers', 'somewhere that smells of cedar'],
-  jacket: ['somewhere with sleeves and pockets', 'somewhere that hangs and drips'],
-  bagSpot: ['somewhere with straps and a zip', 'somewhere that rustles'],
+  wardrobe: ['somewhere full of hangers', 'somewhere cedar-scented'],
+  jacket: ['somewhere with pockets', 'somewhere with sleeves'],
+  bagSpot: ['somewhere with a zip', 'somewhere that rustles'],
   basket: ['somewhere woven', 'somewhere you dump things'],
   keyHook: ['somewhere with a little hook', 'somewhere right by the door'],
-  shoeRack: ['somewhere among the shoes', 'somewhere you kick things off'],
-  sink: ['somewhere damp near the taps', 'somewhere that drips'],
+  shoeRack: ['somewhere among the shoes', 'somewhere shoes gather'],
+  sink: ['somewhere damp by the taps', 'somewhere that drips'],
   tv: ['somewhere near the screen', 'somewhere under the telly'],
-  charger: ['somewhere with a cable', 'somewhere that hums with power'],
+  charger: ['somewhere with a cable', 'somewhere that hums'],
   rug: ['somewhere underfoot', 'somewhere beneath your feet'],
   plant: ['somewhere leafy', 'somewhere green'],
-  papers: ['somewhere under a pile of paper', 'somewhere buried in paper'],
-  bin: ['somewhere you throw things away', "somewhere you'd never look twice"],
+  papers: ['somewhere under paper', 'somewhere buried in paper'],
+  bin: ['somewhere you bin things', "somewhere you'd never look"],
 };
 
 /** Candidate answers for word gates, with riddle-style context. */

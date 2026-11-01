@@ -173,8 +173,8 @@ export const TEMPLATES_B: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'wrapper', title: 'Bubble wrap', text: 'Half-popped bubble wrap. The courier slip is {where:m1}.', links: [weak('m1', 'keys'), weak('m1', 'officeId')] },
-      { slot: 'm1', icon: 'receipt', title: 'Courier slip', text: 'Slip, signed with a smiley. Keys: {where:keys}. ID: {where:officeId}.', links: [strong('keys', 'keys'), strong('officeId', 'officeId')] },
-      { slot: 'e2', icon: 'ticket', title: 'Gift tag', text: 'Tag from a friend. Wallet: {where:wallet}. Phone: {where:phone}.', links: [strong('wallet', 'wallet'), strong('phone', 'phone')] },
+      { slot: 'm1', icon: 'receipt', title: 'Courier slip', text: 'Slip, signed. Keys: {where:keys}. ID: {where:officeId}.', links: [strong('keys', 'keys'), strong('officeId', 'officeId')] },
+      { slot: 'e2', icon: 'ticket', title: 'Gift tag', text: 'Gift tag. Wallet: {where:wallet}. Phone: {where:phone}.', links: [strong('wallet', 'wallet'), strong('phone', 'phone')] },
     ],
   },
   {
