@@ -6,8 +6,11 @@
 
 - src/puzzles: PuzzleShell (extra shared base), UntangleScene, SortScene, WordScene, index (untangle generator unit-checked: 1200 seeds, solution always planar, start always tangled)
 
+- src/organise: OrganiseScene (preview + Shop/Home spots, list scrolls with a second camera, pooled rows), index
+- decor art matches the real DECOR ids (fairy lights, herb pots, towel shelf, bath mat, curtains, mirror, clock, print)
+
 ## Next up
-- src/organise (OrganiseScene, index)
+- Cross-check against AI-2's logic/index.ts once pushed; run the real build + fps gate
 
 ## Notes
 - Extra files inside my own folders (keeps every file < 400 lines): src/art/props.ts, src/puzzles/PuzzleShell.ts
