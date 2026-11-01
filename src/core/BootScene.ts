@@ -3,6 +3,7 @@ import { GAME_H, GAME_W, SCENE } from '../shared/types';
 import { generateAllTextures } from '../art';
 import { sfx } from '../audio/sfx';
 import { loadProfile } from './save';
+import { markBooted } from './errors';
 
 const FONT = 'system-ui, "Segoe UI", Roboto, sans-serif';
 const BAR_W = 520;
@@ -74,6 +75,7 @@ export class BootScene extends Phaser.Scene {
         // Audio is optional: a failure here must never block the game.
       }
       this.running = false;
+      markBooted();
       this.scene.start(SCENE.Menu);
     } catch (err) {
       this.running = false;
