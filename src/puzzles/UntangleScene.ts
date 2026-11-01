@@ -1,0 +1,298 @@
+import Phaser from 'phaser';
+import { PUZZLE_SCENE } from '../shared/types';
+import type { Difficulty } from '../shared/types';
+import { sfx } from '../audio/sfx';
+import { PAL, line, makeText, rrect, shade } from '../art/palette';
+import type { G } from '../art/palette';
+import { PW, PX, PY, PuzzleShell, shuffle } from './PuzzleShell';
+
+const AREA = { x: PX + 80, y: PY + 150, w: PW - 160, h: 390 };
+const NODE_R = 28;
+const THROTTLE_MS = 32;
+
+const LAYOUT: Record<Difficulty, { cols: number; rows: number; drop: number; minCross: number }> = {
+  1: { cols: 3, rows: 2, drop: 0, minCross: 2 },
+  2: { cols: 3, rows: 3, drop: 0, minCross: 4 },
+  3: { cols: 4, rows: 4, drop: 3, minCross: 6 },
+};
+
+interface Theme { title: string; rope: number; node: number; hint: string }
+
+function themeFor(ctx: string | undefined): Theme {
+  const c = (ctx ?? '').toLowerCase();
+  if (/cable|charg|cord|wire/.test(c)) return { title: 'Untangle the cable', rope: 0x3d4651, node: PAL.steel, hint: 'Drag the knots until no cables cross' };
+  if (/necklace|chain|pendant|bead/.test(c)) return { title: 'Untangle the necklace', rope: PAL.gold, node: PAL.rose, hint: 'Drag the beads until no chains cross' };
+  return { title: 'Untangle the headphones', rope: PAL.blue, node: PAL.terracotta, hint: 'Drag the knots until no cords cross' };
+}
+
+export class UntangleScene extends PuzzleShell {
+  private theme: Theme = themeFor(undefined);
+  private n = 0;
+  private ne = 0;
+  private px = new Float32Array(0);
+  private py = new Float32Array(0);
+  private sx = new Float32Array(0);
+  private sy = new Float32Array(0);
+  private ea = new Int16Array(0);
+  private eb = new Int16Array(0);
+  private bad = new Uint8Array(0);
+  private cxs = new Float32Array(0);
+  private cys = new Float32Array(0);
+  private nc = 0;
+  private lastCalc = 0;
+  private edges!: G;
+  private nodes: Phaser.GameObjects.Arc[] = [];
+  private counter!: Phaser.GameObjects.Text;
+  private shown = -1;
+
+  constructor() {
+    super(PUZZLE_SCENE.untangle);
+  }
+
+  protected defaultTitle(): string {
+    return themeFor(this.req.context).title;
+  }
+
+  protected build(): void {
+    this.theme = themeFor(this.req.context);
+    this.nodes = [];
+    this.nc = 0;
+    this.shown = -1;
+    makeText(this, PX + PW / 2, PY + 84, this.theme.hint, 22, PAL.inkSoft, { ox: 0.5, oy: 0.5, align: 'center' });
+    this.counter = makeText(this, PX + PW / 2, PY + 120, '', 26, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center' });
+    const bg = this.add.graphics();
+    rrect(bg, AREA.x - 20, AREA.y - 14, AREA.w + 40, AREA.h + 28, 22, PAL.panelEdge, 0.45);
+    this.edges = this.add.graphics();
+    this.makeGraph();
+    this.recalc();
+    this.drawEdges(false);
+    for (let i = 0; i < this.n; i++) this.makeNode(i);
+    this.updateCounter();
+    this.input.dragDistanceThreshold = 3;
+  }
+
+  private makeGraph(): void {
+    const L = LAYOUT[this.req.difficulty] ?? LAYOUT[1];
+    const { cols, rows } = L;
+    const removed = new Set<number>();
+    const corners = shuffle([0, cols - 1, (rows - 1) * cols, rows * cols - 1], this.rand);
+    for (let i = 0; i < L.drop; i++) removed.add(corners[i]);
+    const idx = new Array<number>(cols * rows).fill(-1);
+    const sx: number[] = [];
+    const sy: number[] = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const k = r * cols + c;
+        if (removed.has(k)) continue;
+        idx[k] = sx.length;
+        const jx = (this.rand() - 0.5) * 28;
+        const jy = (this.rand() - 0.5) * 20;
+        sx.push(AREA.x + 60 + (AREA.w - 120) * (c / (cols - 1)) + jx);
+        sy.push(AREA.y + 50 + (AREA.h - 100) * (r / (rows - 1)) + jy);
+      }
+    }
+    const ea: number[] = [];
+    const eb: number[] = [];
+    const link = (a: number, b: number): void => {
+      if (a >= 0 && b >= 0) {
+        ea.push(a);
+        eb.push(b);
+      }
+    };
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const a = idx[r * cols + c];
+        if (a < 0) continue;
+        if (c + 1 < cols) link(a, idx[r * cols + c + 1]);
+        if (r + 1 < rows) link(a, idx[(r + 1) * cols + c]);
+        if (c + 1 < cols && r + 1 < rows) {
+          const tl = idx[r * cols + c];
+          const tr = idx[r * cols + c + 1];
+          const bl = idx[(r + 1) * cols + c];
+          const br = idx[(r + 1) * cols + c + 1];
+          if (tl >= 0 && tr >= 0 && bl >= 0 && br >= 0) {
+            if (this.rand() < 0.5) link(tl, br);
+            else link(tr, bl);
+          }
+        }
+      }
+    }
+    this.n = sx.length;
+    this.ne = ea.length;
+    this.sx = Float32Array.from(sx);
+    this.sy = Float32Array.from(sy);
+    this.ea = Int16Array.from(ea);
+    this.eb = Int16Array.from(eb);
+    this.bad = new Uint8Array(this.ne);
+    this.cxs = new Float32Array(this.ne * this.ne + 1);
+    this.cys = new Float32Array(this.ne * this.ne + 1);
+    this.px = new Float32Array(this.n);
+    this.py = new Float32Array(this.n);
+    this.scramble(L.minCross);
+  }
+
+  private scramble(minCross: number): void {
+    const order: number[] = [];
+    for (let i = 0; i < this.n; i++) order.push(i);
+    let bestPerm = order.slice();
+    let best = -1;
+    for (let attempt = 0; attempt < 80 && best < minCross; attempt++) {
+      const perm = shuffle(order.slice(), this.rand);
+      this.applyPerm(perm);
+      this.recalc();
+      if (this.nc > best) {
+        best = this.nc;
+        bestPerm = perm;
+      }
+    }
+    if (best < 1) bestPerm = order.slice().reverse();
+    this.applyPerm(bestPerm);
+    for (let i = 0; i < this.n; i++) {
+      this.px[i] += (this.rand() - 0.5) * 16;
+      this.py[i] += (this.rand() - 0.5) * 16;
+      this.clampNode(i);
+    }
+    this.recalc();
+    if (this.nc === 0) {
+      for (let i = 0; i < this.n; i++) {
+        const a = (i / this.n) * Math.PI * 2;
+        const j = (i * 5) % this.n;
+        this.px[i] = AREA.x + AREA.w / 2 + Math.cos((j / this.n) * Math.PI * 2) * (AREA.w * 0.4);
+        this.py[i] = AREA.y + AREA.h / 2 + Math.sin(a * 0 + (j / this.n) * Math.PI * 2) * (AREA.h * 0.38);
+      }
+      this.recalc();
+    }
+  }
+
+  private applyPerm(perm: number[]): void {
+    for (let i = 0; i < this.n; i++) {
+      this.px[i] = this.sx[perm[i]];
+      this.py[i] = this.sy[perm[i]];
+    }
+  }
+
+  private clampNode(i: number): void {
+    this.px[i] = Phaser.Math.Clamp(this.px[i], AREA.x + NODE_R, AREA.x + AREA.w - NODE_R);
+    this.py[i] = Phaser.Math.Clamp(this.py[i], AREA.y + NODE_R, AREA.y + AREA.h - NODE_R);
+  }
+
+  private makeNode(i: number): void {
+    const node = this.add.circle(this.px[i], this.py[i], NODE_R, this.theme.node);
+    node.setStrokeStyle(4, shade(this.theme.node, -0.45));
+    node.setInteractive({ draggable: true, useHandCursor: true });
+    node.on('dragstart', () => sfx.play('pop'));
+    node.on('drag', (_p: Phaser.Input.Pointer, dx: number, dy: number) => {
+      if (this.solved) return;
+      this.px[i] = dx;
+      this.py[i] = dy;
+      this.clampNode(i);
+      node.setPosition(this.px[i], this.py[i]);
+      if (this.time.now - this.lastCalc >= THROTTLE_MS) {
+        this.lastCalc = this.time.now;
+        this.recalc();
+        this.updateCounter();
+      }
+      this.drawEdges(false);
+    });
+    node.on('dragend', () => {
+      if (this.solved) return;
+      this.recalc();
+      this.updateCounter();
+      this.drawEdges(false);
+      if (this.nc === 0) this.win();
+      else sfx.play('tap');
+    });
+    this.nodes.push(node);
+  }
+
+  private recalc(): void {
+    this.nc = 0;
+    this.bad.fill(0);
+    for (let i = 0; i < this.ne; i++) {
+      for (let j = i + 1; j < this.ne; j++) {
+        const a = this.ea[i];
+        const b = this.eb[i];
+        const c = this.ea[j];
+        const d = this.eb[j];
+        if (a === c || a === d || b === c || b === d) continue;
+        if (this.cross(a, b, c, d)) {
+          this.bad[i] = 1;
+          this.bad[j] = 1;
+        }
+      }
+    }
+  }
+
+  private cross(a: number, b: number, c: number, d: number): boolean {
+    const x1 = this.px[a], y1 = this.py[a], x2 = this.px[b], y2 = this.py[b];
+    const x3 = this.px[c], y3 = this.py[c], x4 = this.px[d], y4 = this.py[d];
+    const d1 = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
+    const d2 = (x4 - x3) * (y2 - y3) - (y4 - y3) * (x2 - x3);
+    const d3 = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
+    const d4 = (x2 - x1) * (y4 - y1) - (y2 - y1) * (x4 - x1);
+    if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
+      const t = d1 / (d1 - d2);
+      this.cxs[this.nc] = x1 + t * (x2 - x1);
+      this.cys[this.nc] = y1 + t * (y2 - y1);
+      this.nc++;
+      return true;
+    }
+    return false;
+  }
+
+  private drawEdges(neutral: boolean): void {
+    const g = this.edges;
+    g.clear();
+    for (let i = 0; i < this.ne; i++) {
+      const a = this.ea[i];
+      const b = this.eb[i];
+      const isBad = !neutral && this.bad[i] === 1;
+      line(g, this.px[a], this.py[a], this.px[b], this.py[b], 11, PAL.shadow, 0.35);
+      line(g, this.px[a], this.py[a], this.px[b], this.py[b], 7, isBad ? PAL.red : this.theme.rope);
+    }
+    if (neutral) return;
+    for (let k = 0; k < this.nc; k++) {
+      const x = this.cxs[k];
+      const y = this.cys[k];
+      line(g, x - 9, y - 9, x + 9, y + 9, 6, PAL.white);
+      line(g, x + 9, y - 9, x - 9, y + 9, 6, PAL.white);
+      line(g, x - 8, y - 8, x + 8, y + 8, 3, PAL.red);
+      line(g, x + 8, y - 8, x - 8, y + 8, 3, PAL.red);
+    }
+  }
+
+  private updateCounter(): void {
+    if (this.shown === this.nc) return;
+    this.shown = this.nc;
+    this.counter.setText(this.nc === 0 ? 'No tangles left!' : `Tangles left: ${this.nc}`);
+  }
+
+  private win(): void {
+    for (const nd of this.nodes) nd.disableInteractive();
+    if (this.lowFx) {
+      for (let i = 0; i < this.n; i++) {
+        this.px[i] = this.sx[i];
+        this.py[i] = this.sy[i];
+        this.nodes[i].setPosition(this.px[i], this.py[i]);
+      }
+      this.drawEdges(true);
+    } else {
+      const fx = Float32Array.from(this.px);
+      const fy = Float32Array.from(this.py);
+      this.tweens.addCounter({
+        from: 0, to: 1, duration: 240,
+        onUpdate: (tw) => {
+          const v = tw.getValue() ?? 1;
+          for (let i = 0; i < this.n; i++) {
+            this.px[i] = fx[i] + (this.sx[i] - fx[i]) * v;
+            this.py[i] = fy[i] + (this.sy[i] - fy[i]) * v;
+            this.nodes[i].setPosition(this.px[i], this.py[i]);
+          }
+          this.drawEdges(true);
+        },
+      });
+    }
+    this.counter.setText('Untangled!');
+    this.succeed('snap');
+  }
+}

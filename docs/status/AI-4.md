@@ -4,8 +4,9 @@
 - src/art: palette (colours, draw helpers, makeText/makeButton UI helpers), rooms, spots (20 kinds x closed/open), props (spot helpers), items, icons, decor, index (generateAllTextures)
 - src/audio/sfx.ts (WebAudio synth, generative lo-fi music, safe before unlock())
 
+- src/puzzles: PuzzleShell (extra shared base), UntangleScene, SortScene, WordScene, index (untangle generator unit-checked: 1200 seeds, solution always planar, start always tangled)
+
 ## Next up
-- src/puzzles (PuzzleShell.ts is an extra shared base inside my folder; Untangle, Sort, Word, index)
 - src/organise (OrganiseScene, index)
 
 ## Notes
