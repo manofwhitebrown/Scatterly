@@ -24,7 +24,7 @@ export function burst(scene: Phaser.Scene): void {
   }
 }
 
-/** Flies a pooled image from one point to another (<= 300 ms), then calls done. */
+/** Flies a pooled image along a curved path (<= 320 ms), then calls done. Allocation-free per frame. */
 export function flyItem(
   scene: Phaser.Scene,
   img: Phaser.GameObjects.Image,
@@ -35,14 +35,23 @@ export function flyItem(
 ): void {
   img.setTexture(tex.item(item)).setPosition(from.x, from.y).setDisplaySize(84, 84).setAlpha(1).setVisible(true);
   scene.tweens.killTweensOf(img);
+  const cx = (from.x + to.x) / 2 + (to.y - from.y) * 0.25;
+  const cy = Math.min(from.y, to.y) - 120;
+  const end = 56 / 96;
+  const start = img.scaleX;
+  const state = { t: 0 };
   scene.tweens.add({
-    targets: img,
-    x: to.x,
-    y: to.y,
-    scaleX: 56 / 96,
-    scaleY: 56 / 96,
-    duration: 280,
-    ease: 'Cubic.easeIn',
+    targets: state,
+    t: 1,
+    duration: 320,
+    ease: 'Sine.easeIn',
+    onUpdate: () => {
+      const t = state.t;
+      const u = 1 - t;
+      img.x = u * u * from.x + 2 * u * t * cx + t * t * to.x;
+      img.y = u * u * from.y + 2 * u * t * cy + t * t * to.y;
+      img.setScale(start + (end - start) * t);
+    },
     onComplete: () => {
       img.setVisible(false);
       done();

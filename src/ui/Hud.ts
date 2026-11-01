@@ -3,7 +3,7 @@ import { isLowFx } from '../core/perf';
 import { GAME_W, ROOM_ORDER, tex } from '../shared/types';
 import type { ItemId, RoomId } from '../shared/types';
 import { Button } from './Button';
-import { COLOR, CSS, DEPTH, ROOM_LABEL, drawPlate, fmtClock, makeText } from './theme';
+import { COLOR, CSS, DEPTH, ROOM_LABEL, drawPlate, fmtClock, isCalm, makeText } from './theme';
 
 export interface HudHandlers {
   onPause(): void;
@@ -43,6 +43,7 @@ export class Hud {
   private readonly badge: Phaser.GameObjects.Container;
   private readonly badgeText: Phaser.GameObjects.Text;
   private readonly hintBtn: Button;
+  private readonly clueBtn: Button;
   private lastSec = -1;
   private tone = 0;
   private clueCount = -1;
@@ -76,6 +77,7 @@ export class Hud {
     this.root.add(this.timerText);
 
     const clueBtn = new Button(scene, 938, 32, 176, 'Clues', cfg.handlers.onClues, { fontSize: 28, height: 56 });
+    this.clueBtn = clueBtn;
     this.root.add(clueBtn);
     const dot = scene.add.graphics();
     dot.fillStyle(COLOR.red, 1);
@@ -119,12 +121,30 @@ export class Hud {
     if (s === this.lastSec) return false;
     this.lastSec = s;
     this.timerText.setText(fmtClock(s));
+    if (s <= 10 && s > 0 && !isCalm(this.scene)) {
+      this.scene.tweens.killTweensOf(this.timerText);
+      this.timerText.setScale(1);
+      this.scene.tweens.add({ targets: this.timerText, scale: 1.25, duration: 150, yoyo: true });
+    }
     const tone = s < 10 ? 2 : s < 20 ? 1 : 0;
     if (tone !== this.tone || this.lastSec === s) {
       this.tone = tone;
       this.timerText.setColor(tone === 2 ? CSS.red : tone === 1 ? CSS.amber : CSS.cream);
     }
     return true;
+  }
+
+  /** Position of the Clues button, for effects that fly into it. */
+  get cluePos(): { x: number; y: number } {
+    return { x: this.clueBtn.x, y: this.clueBtn.y };
+  }
+
+  /** Small wiggle on the Clues button when a clue arrives. */
+  wiggleClues(): void {
+    if (isCalm(this.scene)) return;
+    this.scene.tweens.killTweensOf(this.clueBtn);
+    this.clueBtn.setAngle(0);
+    this.scene.tweens.add({ targets: this.clueBtn, angle: 4, duration: 60, yoyo: true, repeat: 3, onComplete: () => this.clueBtn.setAngle(0) });
   }
 
   setClues(count: number): void {
@@ -158,9 +178,11 @@ export class Hud {
     s.img.clearTint();
     s.img.setAlpha(1);
     s.check.setVisible(true);
-    if (!isLowFx(this.scene.game)) {
+    if (!isCalm(this.scene)) {
       const base = s.img.scaleX;
       this.scene.tweens.add({ targets: s.img, scaleX: base * 1.25, scaleY: base * 1.25, duration: 120, yoyo: true });
+      s.check.setScale(2.2);
+      this.scene.tweens.add({ targets: s.check, scale: 1, duration: 160, ease: 'Back.easeOut' });
     }
   }
 
@@ -182,6 +204,8 @@ export class Hud {
   destroy(): void {
     for (const tab of this.tabs.values()) this.scene.tweens.killTweensOf(tab);
     this.scene.tweens.killTweensOf(this.badge);
+    this.scene.tweens.killTweensOf(this.clueBtn);
+    this.scene.tweens.killTweensOf(this.timerText);
     this.root.destroy(true);
   }
 

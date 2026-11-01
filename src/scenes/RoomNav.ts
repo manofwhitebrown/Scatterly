@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { sfx } from '../audio/sfx';
 import type { RoomId } from '../shared/types';
 import { Button } from '../ui/Button';
 import { Hud } from '../ui/Hud';
@@ -17,6 +16,7 @@ export class RoomNav {
     private readonly hud: Hud,
     private readonly rooms: RoomId[],
     private readonly blocked: () => boolean,
+    private readonly onSwitch: (room: RoomId) => void = () => undefined,
   ) {
     this.left = new Button(scene, 24, 400, 48, '‹', () => this.step(-1), { fontSize: 44, height: 120 });
     this.right = new Button(scene, 1256, 400, 48, '›', () => this.step(1), { fontSize: 44, height: 120 });
@@ -38,7 +38,7 @@ export class RoomNav {
     const cur = this.view.room;
     if (this.blocked() || this.view.switching || cur === null || cur === room) return;
     const dir = this.rooms.indexOf(room) > this.rooms.indexOf(cur) ? 1 : -1;
-    sfx.play('swoosh');
+    this.onSwitch(room);
     this.view.show(room, dir);
     this.hud.setActive(room);
     this.update();

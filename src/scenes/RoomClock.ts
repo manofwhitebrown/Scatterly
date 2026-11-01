@@ -14,6 +14,7 @@ export class RoomClock {
     private readonly hud: Hud,
     private readonly frozen: () => boolean,
     private readonly onTimeUp: () => void,
+    private readonly onSecond: (sec: number) => void = () => undefined,
   ) {
     scene.time.addEvent({ delay: 250, loop: true, callback: this.tick, callbackScope: this });
   }
@@ -38,7 +39,10 @@ export class RoomClock {
     if (this.limitSec === null) return;
     const remain = Math.max(0, this.limitSec * 1000 - this.elapsed);
     const sec = Math.ceil(remain / 1000);
-    if (this.hud.setTimer(sec) && sec <= 10 && sec > 0) sfx.play('tick');
+    if (this.hud.setTimer(sec)) {
+      if (sec <= 10 && sec > 0) sfx.play('tick');
+      this.onSecond(sec);
+    }
     if (remain <= 0) this.onTimeUp();
   }
 }

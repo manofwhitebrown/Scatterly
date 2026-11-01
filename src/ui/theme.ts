@@ -113,13 +113,25 @@ export function starText(n: number): string {
   return '★'.repeat(k) + '☆'.repeat(3 - k);
 }
 
-export function buzz(scene: Phaser.Scene, ms = 8): void {
-  if (!getProfile(scene).settings.vibration) return;
+/** True when state changes should happen instantly with no particles or tweens (lowFx or reducedMotion). */
+export function isCalm(scene: Phaser.Scene): boolean {
+  const st = getProfile(scene).settings;
+  return st.lowFx || st.reducedMotion;
+}
+
+/** Haptic pulse. Respects settings.vibration and reducedMotion; never throws. */
+export function vibrate(scene: Phaser.Scene, ms: number): void {
+  const st = getProfile(scene).settings;
+  if (!st.vibration || st.reducedMotion) return;
   try {
     navigator.vibrate?.(ms);
   } catch {
     // Vibration unsupported: ignore.
   }
+}
+
+export function buzz(scene: Phaser.Scene, ms = 8): void {
+  vibrate(scene, ms);
 }
 
 export function sceneExists(scene: Phaser.Scene, key: string): boolean {

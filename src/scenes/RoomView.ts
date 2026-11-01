@@ -73,6 +73,10 @@ export class RoomView {
     });
   }
 
+  spotOf(spotId: SpotId): Spot | undefined {
+    return this.find(spotId)?.spot;
+  }
+
   /** Swaps a spot to its opened texture when the session says it was searched. */
   refresh(spotId: SpotId): void {
     const view = this.find(spotId);

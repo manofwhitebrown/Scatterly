@@ -18,7 +18,7 @@ import { ClueBoard } from '../ui/ClueBoard';
 import { Hud } from '../ui/Hud';
 import { InspectPanel } from '../ui/InspectPanel';
 import { Toast } from '../ui/Toast';
-import { DEPTH, Dim, SIZE, enterFade, getProfile, go, makeText } from '../ui/theme';
+import { DEPTH, Dim, SIZE, enterFade, getProfile, go, isCalm, makeText } from '../ui/theme';
 import { timeUpCard } from './RoomCardConfigs';
 import { ModalCard } from './RoomCards';
 import { burst, flyItem } from './RoomFx';
@@ -26,6 +26,7 @@ import { finishRun } from './RoomFinish';
 import { RoomBack } from './RoomBack';
 import { RoomClock } from './RoomClock';
 import { RoomNav } from './RoomNav';
+import { RoomFeel } from './RoomFeel';
 import { RoomFlow } from './RoomFlow';
 import { RoomGate } from './RoomGate';
 import { RoomView } from './RoomView';
@@ -50,6 +51,7 @@ export class RoomScene extends Phaser.Scene {
   private flyImgs: Phaser.GameObjects.Image[] = [];
   private flyIdx = 0;
   private unsubs: Array<() => void> = [];
+  private feel!: RoomFeel;
   private flow!: RoomFlow;
   private gate!: RoomGate;
   private puzzleOpen = false;
@@ -93,6 +95,7 @@ export class RoomScene extends Phaser.Scene {
 
     this.dim = new Dim(this);
     this.toast = new Toast(this);
+    this.feel = new RoomFeel(this);
     this.view = new RoomView(this, this.session, profile, (spot) => this.onSpot(spot));
     this.view.show(start, 0);
     this.hud = new Hud(this, {
@@ -107,7 +110,8 @@ export class RoomScene extends Phaser.Scene {
         onRoom: (room) => this.nav.goTo(room),
       },
     });
-    this.nav = new RoomNav(this, this.view, this.hud, rooms, () => this.modalOpen());
+    this.nav = new RoomNav(this, this.view, this.hud, rooms, () => this.modalOpen(), (r) => this.feel.roomSwitch(r));
+    sfx.setRoomAmbience(start);
     this.inspect = new InspectPanel(this, this.dim, {
       onTake: (item, x, y) => this.takeItem(item, x, y),
       onClose: () => undefined,
@@ -129,6 +133,7 @@ export class RoomScene extends Phaser.Scene {
       this.hud,
       () => this.finished || this.flow.paused || this.puzzleOpen,
       () => this.onTimeUp(),
+      (sec) => this.feel.urgency(sec),
     );
     this.events.on(Phaser.Scenes.Events.RESUME, this.clock.resync, this.clock);
     this.flow = new RoomFlow(this, this.card, this.scenario, this.mode, {
@@ -184,7 +189,7 @@ export class RoomScene extends Phaser.Scene {
       return;
     }
     this.view.playAction(spot);
-    sfx.play(out.kind === 'locked' ? 'tap' : out.kind === 'empty' ? 'close' : 'swoosh');
+    this.feel.tap(spot);
     if (isLowFx(this.game)) {
       this.applyOutcome(spot, out);
       return;
@@ -197,12 +202,14 @@ export class RoomScene extends Phaser.Scene {
     this.resolving = false;
     if (this.finished) return;
     if (out.kind === 'found') {
+      this.feel.opened(spot, out.items.length > 0);
       this.inspect.show(spot.label, out.items, out.clues, out.message);
     } else if (out.kind === 'locked') {
       const gate = out.gate ?? this.scenario.gates[spot.id];
       if (gate) this.gate.launch(spot, gate);
       else this.toast.show("It won't budge.", 'warn');
     } else {
+      this.feel.empty(spot);
       this.toast.show(out.message.length > 0 ? out.message : 'Nothing here.');
     }
   }
@@ -221,17 +228,23 @@ export class RoomScene extends Phaser.Scene {
       this.toast.show(`${ITEM_LABEL[item]}: not needed this morning.`);
       return;
     }
-    sfx.play('found');
+    this.feel.taken();
     const to = this.hud.slotPos(item);
     const img = this.flyImgs[this.flyIdx++ % Math.max(1, this.flyImgs.length)];
-    if (!to || !img || isLowFx(this.game)) this.hud.markFound(item);
-    else flyItem(this, img, item, { x, y }, to, () => this.hud.markFound(item));
+    const land = (): void => {
+      this.hud.markFound(item);
+      if (to) this.feel.landed(to.x, to.y);
+    };
+    if (!to || !img || isCalm(this)) land();
+    else flyItem(this, img, item, { x, y }, to, land);
   }
 
   private onClue(): void {
     this.hud.setClues(this.session.discoveredClues().length);
     this.toast.show('Clue found!', 'clue');
-    sfx.play('clue');
+    this.hud.wiggleClues();
+    const c = this.hud.cluePos;
+    this.feel.clue(c.x, c.y);
   }
 
   private useHint(): void {
@@ -245,7 +258,11 @@ export class RoomScene extends Phaser.Scene {
     this.countHint();
     this.toast.show(hint.text, 'info', 3200);
     if (hint.room) this.hud.flashTab(hint.room);
-    if (hint.spotId) this.view.queuePulse(hint.spotId);
+    if (hint.spotId) {
+      this.view.queuePulse(hint.spotId);
+      const sp = this.view.spotOf(hint.spotId);
+      this.feel.hint(sp ? sp.x + sp.w / 2 : 640, sp ? sp.y + sp.h / 2 : 360);
+    } else this.feel.hint(640, 360);
   }
 
   private countHint(): void {
@@ -296,14 +313,14 @@ export class RoomScene extends Phaser.Scene {
 
   private onComplete(): void {
     if (!this.lockUp()) return;
-    sfx.play('win');
+    this.feel.win();
     burst(this);
     this.time.delayedCall(600, () => this.end(false));
   }
 
   private onTimeUp(): void {
     if (!this.lockUp()) return;
-    sfx.play('lose');
+    this.feel.lose();
     this.card.show(timeUpCard(() => this.end(true)));
   }
 
@@ -327,6 +344,7 @@ export class RoomScene extends Phaser.Scene {
     this.view.destroy();
     this.toast.destroy();
     this.dim.destroy();
+    this.feel.destroy();
     this.built = false;
   }
 }
