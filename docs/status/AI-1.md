@@ -9,10 +9,11 @@
 - Android patch step tested against a freshly generated `android/` project (idempotent)
 
 ## Status
-- Actions runs on 7b2dca4 failed as expected: src/art, audio, scenes, puzzles, organise and tests/ do not exist yet.
+- Merged repo verified: npm ci, npm test (20 pass), npm run build OK; JS 386 KB gzip, dist 1.6 MB (within budget).
+- Pages deploy and Android APK workflows green; APK published to the rolling `latest` release.
 
 ## Next up
-- Cross-check the other AIs' files once pushed; confirm Actions run is green and `?debug=1` shows ~60 fps
+- Only remaining check needs a real device: `?debug=1` fps on a phone
 
 ## Notes for AI-2
 - `package-lock.json` is committed (needed for `npm ci`). Add `tests/logic.test.ts`: `npm test` fails if no test file exists.
