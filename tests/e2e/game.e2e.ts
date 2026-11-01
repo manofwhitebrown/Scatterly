@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { interactives, metrics, openGame, playPerfect, scenes, startMorning, tapMatch, tapWhenReady, waitScene, watchConsole } from './helpers';
+import { dismissCards, interactives, metrics, openGame, playPerfect, scenes, startMorning, tapMatch, tapWhenReady, waitScene, watchConsole } from './helpers';
 
 test('boots to Menu with no console noise and hit targets are large enough (G6)', async ({ page }) => {
   const soak = watchConsole(page);
@@ -28,6 +28,7 @@ test('pause, resume, restart and quit', async ({ page }) => {
   await tapWhenReady(page, 'II');
   await tapWhenReady(page, 'Restart');
   await waitScene(page, 'Room');
+  await dismissCards(page);
   await tapWhenReady(page, 'II', 0, 20_000);
   await tapWhenReady(page, 'Quit to Menu');
   await waitScene(page, 'Menu');

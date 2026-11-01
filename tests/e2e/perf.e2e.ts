@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { metrics, openGame, startMorning, tapWhenReady, waitScene, watchConsole } from './helpers';
+import { dismissCards, metrics, openGame, startMorning, tapWhenReady, waitScene, watchConsole } from './helpers';
 
 const THROTTLE = 4;
 
@@ -15,7 +15,7 @@ test('G4 leaks: 50x Room restart returns counts to baseline; G2 perf recorded wi
   await tapWhenReady(page, 'II');
   await tapWhenReady(page, 'Restart');
   await waitScene(page, 'Room');
-  await page.waitForTimeout(1500);
+  await dismissCards(page);
   await page.evaluate(() => window.__scatterly!.resetFrameStats());
   const base = await metrics(page);
 
@@ -23,7 +23,7 @@ test('G4 leaks: 50x Room restart returns counts to baseline; G2 perf recorded wi
     await tapWhenReady(page, 'II', 0, 20_000);
     await tapWhenReady(page, 'Restart');
     await waitScene(page, 'Room');
-    await page.waitForTimeout(400);
+    await dismissCards(page);
   }
   await page.waitForTimeout(2500);
   const end = await metrics(page);

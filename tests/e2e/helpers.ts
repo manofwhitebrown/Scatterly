@@ -3,13 +3,17 @@ import type { Page } from '@playwright/test';
 import type { Interactive } from '../../src/core/e2e';
 import type { Metrics } from '../../src/core/metrics';
 
+const BROWSER_NOISE = /GroupMarkerNotSet|software WebGL|GPU stall|swiftshader|ReadPixels/i;
+
 export interface Soak { errors: string[] }
 
 /** Collects console errors, warnings, page errors and unhandled rejections (gate G3). */
 export function watchConsole(page: Page): Soak {
   const soak: Soak = { errors: [] };
   page.on('console', (m) => {
-    if (m.type() === 'error' || m.type() === 'warning') soak.errors.push(`${m.type()}: ${m.text()}`);
+    if (m.type() !== 'error' && m.type() !== 'warning') return;
+    if (BROWSER_NOISE.test(m.text())) return; // headless Chromium software-GL chatter, not game output
+    soak.errors.push(`${m.type()}: ${m.text()}`);
   });
   page.on('pageerror', (e) => soak.errors.push(`pageerror: ${e.message}`));
   return soak;
@@ -49,7 +53,12 @@ export async function tapMatch(page: Page, match: string | RegExp, nth = 0): Pro
 }
 
 export async function tapWhenReady(page: Page, match: string | RegExp, nth = 0, timeout = 15_000): Promise<void> {
-  await expect.poll(() => tapMatch(page, match, nth), { timeout, intervals: [150, 250, 400] }).toBe(true);
+  try {
+    await expect.poll(() => tapMatch(page, match, nth), { timeout, intervals: [150, 250, 400] }).toBe(true);
+  } catch (err) {
+    const seen = (await interactives(page)).map((i) => `${i.scene}:${i.label || i.texture}@${Math.round(i.x)},${Math.round(i.y)} ${Math.round(i.w)}x${Math.round(i.h)}`);
+    throw new Error(`no tappable "${String(match)}" [active ${(await scenes(page)).join('+')}] visible: ${seen.join(' | ')}\n${String(err)}`);
+  }
 }
 
 /** Goes Menu -> ModeSelect -> chosen mode, then clicks through intro and coach cards until spots are tappable. */
