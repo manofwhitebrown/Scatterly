@@ -11,7 +11,7 @@ The house remembers last evening: read the clues, work out where things went, th
 | --- | --- | --- | --- |
 | AI-1 Foundation | 95% | .github/workflows/android.yml | all files pushed; runs red until AI-2/3/4 files land |
 | AI-2 Logic | 100% ✅ | tests/logic.test.ts | all logic + content + tests pushed; 20/20 tests pass locally |
-| AI-3 Face | 90% | src/scenes/index.ts | waiting on logic index.ts (GameSession/generateScenario) to typecheck |
+| AI-3 Face | 95% | docs/status/AI-3.md | build+tests pass locally; needs on-device fps/visual check (gates a, c) |
 | AI-4 Art | 95% | src/puzzles/WordScene.ts | all files pushed; build + Pages green; fps gate (?debug=1) not yet checked on a device |
 
 ## Get the APK

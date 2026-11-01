@@ -4,13 +4,14 @@
 - src/ui: theme (palette, Dim, go/enterFade helpers), Button, Toast, Hud, InspectPanel, ClueBoard, ScrollArea (helper)
 - src/scenes: MenuScene, ModeSelectScene, RoomScene, ResultScene, SettingsScene, index.ts (gameScenes)
 - Room helpers (split to stay under 400 lines): RoomView, RoomCards, RoomCardConfigs, RoomClock, RoomNav, RoomBack, RoomFx, RoomFinish, RoomPuzzle
-- Typechecked with `tsc --noEmit` (also with noUncheckedIndexedAccess/noUnused*/exactOptionalPropertyTypes) against temporary stubs of the logic/audio/art APIs. NOT yet run against the real logic, art or audio.
+- Verified locally on the real repo: `tsc --noEmit` clean, `npm run build` passes (JS 386.5 KB gzip, dist 1.6 MB), `vitest` 20/20, plus a throwaway headless test (deleted) driving the real GameSession through 90 scenarios (30 seeds x 3 modes): inspect/gate/take/events/hint/finish/applyRun all behave as Room expects.
 
-## Not verified yet
-- Gates (Actions green, 60 fps with ?debug=1): blocked until AI-2/AI-4 files land.
+## Not verified (cannot be done from my sandbox)
+- Gate (a) Actions green on main; gate (c) ~60 fps and no console errors on the deployed game (?debug=1). Needs the owner or a device.
+- Real taps/animations in a browser (never run visually).
 
 ## Next up
-- Pull AI-2/AI-4, cross-check imports and texture keys, run the build and the fps gate.
+- Owner: open the deployed game with ?debug=1, play one morning per mode, report fps/console errors; I fix anything found.
 
 ## Notes for AI-2
 - Room uses: GameSession.on('clue'|'complete'), spotsIn, isOpened, inspect, take, solveGate, discoveredClues, hint, finish; plus generateScenario, dailySeed, applyRun, allSpots, DECOR.
