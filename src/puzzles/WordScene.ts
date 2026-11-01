@@ -49,6 +49,10 @@ export class WordScene extends PuzzleShell {
     return this.req.difficulty === 3 ? 'Crack the note' : 'Find the word';
   }
 
+  protected contextIsTitle(): boolean {
+    return false;
+  }
+
   protected build(): void {
     this.pool = [];
     this.slots = [];
@@ -60,7 +64,7 @@ export class WordScene extends PuzzleShell {
     this.word = this.custom ? payload : this.pickWord(d);
     const cx = PX + PW / 2;
     let hint = this.keyboard ? 'Each letter was shifted. The last word is your answer.' : d === 2 ? 'Find the word. One tile is a decoy.' : 'Unscramble the word.';
-    if (this.req.context && this.req.context.trim() && this.req.context.trim() !== this.defaultTitle()) hint = this.req.context.trim();
+    if (this.req.context && this.req.context.trim()) hint = this.req.context.trim();
     makeText(this, cx, PY + 90, hint, 22, PAL.inkSoft, { ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 160 });
     this.gSlots = this.add.graphics();
     this.gPool = this.add.graphics();

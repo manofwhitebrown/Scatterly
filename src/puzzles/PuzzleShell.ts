@@ -45,6 +45,10 @@ export abstract class PuzzleShell extends Phaser.Scene {
 
   protected abstract defaultTitle(): string;
   protected abstract build(): void;
+  /** Puzzles whose context is a hint line (not a title) return false. */
+  protected contextIsTitle(): boolean {
+    return true;
+  }
 
   init(data: PuzzleLaunchData): void {
     if (data && data.req) {
@@ -66,7 +70,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
     g.fillStyle(PAL.shadow, 0.3);
     g.fillRoundedRect(PX + 4, PY + 10, PW, PH, 28);
     panelBox(g, PX, PY, PW, PH, 28, PAL.panel, PAL.panelEdge, 4);
-    const title = this.req.context && this.req.context.trim() ? this.req.context.trim() : this.defaultTitle();
+    const title = this.contextIsTitle() && this.req.context && this.req.context.trim() ? this.req.context.trim() : this.defaultTitle();
     makeText(this, PX + PW / 2, PY + 38, title, 34, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 220 });
     makeButton(this, PX + PW - 46, PY + 42, 56, 56, '', () => this.cancel(), { fill: PAL.steel, glyph: 'close' });
     this.build();
