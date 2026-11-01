@@ -1,0 +1,100 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+      - name: Add Android platform if missing
+        run: |
+          if [ ! -d android ]; then npx cap add android; fi
+          npx cap sync android
+
+      - name: Patch Android project (landscape, fullscreen, app name)
+        continue-on-error: true
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const base = 'android/app/src/main';
+          function edit(file, fn) {
+            try {
+              if (!fs.existsSync(file)) { console.log('skip (missing): ' + file); return; }
+              const before = fs.readFileSync(file, 'utf8');
+              const after = fn(before);
+              if (after !== before) { fs.writeFileSync(file, after); console.log('patched: ' + file); }
+              else console.log('unchanged: ' + file);
+            } catch (e) { console.log('patch failed (ignored): ' + file + ' ' + e.message); }
+          }
+          edit(base + '/AndroidManifest.xml', (xml) =>
+            xml.replace(/<activity\b[^>]*MainActivity[^>]*>/, (tag) =>
+              /android:screenOrientation=/.test(tag)
+                ? tag.replace(/android:screenOrientation="[^"]*"/, 'android:screenOrientation="sensorLandscape"')
+                : tag.replace('<activity', '<activity android:screenOrientation="sensorLandscape"')));
+          edit(base + '/res/values/styles.xml', (xml) =>
+            xml.replace(/(<style\s+name="AppTheme\.NoActionBar"[^>]*>)([\s\S]*?)(<\/style>)/, (m, open, body, close) =>
+              body.includes('windowFullscreen') ? m
+                : open + body +
+                  '    <item name="android:windowFullscreen">true</item>\n' +
+                  '    <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>\n' +
+                  '    ' + close));
+          edit(base + '/res/values/strings.xml', (xml) =>
+            xml.replace(/(<string name="app_name">)[^<]*(<\/string>)/, '$1Scatterly$2')
+               .replace(/(<string name="title_activity_main">)[^<]*(<\/string>)/, '$1Scatterly$2'));
+          NODE
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Assemble debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Scatterly-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Move the rolling "latest" tag to this commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f latest
+          git push -f origin refs/tags/latest
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Scatterly latest APK
+          body: Debug APK built from the latest commit on main. Download app-debug.apk and install it on your phone.
+          prerelease: true
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          overwrite_files: true
