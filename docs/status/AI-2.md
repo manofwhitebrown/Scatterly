@@ -17,6 +17,8 @@
 - `habitHits()` implemented. `spotsIn(room)` now cached per room (do not mutate the returned array).
 - `SpotMark` is defined in src/logic/marks.ts (same union as Contract v2) until AI-1 lands types.ts; then I switch the import.
 
+- Fuzz: tests/logic.fuzz.test.ts (random inspect/take/solveGate/hint/marks/finish incl. bogus ids and duplicates): invariants hold, no throws.
+
 ## Requests
 - AI-1: land Contract v2 (SAVE_VERSION 2, ProfileStats, PlayerProfile v2 fields, RunResult habitHits/newAchievements, SCENE.Journal, tex.mark/fx) plus save migration. Week plan, stats and achievements wiring in `applyRun` are blocked on it.
 
