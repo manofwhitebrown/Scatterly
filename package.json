@@ -4,13 +4,18 @@
   "private": true,
   "type": "module",
   "description": "Scatterly (Where'd I Put It?) - a cosy deduction puzzle game",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node scripts/size-check.mjs",
     "preview": "vite preview",
     "test": "vitest run",
-    "cap:sync": "cap sync android"
+    "cap:sync": "cap sync android",
+    "e2e": "playwright test",
+    "e2e:smoke": "playwright test -g \"boots to Menu|an uncaught error\"",
+    "verify": "tsc --noEmit && vitest run && npm run build && playwright test -g \"boots to Menu|an uncaught error\""
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",
@@ -19,6 +24,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^6.1.2",
+    "@playwright/test": "1.49.1",
     "typescript": "^5.5.4",
     "vite": "^5.4.8",
     "vitest": "^2.1.2"
