@@ -1,23 +1,37 @@
-# AI-3 Face status
+# AI-3 Face status (Phase 2)
 
 ## Done
-- src/ui: theme (palette, Dim, go/enterFade helpers), Button, Toast, Hud, InspectPanel, ClueBoard, ScrollArea (helper)
-- src/scenes: MenuScene, ModeSelectScene, RoomScene, ResultScene, SettingsScene, index.ts (gameScenes)
-- Room helpers (split to stay under 400 lines): RoomView, RoomCards, RoomCardConfigs, RoomClock, RoomNav, RoomBack, RoomFx, RoomFinish, RoomPuzzle
-- Verified locally on the real repo: `tsc --noEmit` clean, `npm run build` passes (JS 386.5 KB gzip, dist 1.6 MB), `vitest` 20/20, plus a throwaway headless test (deleted) driving the real GameSession through 90 scenarios (30 seeds x 3 modes): inspect/gate/take/events/hint/finish/applyRun all behave as Room expects.
+- D0 Prep: RoomScene split. 392 -> ~362 lines; new RoomFlow (intro/coach/pause), RoomGate (puzzle launch), RoomFeel (Feel Spec triggers), RoomMarks (badges). All scene/ui files < 400 lines.
+- D1 Tap targets: `src/ui/hit.ts` `pickSpot` (hit area >= 96x96 centred on art, nearest centre wins) used by one room-wide zone in RoomView; Button hit area >= 96x96; body/label text 28 px (Toast too); HUD button text 28 px. Test: tests/ui-hit.test.ts.
+- D2 Feel Spec (Room): RoomFeel fires sfx + playFx + vibrate; curved item flight (RoomFx.flyItem), slot bounce + check stamp and Clues wiggle and timer pulse (Hud), room-switch light sweep + ambience (RoomFeel.roomSwitch), Rush last 10 s tint + sfx.setIntensity (RoomFeel.urgency, via RoomClock onSecond), win/lose (RoomFeel.win/lose), `vibrate`/`isCalm` helpers in ui/theme.
+- D3 Marks: 400 ms long-press in RoomView (suppresses the following tap), cycles via session.cycleMark, RoomMarks badges (pooled, lazy, hidden when cleared), coach step 4, Settings tip. Falls back to a text glyph if tex.mark art is missing.
+- D4 Journal (partial): JournalScene (week board, streak, stats, earned achievement ids, ScrollArea), reachable from Menu.
+- D7 Settings (partial): Reduced motion toggle added; two-step Reset already existed.
 
-## Not verified (cannot be done from my sandbox)
-- Gate (a) Actions green on main; gate (c) ~60 fps and no console errors on the deployed game (?debug=1). Needs the owner or a device.
-- Real taps/animations in a browser (never run visually).
+## In progress / not started
+- D4: achievement names + progress bars (needs AI-2 `ACHIEVEMENTS`), reachable from Result, toasts for newAchievements.
+- D5 Result story, D6 Menu polish / guided tutorial, D8 perf audit numbers, Feel rows not yet wired: Buy decor, Room unlock, Result win stars/coins (Result and Organise).
+- Item "found" pop in InspectPanel, Hud-side vignette flash.
 
-## Next up
-- Owner: open the deployed game with ?debug=1, play one morning per mode, report fps/console errors; I fix anything found.
+## Feel Spec rows wired (where it fires)
+tap/open/empty/found/take/clue/hint/room/urgent/win/lose: src/scenes/RoomFeel.ts, called from RoomScene (onSpot, applyOutcome, takeItem, onClue, useHint, onComplete, onTimeUp) and RoomNav (onSwitch). Existing `burst` still draws the win stars until AI-4's playFx('win') renders.
+
+## Verified (commands run)
+- `npx tsc --noEmit` clean, `npm test` 46/46, `npm run build` green, JS 390.8 KB gzip (budget 450).
+
+## Not verified
+- Anything visual or tactile (feel, fps, haptics, light sweep, badge look): never seen on a device. Owner must check with `?debug=1`.
+- Tab labels remain 24 px (5 tabs must fit 124 px each); everything else >= 28 px.
+- No e2e step yet for marks / hit targets (AI-1 owns tests/e2e).
+- G4 leak counts not measured.
+
+## Requests
+- AI-2: export `ACHIEVEMENTS` (id, name, description, target, progress(stats)) and `weekPlan` for the Journal.
+- AI-4: art for tex.mark('ruledOut'|'hunch'); implement playFx rows.
+- AI-1: e2e steps: long-press a spot twice then tap; tap a 90x60 spot at its edge.
 
 ## Notes for AI-2
-- Room uses: GameSession.on('clue'|'complete'), spotsIn, isOpened, inspect, take, solveGate, discoveredClues, hint, finish; plus generateScenario, dailySeed, applyRun, allSpots, DECOR.
-- Daily replay: Room treats `profile.lastDailyDate === local YYYY-MM-DD` as already done (coins forced to 0, applyRun skipped).
-- applyRun must not depend on anything Room mutates except tutorialDone (Room commits that itself).
+- Room uses GameSession.on('clue'|'complete'|'mark'), spotsIn, isOpened, inspect, take, solveGate, cycleMark, marks, discoveredClues, hint, finish.
 
 ## Notes for AI-4
-- Room draws item/icon/spot/room/decor textures only via the `tex` helpers; please make sure `_open` variants exist for every SpotKind.
-- Puzzle scenes must call onDone once, then `scene.stop()`; Room resumes itself inside onDone.
+- Puzzle scenes call onDone once, then scene.stop(); Room resumes itself inside onDone.

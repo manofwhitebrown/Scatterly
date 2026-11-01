@@ -29,9 +29,10 @@ export class MenuScene extends Phaser.Scene {
     const open = (key: string): void => {
       if (!go(this, key)) toast.show('That screen is not available yet.', 'warn');
     };
-    new Button(this, 640, 360, 380, 'Play', () => open(SCENE.ModeSelect), { variant: 'primary' });
-    new Button(this, 640, 444, 380, 'Organise', () => open(SCENE.Organise));
-    new Button(this, 640, 528, 380, 'Settings', () => open(SCENE.Settings));
+    new Button(this, 640, 330, 380, 'Play', () => open(SCENE.ModeSelect), { variant: 'primary' });
+    new Button(this, 640, 410, 380, 'Organise', () => open(SCENE.Organise));
+    new Button(this, 640, 490, 380, 'Journal', () => open(SCENE.Journal));
+    new Button(this, 640, 570, 380, 'Settings', () => open(SCENE.Settings));
 
     const key = this.add.image(1020, 420, tex.item('keys')).setDisplaySize(170, 170);
     if (!isLowFx(this.game)) {

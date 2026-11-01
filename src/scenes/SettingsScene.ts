@@ -14,6 +14,7 @@ const ROWS: Array<{ key: SettingKey; label: string }> = [
   { key: 'music', label: 'Music' },
   { key: 'vibration', label: 'Vibration' },
   { key: 'lowFx', label: 'Low effects (smoother on slow phones)' },
+  { key: 'reducedMotion', label: 'Reduced motion' },
 ];
 
 export class SettingsScene extends Phaser.Scene {
@@ -36,7 +37,7 @@ export class SettingsScene extends Phaser.Scene {
     makeText(this, 640, 70, 'Settings', { fontSize: `${SIZE.title}px`, fontStyle: 'bold', color: CSS.amber }).setOrigin(0.5);
 
     ROWS.forEach((row, i) => {
-      const y = 170 + i * 84;
+      const y = 150 + i * 74;
       makeText(this, 160, y, row.label, { fontSize: `${SIZE.label}px` }).setOrigin(0, 0.5);
       const on = getProfile(this).settings[row.key];
       const btn = new Button(this, 1040, y, 200, on ? 'On' : 'Off', () => this.toggle(row.key), {
@@ -45,7 +46,12 @@ export class SettingsScene extends Phaser.Scene {
       this.toggles.set(row.key, btn);
     });
 
-    this.resetBtn = new Button(this, 640, 520, 420, 'Reset progress', () => this.onReset(), { variant: 'danger' });
+    this.resetBtn = new Button(this, 640, 560, 420, 'Reset progress', () => this.onReset(), { variant: 'danger' });
+    makeText(this, 640, 636, 'Tip: long-press a spot to mark it ✕ ruled out or ? hunch.', {
+      fontSize: `${SIZE.body}px`,
+      color: CSS.muted,
+      align: 'center',
+    }).setOrigin(0.5);
     new Button(this, 24 + 80, 664, 160, 'Back', () => go(this, SCENE.Menu));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.resetTimer?.remove(false);
