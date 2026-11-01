@@ -124,20 +124,35 @@ export async function gotoRoom(page: Page, room: string): Promise<void> {
 export async function playPerfect(page: Page): Promise<void> {
   const { plans } = await readPlan(page);
   for (const p of plans) {
-    await gotoRoom(page, p.room);
-    await tapAt(page, p.x, p.y);
-    await page.waitForTimeout(500);
-    const active = await scenes(page);
-    if (active.some((k) => k.startsWith('Puzzle'))) {
-      await resolveGate(page);
-      await waitScene(page, 'Room');
+    const label = ITEM_LABEL[p.target as ItemId];
+    let taken = false;
+    for (let attempt = 0; attempt < 4 && !taken; attempt++) {
+      await gotoRoom(page, p.room);
+      await waitIdle(page);
       await tapAt(page, p.x, p.y);
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(700);
+      if ((await scenes(page)).some((k) => k.startsWith('Puzzle'))) {
+        await resolveGate(page);
+        await waitScene(page, 'Room');
+        await waitIdle(page);
+        await tapAt(page, p.x, p.y);
+        await page.waitForTimeout(700);
+      }
+      if (await tapMatch(page, label)) taken = true;
+      else await tapMatch(page, '✕');
     }
-    await tapWhenReady(page, ITEM_LABEL[p.target as ItemId], 0, 10_000);
+    if (!taken) await tapWhenReady(page, label, 0, 4_000);
     await page.waitForTimeout(900);
   }
   await waitScene(page, 'Result', 40_000);
+}
+
+async function waitIdle(page: Page): Promise<void> {
+  await page.waitForFunction(() => {
+    const r = window.__scatterly!.game.scene.getScene('Room') as unknown as { view?: { switching: boolean } };
+    return r.view?.switching !== true;
+  }, undefined, { timeout: 10_000 });
+  await page.waitForTimeout(300);
 }
 
 async function resolveGate(page: Page): Promise<void> {
