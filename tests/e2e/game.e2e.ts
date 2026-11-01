@@ -31,6 +31,7 @@ test('pause, resume, restart and quit', async ({ page }) => {
   await dismissCards(page);
   await tapWhenReady(page, 'II', 0, 20_000);
   await tapWhenReady(page, 'Quit to Menu');
+  await tapWhenReady(page, 'Quit');
   await waitScene(page, 'Menu');
 });
 

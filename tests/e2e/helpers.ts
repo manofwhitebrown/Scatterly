@@ -1,5 +1,7 @@
 import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { ITEM_LABEL } from '../../src/shared/types';
+import type { ItemId } from '../../src/shared/types';
 import type { Interactive } from '../../src/core/e2e';
 import type { Metrics } from '../../src/core/metrics';
 
@@ -132,7 +134,7 @@ export async function playPerfect(page: Page): Promise<void> {
       await tapAt(page, p.x, p.y);
       await page.waitForTimeout(500);
     }
-    await tapWhenReady(page, `item_${p.target}`, 0, 10_000);
+    await tapWhenReady(page, ITEM_LABEL[p.target as ItemId], 0, 10_000);
     await page.waitForTimeout(900);
   }
   await waitScene(page, 'Result', 40_000);
