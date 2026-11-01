@@ -1,4 +1,6 @@
 export { GameSession } from './session';
+export { nextMark } from './marks';
+export type { SpotMark, MarkMap } from './marks';
 export { generateScenario, dailySeed } from './generator';
 export { applyRun, allSpots, listDecor, buyDecor, homeSpotCandidates, setHomeSpot } from './progression';
 export { HOUSE } from '../content/house';

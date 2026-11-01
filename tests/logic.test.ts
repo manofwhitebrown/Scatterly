@@ -282,3 +282,90 @@ describe('performance', () => {
     expect(Date.now() - t0).toBeLessThan(1500);
   });
 });
+
+describe('deduction marks', () => {
+  function sess(profile: PlayerProfile = fresh()): GameSession {
+    return new GameSession(generateScenario(5, 'relaxed', profile), profile, 'relaxed');
+  }
+  it('sets, clears and cycles marks', () => {
+    const g = sess();
+    const id = g.spotsIn('kitchen')[0]?.id as string;
+    expect(g.setMark(id, 'hunch')).toBe(true);
+    expect(g.marks().get(id)).toBe('hunch');
+    expect(g.setMark(id, 'hunch')).toBe(false);
+    expect(g.setMark(id, null)).toBe(true);
+    expect(g.marks().has(id)).toBe(false);
+    expect([g.cycleMark(id), g.cycleMark(id), g.cycleMark(id)]).toEqual(['ruledOut', 'hunch', null]);
+  });
+  it('ignores unknown and locked-room spot ids', () => {
+    const g = sess();
+    expect(g.setMark('nowhere.void', 'hunch')).toBe(false);
+    expect(g.setMark('bathroom.sink', 'hunch')).toBe(false);
+    expect(g.marks().size).toBe(0);
+  });
+  it('searching clears the mark and opened spots cannot be marked', () => {
+    const g = sess();
+    const id = g.spotsIn('living')[0]?.id as string;
+    const seen: unknown[] = [];
+    g.on('mark', (p) => seen.push(p));
+    g.setMark(id, 'ruledOut');
+    const out = g.inspect(id);
+    if (out.kind !== 'locked') {
+      expect(g.marks().has(id)).toBe(false);
+      expect(g.setMark(id, 'hunch')).toBe(false);
+      expect(seen.length).toBe(2);
+    }
+  });
+  it('marks on gated spots survive the gate solve and never change scoring', () => {
+    const p = { ...day10 };
+    let found = false;
+    for (let seed = 1; seed <= 200 && !found; seed++) {
+      const sc = generateScenario(seed, 'relaxed', p);
+      const gated = Object.keys(sc.gates)[0];
+      if (!gated) continue;
+      found = true;
+      const a = new GameSession(sc, p, 'relaxed');
+      const b = new GameSession(sc, p, 'relaxed');
+      expect(a.setMark(gated, 'hunch')).toBe(true);
+      expect(a.inspect(gated).kind).toBe('locked');
+      expect(a.marks().get(gated)).toBe('hunch');
+      a.solveGate(gated);
+      b.solveGate(gated);
+      expect(a.marks().get(gated)).toBe('hunch');
+      a.inspect(gated);
+      b.inspect(gated);
+      expect(a.finish(1000, false)).toEqual(b.finish(1000, false));
+    }
+    expect(found).toBe(true);
+  });
+});
+
+describe('habit payoff', () => {
+  it('habitHits lists only found targets at their home spot', () => {
+    let checked = 0;
+    for (let seed = 1; seed <= 300; seed++) {
+      const sc = generateScenario(seed, 'relaxed', day10);
+      const g = new GameSession(sc, day10, 'relaxed');
+      expect(g.habitHits()).toEqual([]);
+      for (const t of sc.targets) {
+        const where = sc.placement[t] as string;
+        const sp = Object.keys(sc.gates).includes(where);
+        if (sp) g.solveGate(where);
+        g.inspect(where);
+        g.take(t);
+      }
+      const expected = sc.targets.filter((t) => day10.homeSpots[t] === sc.placement[t]);
+      expect(g.habitHits().sort()).toEqual(expected.sort());
+      checked += expected.length;
+    }
+    expect(checked).toBeGreaterThan(0);
+  });
+});
+
+describe('spotsIn cache', () => {
+  it('returns the same array per room', () => {
+    const g = new GameSession(generateScenario(3, 'relaxed', fresh()), fresh(), 'relaxed');
+    expect(g.spotsIn('kitchen')).toBe(g.spotsIn('kitchen'));
+    expect(g.spotsIn('bathroom')).toEqual([]);
+  });
+});

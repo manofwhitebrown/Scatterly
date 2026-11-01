@@ -2,16 +2,19 @@ import { anySpot } from '../content/decor';
 import { ITEM_DEFS, ROOM_NAME } from '../content/items';
 import { hashString } from './rng';
 import { allSpots } from './progression';
+import { nextMark } from './marks';
+import type { MarkMap, SpotMark } from './marks';
 import { ITEM_LABEL } from '../shared/types';
 import type {
   Clue, GameMode, Gate, InspectOutcome, ItemId, PlayerProfile, RoomId, RunResult, Scenario, Spot, SpotId,
 } from '../shared/types';
 
-type EventName = 'clue' | 'found' | 'complete' | 'hint';
+type EventName = 'clue' | 'found' | 'complete' | 'hint' | 'mark';
 type Listener = (payload?: unknown) => void;
 
 export interface HintResult { text: string; room?: RoomId; spotId?: SpotId }
 
+const EMPTY_SPOTS: Spot[] = [];
 const EMPTY_MSGS = [
   'Nothing here but dust and good intentions.',
   'Just a stray crumb. Nothing useful.',
@@ -35,6 +38,8 @@ export class GameSession {
   private readonly clueList: Clue[] = [];
   private readonly taken: ItemId[] = [];
   private readonly hintStage = new Map<ItemId, number>();
+  private readonly byRoom = new Map<RoomId, Spot[]>();
+  private readonly markMap = new Map<SpotId, SpotMark>();
   private readonly listeners = new Map<EventName, Set<Listener>>();
   private searches = 0;
   private hintsUsed = 0;
@@ -45,10 +50,43 @@ export class GameSession {
     this.mode = mode;
     this.profile = profile;
     this.spots = new Map(allSpots(profile).filter((s) => profile.unlockedRooms.includes(s.room)).map((s) => [s.id, s]));
+    for (const s of this.spots.values()) {
+      const list = this.byRoom.get(s.room);
+      if (list) list.push(s);
+      else this.byRoom.set(s.room, [s]);
+    }
   }
 
+  /** Cached per room; callers must not mutate the returned array. */
   spotsIn(room: RoomId): Spot[] {
-    return [...this.spots.values()].filter((s) => s.room === room);
+    return this.byRoom.get(room) ?? EMPTY_SPOTS;
+  }
+
+  /** Sets or clears (null) a note on an unsearched spot. Returns true if anything changed. */
+  setMark(spotId: SpotId, mark: SpotMark | null): boolean {
+    if (!this.spots.has(spotId) || this.opened.has(spotId)) return false;
+    if (this.markMap.get(spotId) === (mark ?? undefined)) return false;
+    if (mark === null) this.markMap.delete(spotId);
+    else this.markMap.set(spotId, mark);
+    this.emit('mark', { spotId, mark });
+    return true;
+  }
+
+  /** Advances the mark on a spot through none -> ruledOut -> hunch -> none. */
+  cycleMark(spotId: SpotId): SpotMark | null {
+    const next = nextMark(this.markMap.get(spotId));
+    this.setMark(spotId, next);
+    return this.markMap.get(spotId) ?? null;
+  }
+
+  marks(): MarkMap {
+    return this.markMap;
+  }
+
+  /** Found targets that were sitting at the player's chosen home spot for that item. */
+  habitHits(): ItemId[] {
+    const homes = this.profile.homeSpots;
+    return this.found().filter((i) => homes[i] !== undefined && homes[i] === this.scenario.placement[i]);
   }
 
   isOpened(spotId: SpotId): boolean {
@@ -65,6 +103,7 @@ export class GameSession {
     if (!this.opened.has(spotId)) {
       this.opened.add(spotId);
       this.searches++;
+      if (this.markMap.delete(spotId)) this.emit('mark', { spotId, mark: null });
     }
     const items = this.itemsAt(spotId);
     const clues = this.scenario.clues.filter((c) => c.spotId === spotId);
