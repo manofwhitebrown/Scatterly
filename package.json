@@ -1,0 +1,26 @@
+{
+  "name": "scatterly",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Scatterly (Where'd I Put It?) - a cosy deduction puzzle game",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && node scripts/size-check.mjs",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "cap:sync": "cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
+    "phaser": "^3.80.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.8",
+    "vitest": "^2.1.2"
+  }
+}
