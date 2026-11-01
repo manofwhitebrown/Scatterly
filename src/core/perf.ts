@@ -2,13 +2,18 @@ import Phaser from 'phaser';
 import { SCENE } from '../shared/types';
 import type { PlayerProfile } from '../shared/types';
 import { commitProfile } from './save';
+import { FrameStats } from './frameStats';
+import { formatMetrics, readMetrics } from './metrics';
+import { installE2e } from './e2e';
 
 const SAMPLE_WINDOW_MS = 4000;
 const SAMPLE_EVERY_MS = 250;
 const MIN_SAMPLES = 8;
 const SLOW_FPS = 45;
 
-const debugOn = new URLSearchParams(window.location.search).get('debug') === '1';
+const query = new URLSearchParams(window.location.search);
+const debugOn = query.get('debug') === '1';
+const e2eOn = query.get('e2e') === '1';
 
 function profileOf(game: Phaser.Game): PlayerProfile | undefined {
   return game.registry.get('profile') as PlayerProfile | undefined;
@@ -57,21 +62,15 @@ function attachRoomHook(game: Phaser.Game): void {
   room.events.once(Phaser.Scenes.Events.START, () => sampleFirstRoom(game));
 }
 
-function countObjects(game: Phaser.Game): number {
-  let n = 0;
-  for (const s of game.scene.getScenes(true)) n += s.children.length;
-  return n;
-}
-
-function showOverlay(game: Phaser.Game): void {
+function showOverlay(game: Phaser.Game, stats: FrameStats): void {
   const el = document.createElement('div');
   el.style.cssText =
     'position:fixed;top:4px;left:4px;z-index:9;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.6);' +
-    'color:#9f9;font:11px/1.3 monospace;pointer-events:none';
+    'color:#9f9;font:11px/1.3 monospace;white-space:pre;pointer-events:none';
   document.body.appendChild(el);
   let last = '';
   window.setInterval(() => {
-    const text = `${Math.round(game.loop.actualFps)} fps | ${countObjects(game)} obj`;
+    const text = formatMetrics(readMetrics(game, stats));
     if (text !== last) {
       last = text;
       el.textContent = text;
@@ -83,6 +82,10 @@ function showOverlay(game: Phaser.Game): void {
 export function installPerf(game: Phaser.Game): void {
   game.events.once(Phaser.Core.Events.READY, () => {
     attachRoomHook(game);
-    if (debugOn) showOverlay(game);
+    if (!debugOn && !e2eOn) return;
+    const stats = new FrameStats(game);
+    game.scene.getScene(SCENE.Menu)?.events.once(Phaser.Scenes.Events.START, () => stats.reset());
+    if (debugOn) showOverlay(game, stats);
+    if (e2eOn) installE2e(game, stats);
   });
 }
