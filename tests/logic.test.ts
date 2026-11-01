@@ -12,9 +12,11 @@ import type { GameMode, PlayerProfile, RunResult, Spot } from '../src/shared/typ
 
 function fresh(): PlayerProfile {
   return {
-    version: 1, day: 1, coins: 0, streak: 0, lastDailyDate: null,
+    version: 2, day: 1, coins: 0, streak: 0, lastDailyDate: null,
     unlockedRooms: ['entrance', 'living', 'kitchen', 'bedroom'], owned: [], homeSpots: {},
-    bestStars: {}, tutorialDone: false, settings: { sfx: true, music: true, vibration: true, lowFx: false },
+    bestStars: {}, tutorialDone: false,
+    stats: { mornings: 0, perfect: 0, itemsFound: 0, hintsUsed: 0, puzzlesSolved: 0, bestStreak: 0, fastestMs: null },
+    achievements: [], weekMorning: 0, weekStars: 0, settings: { sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: false },
   };
 }
 const day10: PlayerProfile = {
@@ -239,7 +241,7 @@ describe('progression', () => {
   it('applyRun updates and does not mutate', () => {
     const p = fresh();
     const frozen = JSON.stringify(p);
-    const r: RunResult = { scenarioId: 'x', mode: 'daily', targets: [], found: [], timeMs: 1, searches: 1, hintsUsed: 0, timedOut: false, stars: 2, coinsEarned: 40 };
+    const r: RunResult = { scenarioId: 'x', mode: 'daily', targets: [], found: [], timeMs: 1, searches: 1, hintsUsed: 0, timedOut: false, stars: 2, coinsEarned: 40, habitHits: [], newAchievements: [] };
     const a = applyRun(p, r, '2026-11-01');
     expect(a.day).toBe(2);
     expect(a.coins).toBe(40);

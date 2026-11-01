@@ -1,14 +1,16 @@
 import type Phaser from 'phaser';
 import { ITEM_IDS, ROOM_ORDER } from '../shared/types';
-import type { ItemId, PlayerProfile, RoomId, SpotId } from '../shared/types';
+import { SAVE_VERSION } from '../shared/types';
+import type { ItemId, PlayerProfile, ProfileStats, RoomId, SpotId } from '../shared/types';
 
-const STORAGE_KEY = 'scatterly.profile.v1';
+const STORAGE_KEY = 'scatterly.profile.v1'; // key kept so v1 saves are found and migrated in place
+const MAX_ACHIEVEMENTS = 200;
 const WRITE_DELAY_MS = 300;
 const DEFAULT_ROOMS: RoomId[] = ['entrance', 'living', 'kitchen', 'bedroom'];
 
 export function defaultProfile(): PlayerProfile {
   return {
-    version: 1,
+    version: SAVE_VERSION,
     day: 1,
     coins: 0,
     streak: 0,
@@ -18,8 +20,16 @@ export function defaultProfile(): PlayerProfile {
     homeSpots: {},
     bestStars: {},
     tutorialDone: false,
-    settings: { sfx: true, music: true, vibration: true, lowFx: false },
+    stats: defaultStats(),
+    achievements: [],
+    weekMorning: 0,
+    weekStars: 0,
+    settings: { sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: false },
   };
+}
+
+export function defaultStats(): ProfileStats {
+  return { mornings: 0, perfect: 0, itemsFound: 0, hintsUsed: 0, puzzlesSolved: 0, bestStreak: 0, fastestMs: null };
 }
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -40,6 +50,30 @@ function isRoomId(v: unknown): v is RoomId {
 
 function isItemId(v: unknown): v is ItemId {
   return typeof v === 'string' && (ITEM_IDS as readonly string[]).includes(v);
+}
+
+function sanitizeStats(raw: unknown): ProfileStats {
+  const d = defaultStats();
+  if (!isRecord(raw)) return d;
+  const f = raw.fastestMs;
+  return {
+    mornings: wholeNumber(raw.mornings, 0, d.mornings),
+    perfect: wholeNumber(raw.perfect, 0, d.perfect),
+    itemsFound: wholeNumber(raw.itemsFound, 0, d.itemsFound),
+    hintsUsed: wholeNumber(raw.hintsUsed, 0, d.hintsUsed),
+    puzzlesSolved: wholeNumber(raw.puzzlesSolved, 0, d.puzzlesSolved),
+    bestStreak: wholeNumber(raw.bestStreak, 0, d.bestStreak),
+    fastestMs: typeof f === 'number' && Number.isFinite(f) && f >= 0 ? Math.floor(f) : null,
+  };
+}
+
+/**
+ * Migrates any stored value to the current version. v1 -> v2 keeps all progress and fills new
+ * fields with defaults. Future versions (> SAVE_VERSION) are read field-by-field, never trusted
+ * wholesale. Anything that is not an object yields a fresh profile. Never throws.
+ */
+export function migrate(raw: unknown): PlayerProfile {
+  return sanitize(raw);
 }
 
 /** Field-by-field validation: stored data is never trusted, every field falls back to its default. */
@@ -73,11 +107,19 @@ function sanitize(raw: unknown): PlayerProfile {
     }
   }
 
+  const achievements: string[] = [];
+  if (Array.isArray(raw.achievements)) {
+    for (const id of raw.achievements) {
+      if (achievements.length >= MAX_ACHIEVEMENTS) break;
+      if (typeof id === 'string' && id.length > 0 && id.length < 80 && !achievements.includes(id)) achievements.push(id);
+    }
+  }
+
   const s = isRecord(raw.settings) ? raw.settings : {};
   const last = raw.lastDailyDate;
 
   return {
-    version: 1,
+    version: SAVE_VERSION,
     day: wholeNumber(raw.day, 1, d.day),
     coins: wholeNumber(raw.coins, 0, d.coins),
     streak: wholeNumber(raw.streak, 0, d.streak),
@@ -87,11 +129,16 @@ function sanitize(raw: unknown): PlayerProfile {
     homeSpots,
     bestStars,
     tutorialDone: bool(raw.tutorialDone, d.tutorialDone),
+    stats: sanitizeStats(raw.stats),
+    achievements,
+    weekMorning: Math.min(6, wholeNumber(raw.weekMorning, 0, 0)),
+    weekStars: wholeNumber(raw.weekStars, 0, 0),
     settings: {
       sfx: bool(s.sfx, d.settings.sfx),
       music: bool(s.music, d.settings.music),
       vibration: bool(s.vibration, d.settings.vibration),
       lowFx: bool(s.lowFx, d.settings.lowFx),
+      reducedMotion: bool(s.reducedMotion, d.settings.reducedMotion),
     },
   };
 }

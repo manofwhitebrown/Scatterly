@@ -204,7 +204,7 @@ export class GameSession {
     return {
       scenarioId: this.scenario.id, mode: this.mode, targets: this.scenario.targets.slice(),
       found: this.found(), timeMs, searches: this.searches, hintsUsed: this.hintsUsed, timedOut,
-      stars, coinsEarned: coins,
+      stars, coinsEarned: coins, habitHits: [], newAchievements: [],
     };
   }
 

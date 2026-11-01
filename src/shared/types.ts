@@ -54,19 +54,29 @@ export interface InspectOutcome {
   kind: 'empty' | 'found' | 'locked';
   items: ItemId[]; clues: Clue[]; gate?: Gate; message: string;
 }
+export const SAVE_VERSION = 2;
+export type SpotMark = 'ruledOut' | 'hunch';
+export type FxName = 'tap' | 'open' | 'empty' | 'found' | 'take' | 'clue' | 'hint' | 'room'
+  | 'urgent' | 'win' | 'lose' | 'coin' | 'star' | 'buy' | 'unlock' | 'puzzleOk';
+export interface ProfileStats {
+  mornings: number; perfect: number; itemsFound: number; hintsUsed: number;
+  puzzlesSolved: number; bestStreak: number; fastestMs: number | null;
+}
 export interface RunResult {
   scenarioId: string; mode: GameMode; targets: ItemId[]; found: ItemId[];
   timeMs: number; searches: number; hintsUsed: number; timedOut: boolean;
   stars: 0 | 1 | 2 | 3; coinsEarned: number;
+  habitHits: ItemId[]; newAchievements: string[];
 }
 export interface PlayerProfile {
-  version: 1; day: number; coins: number; streak: number; lastDailyDate: string | null;
+  version: 2; day: number; coins: number; streak: number; lastDailyDate: string | null;
   unlockedRooms: RoomId[];                     // default: entrance, living, kitchen, bedroom
   owned: string[];                             // DecorDef ids
   homeSpots: Partial<Record<ItemId, SpotId>>;  // dedicated places chosen by player
   bestStars: Record<string, 0 | 1 | 2 | 3>;    // by scenario id
   tutorialDone: boolean;
-  settings: { sfx: boolean; music: boolean; vibration: boolean; lowFx: boolean };
+  stats: ProfileStats; achievements: string[]; weekMorning: number; weekStars: number;
+  settings: { sfx: boolean; music: boolean; vibration: boolean; lowFx: boolean; reducedMotion: boolean };
 }
 export interface DecorDef {
   id: string; name: string; room: RoomId; price: number; unlockDay: number;
@@ -85,7 +95,7 @@ export interface ResultSceneData { result: RunResult; scenario: Scenario }
 
 export const SCENE = {
   Boot: 'Boot', Menu: 'Menu', ModeSelect: 'ModeSelect', Room: 'Room', Result: 'Result',
-  Settings: 'Settings', Organise: 'Organise',
+  Settings: 'Settings', Organise: 'Organise', Journal: 'Journal',
 } as const;
 export const PUZZLE_SCENE: Record<PuzzleKind, string> = {
   untangle: 'PuzzleUntangle', sort: 'PuzzleSort', word: 'PuzzleWord',
@@ -96,4 +106,6 @@ export const tex = {
   item: (i: ItemId) => `item_${i}`,
   icon: (c: ClueIcon) => `icon_${c}`,
   decor: (id: string) => `decor_${id}`,
+  mark: (m: SpotMark) => `mark_${m}`,
+  fx: (n: 'dot' | 'star' | 'ring' | 'confetti' | 'mote') => `fx_${n}`,
 };
