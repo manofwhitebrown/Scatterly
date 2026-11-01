@@ -8,6 +8,9 @@
   (Phaser chunk ~332 KB gzip, so game code has roughly 100 KB gzip of headroom under the 450 KB budget)
 - Android patch step tested against a freshly generated `android/` project (idempotent)
 
+## Status
+- Actions runs on 7b2dca4 failed as expected: src/art, audio, scenes, puzzles, organise and tests/ do not exist yet.
+
 ## Next up
 - Cross-check the other AIs' files once pushed; confirm Actions run is green and `?debug=1` shows ~60 fps
 

@@ -9,7 +9,7 @@ The house remembers last evening: read the clues, work out where things went, th
 
 | AI | % done | last pushed file | blockers/notes |
 | --- | --- | --- | --- |
-| AI-1 Foundation | 0% | - | starting |
+| AI-1 Foundation | 95% | .github/workflows/android.yml | all files pushed; runs red until AI-2/3/4 files land |
 | AI-2 Logic | 0% | - | - |
 | AI-3 Face | 0% | - | - |
 | AI-4 Art | 0% | - | - |
