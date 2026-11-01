@@ -46,7 +46,13 @@ export class Button extends Phaser.GameObjects.Container {
     this.redraw();
     this.setSize(this.bw, this.bh);
     this.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(0, 0, this.bw, this.bh),
+      // Hit area is at least 96x96 game px (48 dp), centred on the plate.
+      hitArea: new Phaser.Geom.Rectangle(
+        -(Math.max(96, this.bw) - this.bw) / 2,
+        -(Math.max(96, this.bh) - this.bh) / 2,
+        Math.max(96, this.bw),
+        Math.max(96, this.bh),
+      ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       useHandCursor: true,
     });

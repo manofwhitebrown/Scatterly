@@ -58,7 +58,7 @@ export class Hud {
     bar.fillRect(0, 62, GAME_W, 2);
     this.root.add(bar);
 
-    this.root.add(new Button(scene, 52, 32, 56, 'II', cfg.handlers.onPause, { fontSize: 26, height: 56 }));
+    this.root.add(new Button(scene, 52, 32, 56, 'II', cfg.handlers.onPause, { fontSize: 28, height: 56 }));
 
     for (const room of ROOM_ORDER) {
       const tab = new Button(scene, 0, 32, TAB_W, ROOM_LABEL[room], () => cfg.handlers.onRoom(room), {
@@ -75,7 +75,7 @@ export class Hud {
     this.timerText.setVisible(cfg.timed);
     this.root.add(this.timerText);
 
-    const clueBtn = new Button(scene, 938, 32, 176, 'Clues', cfg.handlers.onClues, { fontSize: 26, height: 56 });
+    const clueBtn = new Button(scene, 938, 32, 176, 'Clues', cfg.handlers.onClues, { fontSize: 28, height: 56 });
     this.root.add(clueBtn);
     const dot = scene.add.graphics();
     dot.fillStyle(COLOR.red, 1);
@@ -86,7 +86,7 @@ export class Hud {
     this.badge = scene.add.container(938 + 80, 10, [dot, this.badgeText]).setVisible(false);
     this.root.add(this.badge);
 
-    this.hintBtn = new Button(scene, 1126, 32, 176, 'Hint', cfg.handlers.onHint, { fontSize: 26, height: 56 });
+    this.hintBtn = new Button(scene, 1126, 32, 176, 'Hint', cfg.handlers.onHint, { fontSize: 28, height: 56 });
     this.root.add(this.hintBtn);
 
     this.buildTray(cfg.targets);

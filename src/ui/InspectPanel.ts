@@ -77,7 +77,7 @@ export class InspectPanel {
     for (let i = 0; i < MAX_TILES; i++) this.tiles.push(this.buildTile());
     for (let i = 0; i < MAX_NOTES; i++) this.notes.push(this.buildNote());
 
-    this.root.add(new Button(scene, PX + PW - 48, PY + 46, 56, '✕', () => this.close(), { fontSize: 26, height: 56 }));
+    this.root.add(new Button(scene, PX + PW - 48, PY + 46, 56, '✕', () => this.close(), { fontSize: 28, height: 56 }));
   }
 
   get isOpen(): boolean {

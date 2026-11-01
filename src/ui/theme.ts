@@ -35,7 +35,7 @@ export const CSS = {
 
 export const FONT = 'system-ui, "Segoe UI", Roboto, sans-serif';
 
-export const SIZE = { body: 24, label: 26, button: 28, heading: 40, title: 56 } as const;
+export const SIZE = { body: 28, label: 28, button: 28, heading: 40, title: 56 } as const;
 
 export const DEPTH = { hud: 100, dim: 190, panel: 200, board: 300, cardDim: 390, card: 400, fly: 500, toast: 1000 } as const;
 

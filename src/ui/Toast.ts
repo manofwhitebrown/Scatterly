@@ -15,7 +15,7 @@ export class Toast {
   constructor(private readonly scene: Phaser.Scene, y = 112) {
     this.plate = scene.add.graphics();
     this.label = makeText(scene, 0, 0, '', {
-      fontSize: '26px',
+      fontSize: '28px',
       fontStyle: 'bold',
       align: 'center',
       wordWrap: { width: 860 },

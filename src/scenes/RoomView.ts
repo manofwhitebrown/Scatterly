@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { isLowFx } from '../core/perf';
 import { DECOR, GameSession } from '../logic';
 import { tex } from '../shared/types';
+import { pickSpot } from '../ui/hit';
 import type { PlayerProfile, RoomId, Spot, SpotId } from '../shared/types';
 
 interface SpotView {
@@ -14,7 +15,6 @@ interface RoomLayer {
   spots: Map<SpotId, SpotView>;
 }
 
-const PAD = 8;
 const SLIDE = 60;
 const SLIDE_MS = 180;
 
@@ -163,18 +163,16 @@ export class RoomView {
     for (const spot of list) {
       const img = this.scene.add.image(spot.x, spot.y, tex.spot(spot.kind, this.session.isOpened(spot.id)));
       img.setOrigin(0, 0);
-      img.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(-PAD, -PAD, spot.w + PAD * 2, spot.h + PAD * 2),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-        useHandCursor: true,
-      });
-      img.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-        if (this.busy || this.current !== room || pointer.getDistance() > 16) return;
-        this.onTap(spot);
-      });
       box.add(img);
       spots.set(spot.id, { spot, img });
     }
+    const zone = this.scene.add.zone(0, 0, 1280, 720).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+    zone.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+      if (this.busy || this.current !== room || pointer.getDistance() > 16) return;
+      const hit = pickSpot(list, pointer.x, pointer.y);
+      if (hit) this.onTap(hit);
+    });
+    box.add(zone);
     const layer: RoomLayer = { box, spots };
     this.layers.set(room, layer);
     return layer;
