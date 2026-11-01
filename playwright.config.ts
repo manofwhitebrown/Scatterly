@@ -10,7 +10,7 @@ export default defineConfig({
   workers: 1,
   fullyParallel: false,
   retries: 0,
-  reporter: [['list'], ['json', { outputFile: 'test-results/e2e.json' }]],
+  reporter: [['list'], ['github'], ['json', { outputFile: 'test-results/e2e.json' }]],
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
     viewport: { width: 1280, height: 720 },
