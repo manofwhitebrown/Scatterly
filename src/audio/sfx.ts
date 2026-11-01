@@ -1,8 +1,12 @@
 export type SfxName = 'tap' | 'open' | 'close' | 'found' | 'clue' | 'error' | 'win' | 'lose' | 'tick' | 'pop' | 'swoosh' | 'coin' | 'snap';
 
+export interface PlayOpts { step?: number }
+
 export interface SfxApi {
   unlock(): void;
-  play(name: SfxName): void;
+  play(name: SfxName, opts?: PlayOpts): void;
+  setIntensity(level: number): void;
+  setRoomAmbience(room: string | null): void;
   setEnabled(sfx: boolean, music: boolean): void;
   startMusic(): void;
   stopMusic(): void;
@@ -93,7 +97,10 @@ function activeVoices(now: number): number {
   return voiceEnds.length;
 }
 
-function play(name: SfxName): void {
+let intensity = 0;
+let ambience: string | null = null;
+
+function play(name: SfxName, opts?: PlayOpts): void {
   if (!sfxOn) return;
   const c = ctx;
   const out = sfxGain;
@@ -105,7 +112,8 @@ function play(name: SfxName): void {
     if (activeVoices(now) >= MAX_VOICES) return;
     lastPlayed[name] = now;
     const r = RECIPES[name];
-    const jitter = 1 + (Math.random() - 0.5) * 0.06;
+    const stepUp = Math.pow(2, Math.min(12, Math.max(0, Math.floor(opts?.step ?? 0))) / 12);
+    const jitter = (1 + (Math.random() - 0.5) * 0.06) * stepUp;
     let end = now;
     for (const b of r.blips) {
       const t = now + (b.at ?? 0);
@@ -243,6 +251,12 @@ export const sfx: SfxApi = {
     }
   },
   play,
+  setIntensity(level: number): void {
+    intensity = Number.isFinite(level) ? Math.min(1, Math.max(0, level)) : 0;
+  },
+  setRoomAmbience(room: string | null): void {
+    ambience = room;
+  },
   setEnabled(sfxEnabled: boolean, musicEnabled: boolean): void {
     sfxOn = sfxEnabled;
     musicOn = musicEnabled;
@@ -260,3 +274,7 @@ export const sfx: SfxApi = {
     stopTimer();
   },
 };
+
+export function audioDebug(): { intensity: number; ambience: string | null } {
+  return { intensity, ambience };
+}

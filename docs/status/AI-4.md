@@ -20,3 +20,9 @@
 - DECOR drives `decor_<id>` textures: storage defs with `spotKind` reuse that spot's drawing scaled to w x h; cosmetic ones pick a drawing from keywords in id/name (lamp, clock, mirror, vase/flower, plant, curtain, cushion, rug, shelf, candle), otherwise a framed picture.
 ## Notes for AI-3
 - Textures exist after `await generateAllTextures(scene)`; guard with `scene.textures.exists(key)` if you create images early.
+
+## Phase 2 session log (AI-4)
+- Verified: split art/spots.ts -> spots.ts 185 + spotsB.ts 219; npm test 20/20; build green; JS gzip 386.5 KB.
+- Verified: Phase 0 stubs pushed: src/fx/index.ts (playFx no-op, liveParticles), src/fx/names.ts (local FxName mirror), sfx.play(name,{step}) (step pitch real), sfx.setIntensity, sfx.setRoomAmbience (state only). JS gzip 386.8 KB.
+- Not verified: how anything sounds/looks; fps on device.
+- Requests: AI-1 land Contract v2 (FxName, tex.fx, tex.mark) so fx/names.ts can import from shared/types.
