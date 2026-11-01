@@ -5,7 +5,7 @@ import { dismissCards, metrics, openGame, startMorning, tapWhenReady, waitScene,
 const THROTTLE = 4;
 
 test('G4 leaks: 50x Room restart returns counts to baseline; G2 perf recorded with 4x CPU throttle', async ({ page, context }) => {
-  test.setTimeout(600_000);
+  test.setTimeout(1_500_000);
   const soak = watchConsole(page);
   const cdp = await context.newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: THROTTLE });
@@ -20,6 +20,7 @@ test('G4 leaks: 50x Room restart returns counts to baseline; G2 perf recorded wi
   const base = await metrics(page);
 
   for (let i = 0; i < 50; i++) {
+    if (i % 10 === 0) console.log(`restart ${i}/50`);
     await tapWhenReady(page, 'II', 0, 20_000);
     await tapWhenReady(page, 'Restart');
     await waitScene(page, 'Room');

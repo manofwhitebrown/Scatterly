@@ -141,7 +141,13 @@ export async function playPerfect(page: Page): Promise<void> {
       if (await tapMatch(page, label)) taken = true;
       else await tapMatch(page, '✕');
     }
-    if (!taken) await tapWhenReady(page, label, 0, 4_000);
+    if (!taken) {
+      const dbg = await page.evaluate(() => {
+        const r = window.__scatterly!.game.scene.getScene('Room') as unknown as { view?: { room: string | null } };
+        return r.view?.room ?? 'none';
+      });
+      throw new Error(`could not take ${p.target} at ${p.spotId} (${Math.round(p.x)},${Math.round(p.y)}) gated=${String(p.gated)} planned=${plans.map((q) => q.spotId).join(',')} viewRoom=${dbg}`);
+    }
     await page.waitForTimeout(900);
   }
   await waitScene(page, 'Result', 40_000);

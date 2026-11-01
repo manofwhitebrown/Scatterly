@@ -12,6 +12,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,8 +28,11 @@ jobs:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
-      - name: E2E (all modes, error policy, leaks, perf)
-        run: npx playwright test
+      - name: E2E flow (modes, pause, settings, error policy, background)
+        run: npx playwright test game.e2e.ts
+      - name: E2E leaks and perf (50x restart, 4x CPU throttle)
+        if: always()
+        run: npx playwright test perf.e2e.ts
       - name: Perf regression gate (software GL, regression only)
         run: node scripts/perf-compare.mjs
       - uses: actions/upload-artifact@v4
