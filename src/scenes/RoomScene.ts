@@ -1,15 +1,12 @@
 import Phaser from 'phaser';
 import { sfx } from '../audio/sfx';
-import { commitProfile } from '../core/save';
 import { isLowFx } from '../core/perf';
 import { GameSession, allSpots, generateScenario } from '../logic';
-import { ITEM_LABEL, PUZZLE_SCENE, ROOM_ORDER, SCENE, tex } from '../shared/types';
+import { ITEM_LABEL, ROOM_ORDER, SCENE, tex } from '../shared/types';
 import type {
   GameMode,
-  Gate,
   InspectOutcome,
   ItemId,
-  PuzzleResult,
   RoomId,
   RoomSceneData,
   Scenario,
@@ -21,15 +18,16 @@ import { ClueBoard } from '../ui/ClueBoard';
 import { Hud } from '../ui/Hud';
 import { InspectPanel } from '../ui/InspectPanel';
 import { Toast } from '../ui/Toast';
-import { DEPTH, Dim, SIZE, enterFade, getProfile, go, makeText, sceneExists } from '../ui/theme';
-import { coachCard, introCard, pauseCard, quitCard, timeUpCard, COACH_STEPS } from './RoomCardConfigs';
+import { DEPTH, Dim, SIZE, enterFade, getProfile, go, makeText } from '../ui/theme';
+import { timeUpCard } from './RoomCardConfigs';
 import { ModalCard } from './RoomCards';
 import { burst, flyItem } from './RoomFx';
 import { finishRun } from './RoomFinish';
 import { RoomBack } from './RoomBack';
 import { RoomClock } from './RoomClock';
 import { RoomNav } from './RoomNav';
-import { puzzleLaunchData } from './RoomPuzzle';
+import { RoomFlow } from './RoomFlow';
+import { RoomGate } from './RoomGate';
 import { RoomView } from './RoomView';
 
 export class RoomScene extends Phaser.Scene {
@@ -52,7 +50,8 @@ export class RoomScene extends Phaser.Scene {
   private flyImgs: Phaser.GameObjects.Image[] = [];
   private flyIdx = 0;
   private unsubs: Array<() => void> = [];
-  private paused = false;
+  private flow!: RoomFlow;
+  private gate!: RoomGate;
   private puzzleOpen = false;
   private resolving = false;
   private finished = false;
@@ -66,7 +65,6 @@ export class RoomScene extends Phaser.Scene {
     this.mode = data.mode;
     this.seed = data.seed ?? Math.floor(Math.random() * 2147483647);
     this.built = false;
-    this.paused = false;
     this.puzzleOpen = false;
     this.resolving = false;
     this.finished = false;
@@ -103,7 +101,7 @@ export class RoomScene extends Phaser.Scene {
       rooms,
       active: start,
       handlers: {
-        onPause: () => this.openPause(),
+        onPause: () => this.flow.openPause(),
         onClues: () => this.openBoard(),
         onHint: () => this.useHint(),
         onRoom: (room) => this.nav.goTo(room),
@@ -129,35 +127,33 @@ export class RoomScene extends Phaser.Scene {
       this,
       this.mode === 'rush' ? this.scenario.timeLimitSec : null,
       this.hud,
-      () => this.finished || this.paused || this.puzzleOpen,
+      () => this.finished || this.flow.paused || this.puzzleOpen,
       () => this.onTimeUp(),
     );
     this.events.on(Phaser.Scenes.Events.RESUME, this.clock.resync, this.clock);
+    this.flow = new RoomFlow(this, this.card, this.scenario, this.mode, {
+      beginClock: () => this.beginClock(),
+      resyncClock: () => this.clock.resync(),
+      restart: () => this.scene.restart({ mode: this.mode, seed: this.seed } as RoomSceneData),
+      quit: () => go(this, SCENE.Menu),
+      canPause: () => this.clock.started && !this.finished && !this.puzzleOpen,
+      hideOverlays: () => {
+        this.inspect.hide(true);
+        this.board.hide();
+      },
+    });
+    this.gate = new RoomGate(this, this.scenario, {
+      setPuzzleOpen: (open) => {
+        this.puzzleOpen = open;
+      },
+      solve: (spot, skipped) => this.session.solveGate(spot.id, skipped ? true : undefined),
+      countHint: () => this.countHint(),
+      reinspect: (spot) => this.reinspect(spot),
+      warn: (m) => this.toast.show(m, 'warn'),
+    });
     this.back = new RoomBack(this, () => this.onBack());
     this.built = true;
-    this.card.show(introCard(this.scenario, this.mode, () => this.afterIntro()));
-  }
-
-  private afterIntro(): void {
-    this.card.hide();
-    const p = getProfile(this);
-    if (p.day === 1 || !p.tutorialDone) this.showCoach(0);
-    else this.beginClock();
-  }
-
-  private showCoach(step: number): void {
-    this.card.show(
-      coachCard(step, () => {
-        if (step < COACH_STEPS.length - 1) {
-          this.showCoach(step + 1);
-          return;
-        }
-        this.card.hide();
-        const p = getProfile(this);
-        if (!p.tutorialDone) commitProfile(this.game, { ...p, tutorialDone: true });
-        this.beginClock();
-      }),
-    );
+    this.flow.intro();
   }
 
   private beginClock(): void {
@@ -169,7 +165,7 @@ export class RoomScene extends Phaser.Scene {
     return (
       !this.clock.started ||
       this.finished ||
-      this.paused ||
+      this.flow.paused ||
       this.puzzleOpen ||
       this.resolving ||
       this.inspect.isOpen ||
@@ -204,7 +200,7 @@ export class RoomScene extends Phaser.Scene {
       this.inspect.show(spot.label, out.items, out.clues, out.message);
     } else if (out.kind === 'locked') {
       const gate = out.gate ?? this.scenario.gates[spot.id];
-      if (gate) this.launchGate(spot, gate);
+      if (gate) this.gate.launch(spot, gate);
       else this.toast.show("It won't budge.", 'warn');
     } else {
       this.toast.show(out.message.length > 0 ? out.message : 'Nothing here.');
@@ -258,7 +254,7 @@ export class RoomScene extends Phaser.Scene {
   }
 
   private openBoard(): void {
-    if (!this.clock.started || this.finished || this.paused || this.puzzleOpen || this.card.isOpen || this.resolving) return;
+    if (!this.clock.started || this.finished || this.flow.paused || this.puzzleOpen || this.card.isOpen || this.resolving) return;
     this.inspect.hide(true);
     this.board.show(this.session.discoveredClues());
   }
@@ -270,35 +266,6 @@ export class RoomScene extends Phaser.Scene {
     }
     if (room) this.hud.flashTab(room);
     if (spotId) this.view.queuePulse(spotId);
-  }
-
-  private launchGate(spot: Spot, gate: Gate): void {
-    const key = PUZZLE_SCENE[gate.kind];
-    if (!sceneExists(this, key)) {
-      this.toast.show("That puzzle isn't available, so it opened anyway.", 'warn');
-      this.session.solveGate(spot.id, true);
-      this.countHint();
-      this.reinspect(spot);
-      return;
-    }
-    const data = puzzleLaunchData(this.scenario, spot, gate, (r) => this.onPuzzleDone(spot, r));
-    this.puzzleOpen = true;
-    this.scene.pause();
-    this.scene.launch(key, data);
-  }
-
-  private onPuzzleDone(spot: Spot, r: PuzzleResult): void {
-    this.puzzleOpen = false;
-    this.scene.resume();
-    if (r.solved) {
-      this.session.solveGate(spot.id);
-    } else if (r.skipped) {
-      this.session.solveGate(spot.id, true);
-      this.countHint();
-    } else {
-      return;
-    }
-    this.reinspect(spot);
   }
 
   private reinspect(spot: Spot): void {
@@ -313,37 +280,10 @@ export class RoomScene extends Phaser.Scene {
   }
 
   private onBack(): void {
-    if (this.paused) this.closePause();
+    if (this.flow.paused) this.flow.closePause();
     else if (this.board.isOpen) this.board.hide();
     else if (this.inspect.isOpen) this.inspect.hide();
-    else this.openPause();
-  }
-
-  private openPause(): void {
-    if (!this.clock.started || this.finished || this.puzzleOpen || this.paused) return;
-    this.inspect.hide(true);
-    this.board.hide();
-    this.paused = true;
-    this.showPause();
-  }
-
-  private closePause(): void {
-    this.card.hide();
-    this.paused = false;
-    this.clock.resync();
-  }
-
-  private showPause(): void {
-    this.card.show(
-      pauseCard(
-        () => this.closePause(),
-        () => {
-          const data: RoomSceneData = { mode: this.mode, seed: this.seed };
-          this.scene.restart(data);
-        },
-        () => this.card.show(quitCard(() => this.showPause(), () => go(this, SCENE.Menu))),
-      ),
-    );
+    else this.flow.openPause();
   }
 
   private lockUp(): boolean {
