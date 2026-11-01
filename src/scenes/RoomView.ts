@@ -16,6 +16,7 @@ interface RoomLayer {
 }
 
 const SLIDE = 60;
+const LONG_MS = 400;
 const SLIDE_MS = 180;
 
 /** Renders one room at a time. Room layers are built lazily, cached by room id and reused. */
@@ -24,12 +25,15 @@ export class RoomView {
   private current: RoomId | null = null;
   private busy = false;
   private pulseSpot: SpotId | null = null;
+  private pressTimer: Phaser.Time.TimerEvent | null = null;
+  private longFired = false;
 
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly session: GameSession,
     private readonly profile: PlayerProfile,
     private readonly onTap: (spot: Spot) => void,
+    private readonly onLong: (spot: Spot) => void = () => undefined,
   ) {}
 
   get room(): RoomId | null {
@@ -71,6 +75,12 @@ export class RoomView {
         this.afterShow(room);
       },
     });
+  }
+
+  /** Adds an overlay object (e.g. a mark badge) to a room layer so it hides and shows with the room. */
+  attach(room: RoomId, obj: Phaser.GameObjects.GameObject): void {
+    const layer = this.layers.get(room) ?? this.build(room);
+    layer.box.add(obj);
   }
 
   spotOf(spotId: SpotId): Spot | undefined {
@@ -118,6 +128,8 @@ export class RoomView {
   }
 
   destroy(): void {
+    this.pressTimer?.remove(false);
+    this.pressTimer = null;
     for (const layer of this.layers.values()) {
       for (const view of layer.spots.values()) this.scene.tweens.killTweensOf(view.img);
       this.scene.tweens.killTweensOf(layer.box);
@@ -171,7 +183,24 @@ export class RoomView {
       spots.set(spot.id, { spot, img });
     }
     const zone = this.scene.add.zone(0, 0, 1280, 720).setOrigin(0, 0).setInteractive({ useHandCursor: true });
+    zone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      this.longFired = false;
+      this.pressTimer?.remove(false);
+      this.pressTimer = this.scene.time.delayedCall(LONG_MS, () => {
+        if (this.busy || this.current !== room || pointer.getDistance() > 16) return;
+        const hit = pickSpot(list, pointer.x, pointer.y);
+        if (!hit) return;
+        this.longFired = true;
+        this.onLong(hit);
+      });
+    });
     zone.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+      this.pressTimer?.remove(false);
+      this.pressTimer = null;
+      if (this.longFired) {
+        this.longFired = false;
+        return;
+      }
       if (this.busy || this.current !== room || pointer.getDistance() > 16) return;
       const hit = pickSpot(list, pointer.x, pointer.y);
       if (hit) this.onTap(hit);

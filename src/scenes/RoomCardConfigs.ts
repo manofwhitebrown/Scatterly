@@ -6,6 +6,7 @@ export const COACH_STEPS = [
   'Tap any furniture to search it. Drawers, jackets, sofas and bags can all hide things.',
   'Read every clue you find. The Clue Board keeps all of them in one place.',
   'Clues point to rooms and spots. Work out where last night led your things.',
+  'Long-press a spot to mark it: ✕ ruled out, ? hunch. Press again to change or clear.',
 ];
 
 export function introCard(s: Scenario, mode: GameMode, onStart: () => void): CardConfig {

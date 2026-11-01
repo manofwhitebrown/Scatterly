@@ -18,7 +18,7 @@ import { ClueBoard } from '../ui/ClueBoard';
 import { Hud } from '../ui/Hud';
 import { InspectPanel } from '../ui/InspectPanel';
 import { Toast } from '../ui/Toast';
-import { DEPTH, Dim, SIZE, enterFade, getProfile, go, isCalm, makeText } from '../ui/theme';
+import { DEPTH, Dim, SIZE, enterFade, getProfile, go, isCalm, makeText, vibrate } from '../ui/theme';
 import { timeUpCard } from './RoomCardConfigs';
 import { ModalCard } from './RoomCards';
 import { burst, flyItem } from './RoomFx';
@@ -26,6 +26,7 @@ import { finishRun } from './RoomFinish';
 import { RoomBack } from './RoomBack';
 import { RoomClock } from './RoomClock';
 import { RoomNav } from './RoomNav';
+import { RoomMarks } from './RoomMarks';
 import { RoomFeel } from './RoomFeel';
 import { RoomFlow } from './RoomFlow';
 import { RoomGate } from './RoomGate';
@@ -52,6 +53,7 @@ export class RoomScene extends Phaser.Scene {
   private flyIdx = 0;
   private unsubs: Array<() => void> = [];
   private feel!: RoomFeel;
+  private marks!: RoomMarks;
   private flow!: RoomFlow;
   private gate!: RoomGate;
   private puzzleOpen = false;
@@ -96,8 +98,9 @@ export class RoomScene extends Phaser.Scene {
     this.dim = new Dim(this);
     this.toast = new Toast(this);
     this.feel = new RoomFeel(this);
-    this.view = new RoomView(this, this.session, profile, (spot) => this.onSpot(spot));
+    this.view = new RoomView(this, this.session, profile, (spot) => this.onSpot(spot), (spot) => this.onLong(spot));
     this.view.show(start, 0);
+    this.marks = new RoomMarks(this, this.view, this.session);
     this.hud = new Hud(this, {
       targets: this.scenario.targets,
       timed: this.mode === 'rush',
@@ -196,6 +199,14 @@ export class RoomScene extends Phaser.Scene {
     }
     this.resolving = true;
     this.time.delayedCall(140, () => this.applyOutcome(spot, out));
+  }
+
+  /** Long-press: cycle the deduction mark. The tap that follows is suppressed by RoomView. */
+  private onLong(spot: Spot): void {
+    if (this.modalOpen() || this.session.isOpened(spot.id)) return;
+    this.session.cycleMark(spot.id);
+    vibrate(this, 10);
+    sfx.play('tap', { step: 3 });
   }
 
   private applyOutcome(spot: Spot, out: InspectOutcome): void {
@@ -344,6 +355,7 @@ export class RoomScene extends Phaser.Scene {
     this.view.destroy();
     this.toast.destroy();
     this.dim.destroy();
+    this.marks.destroy();
     this.feel.destroy();
     this.built = false;
   }
