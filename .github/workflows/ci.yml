@@ -32,6 +32,9 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: E2E flow (modes, pause, settings, error policy, background)
         run: npx playwright test game.e2e.ts
+      - name: E2E puzzles (open, audit targets, auto-solve every implemented kind)
+        if: always()
+        run: npx playwright test puzzles.e2e.ts
       - name: E2E leaks and perf (50x restart, 4x CPU throttle)
         if: always()
         run: npx playwright test perf.e2e.ts

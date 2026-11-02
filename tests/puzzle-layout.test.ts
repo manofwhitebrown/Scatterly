@@ -34,6 +34,12 @@ describe('puzzle layout guards', () => {
     expect(PY + 508 + 48).toBeLessThanOrEqual(BAR_TOP);
     expect(PX + 720 + 162).toBeLessThanOrEqual(PX + PW);
   });
+  it('memory: 3x3 pads and side panel fit', () => {
+    const rowsH = 3 * 110 + 2 * 8;
+    expect(PY + 250 + rowsH / 2).toBeLessThanOrEqual(BAR_TOP);
+    expect(PY + 250 - rowsH / 2).toBeGreaterThanOrEqual(PY + 60);
+    expect(PX + 740 + 130).toBeLessThanOrEqual(PX + PW);
+  });
   it('keys are at least 96 px', () => {
     expect(KEY).toBeGreaterThanOrEqual(96);
   });

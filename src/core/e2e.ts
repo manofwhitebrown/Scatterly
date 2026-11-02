@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
-import { GAME_H, GAME_W } from '../shared/types';
+import { GAME_H, GAME_W, PUZZLE_SCENE } from '../shared/types';
+import type { Difficulty, PuzzleKind, PuzzleResult } from '../shared/types';
 import type { FrameStats } from './frameStats';
 import { readMetrics } from './metrics';
 import type { Metrics } from './metrics';
@@ -19,6 +20,11 @@ export interface ScatterlyE2E {
   injectError(sceneKey: string): void;
   /** Every visible tappable object in the active scenes (labels, centres, hit sizes). */
   interactives(): Interactive[];
+  /** Opens a puzzle scene directly (no Room needed). The result lands in `lastPuzzleResult`. */
+  openPuzzle(kind: PuzzleKind, difficulty: Difficulty, seed: number): void;
+  lastPuzzleResult: PuzzleResult | null;
+  /** The open puzzle's bot hooks (autoSolve / hint / skip), or null. */
+  puzzleBot(): { autoSolve(): void; hint(): void; skip(confirm: boolean): void } | null;
   /** Converts game coordinates to page (client) coordinates for real pointer events. */
   toClient(x: number, y: number): { x: number; y: number };
 }
@@ -84,6 +90,18 @@ export function installE2e(game: Phaser.Game, stats: FrameStats): void {
       const out: Interactive[] = [];
       for (const sc of game.scene.getScenes(true)) collect(sc.children.list, sc.scene.key, out);
       return out;
+    },
+    lastPuzzleResult: null,
+    openPuzzle: (kind, difficulty, seed) => {
+      api.lastPuzzleResult = null;
+      game.scene.run(PUZZLE_SCENE[kind], { req: { kind, seed, difficulty }, notes: [], onDone: (r: PuzzleResult) => { api.lastPuzzleResult = r; } });
+    },
+    puzzleBot: () => {
+      for (const sc of game.scene.getScenes(true)) {
+        const bot = (sc as unknown as { __e2e?: { autoSolve(): void; hint(): void; skip(confirm: boolean): void } }).__e2e;
+        if (bot) return bot;
+      }
+      return null;
     },
     toClient: (x, y) => {
       const r = game.canvas.getBoundingClientRect();

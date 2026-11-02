@@ -71,7 +71,15 @@
 - `slide` DONE (SlideScene.ts, 98 lines): 3x3, 96 px numbered tiles, tap a neighbour of the gap, non-neighbour taps play the error sound, Reset, move counter; win via `PUZZLES.slide.check(spec, taps)`.
 - `pipes` DONE (PipesScene.ts): 3x3 to 5x5, 96 px tiles, tap rotates clockwise, water flow is computed for display (wet pipes blue, dry grey, rings fill when reached, source is a diamond) while the win is decided by `PUZZLES.pipes.check`. Request to AI-2: export `connected()` from pipes.ts so the scene does not carry a 20-line copy of the flood fill.
 - `mastermind` DONE (MastermindScene.ts + Symbols.ts): six symbols that differ in shape AND colour (circle, square, triangle, diamond, star, cross), 96 px palette, tap a filled slot to clear it, "Check" enabled only when full, history of up to 9 rows ("2 fit, 1 near"), "Try n of max"; running out of tries clears the board (the answer list stays within `maxAttempts`, so the puzzle remains winnable).
-- Next: memory (then e2e bot v3, boot-time measurement, Dollhouse hooks).
+- `memory` DONE (MemoryScene.ts): 4/6/9 pads (110 px, numbered AND coloured), Simon playback of a growing prefix (650 ms per pad), "Watch again" button, wrong tap replays the round, input locked during playback; e2e feeds the prefix each round like a player.
+- Tier 1 complete: 11 kinds in `IMPLEMENTED` (untangle, sort, word, code, target, sequence, lights, slide, pipes, mastermind, memory).
+
+## E2E for puzzles (new, runs in CI as its own step)
+- `window.__scatterly.openPuzzle(kind, difficulty, seed)`, `lastPuzzleResult`, `puzzleBot()` (autoSolve / hint / skip(confirm)).
+- `tests/e2e/puzzles.e2e.ts`: for every implemented kind x difficulty 1-3: opens, every tappable stays on screen, new kinds have all targets >= 96x96 and none overlapping, Hint then confirmed Skip reports `{skipped:true, solved:false, hints:2}`; and for the 8 new kinds the reference solution solves the scene through its own handlers. No console errors, no logged errors.
+- This is the first real check of the layouts: until CI runs it, none of the new scenes has been seen running.
+
+- Next: read the first CI result for puzzles.e2e.ts and fix what it finds; then boot-time measurement and Dollhouse hooks (iso kit from AI-4).
 - Not verified: how it looks/plays in a browser (no Playwright browser available locally; CI e2e will be the first run).
 
 ## Requests (new)

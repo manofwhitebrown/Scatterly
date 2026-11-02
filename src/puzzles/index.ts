@@ -9,5 +9,6 @@ import { LightsScene } from './LightsScene';
 import { SlideScene } from './SlideScene';
 import { PipesScene } from './PipesScene';
 import { MastermindScene } from './MastermindScene';
+import { MemoryScene } from './MemoryScene';
 
-export const puzzleScenes: Phaser.Types.Scenes.SceneType[] = [UntangleScene, SortScene, WordScene, CodeScene, TargetScene, SequenceScene, LightsScene, SlideScene, PipesScene, MastermindScene];
+export const puzzleScenes: Phaser.Types.Scenes.SceneType[] = [UntangleScene, SortScene, WordScene, CodeScene, TargetScene, SequenceScene, LightsScene, SlideScene, PipesScene, MastermindScene, MemoryScene];
