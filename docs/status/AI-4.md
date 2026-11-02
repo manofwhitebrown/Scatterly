@@ -26,3 +26,10 @@
 - Verified: Phase 0 stubs pushed: src/fx/index.ts (playFx no-op, liveParticles), src/fx/names.ts (local FxName mirror), sfx.play(name,{step}) (step pitch real), sfx.setIntensity, sfx.setRoomAmbience (state only). JS gzip 386.8 KB.
 - Not verified: how anything sounds/looks; fps on device.
 - Requests: AI-1 land Contract v2 (FxName, tex.fx, tex.mark) so fx/names.ts can import from shared/types.
+
+## Phase 3 (AI-4)
+- Verified (c266730): real FX system in src/fx (specs.ts, pool.ts, textures.ts, layer.ts, index.ts). All 16 FxNames implemented: tap, open, empty, found, take, clue, hint, room, urgent, win, lose, coin, star, buy, unlock, puzzleOk. Pooled images (cap 60), confetti cap 40, one pooled flash rectangle, one update listener per scene, no per-particle tweens, cleanup on shutdown/destroy, calm mode (lowFx/reducedMotion) = one 120 ms ring highlight. `liveParticles()` feeds the debug overlay.
+- Verified: `npx tsc --noEmit` clean; `npm test` 49/49 (new tests/fx.test.ts: specs within caps, allowedCount, Pool reuse/steal); `npm run build` green, JS gzip 393.3 KB (was 391).
+- Not verified: how effects look or feel on a device; fps with effects; G4 leak counts (no e2e step yet for fx).
+- Blocked: iso kit v0 needs Contract v3 (Spot.iso, IsoPlacement, ISO) from AI-1; types.ts is still SAVE_VERSION 2. Waiting.
+- Next: audio (ambience beds, puzzle sounds, limiter, 12 voices), then iso kit once v3 lands.
