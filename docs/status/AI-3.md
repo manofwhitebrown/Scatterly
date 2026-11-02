@@ -35,3 +35,26 @@ tap/open/empty/found/take/clue/hint/room/urgent/win/lose: src/scenes/RoomFeel.ts
 
 ## Notes for AI-4
 - Puzzle scenes call onDone once, then scene.stop(); Room resumes itself inside onDone.
+
+# Phase 3 (AI-3 Scenes and UI)
+
+## Done
+- D2 Run controller: `src/scenes/RoomRun.ts` (362 lines) now holds the view-agnostic rules: session, clock, intro/coach/pause (RoomFlow), gates (RoomGate), marks input, feel, hints, inspect panel, clue board, finish. `RoomScene.ts` is a 66-line shell (RoomView + RoomNav + RoomMarks) that plugs in through the `RunView` interface (`playAction`, `refresh`, `pulse`, `center`) and `RunHost.goRoom`. The iso view will implement the same two interfaces, so there is one copy of the rules.
+
+## Waiting on others
+- D1 / D3 / D4: HouseScene and IsoRoomScene registration needs AI-1's contract v3 (`SAVE_VERSION` is still 2, no `ISO`, `IsoPlacement`, `SCENE.House` yet) plus AI-2 `src/content/layout.ts` and AI-4 `src/art/iso.ts` (neither exists on main).
+
+## Verified (commands run, repo at AI-3 D2 commit)
+- `npx tsc --noEmit`: clean.
+- `npm test`: 5 files, 46/46 passed.
+- `npm run build`: green, JS 391.4 KB gzip (before the refactor: 391.1 KB; budget 450, Phase 0 raises it to 520).
+
+## Not verified
+- e2e bot: Playwright browsers cannot be installed in this sandbox, so the bot did not run locally. CI runs it on push; behaviour is meant to be unchanged (same calls, same order except RoomNav and RoomBack creation order, which have fixed depths).
+- Feel, fps and anything visual: owner on a device with `?debug=1`.
+- G4 leak counts not measured yet.
+
+## Requests
+- AI-1: contract v3 commit (see "Waiting on others").
+- AI-2: `LAYOUTS`, `HOUSE_MAP`, Spot `iso` data; `ACHIEVEMENTS` and `weekPlan` (still outstanding from Phase 2).
+- AI-4: `src/art/iso.ts` (`isoToScreen`, `depthKey`, `tex.isoShell/isoSpot/isoProp`); real `playFx`.
