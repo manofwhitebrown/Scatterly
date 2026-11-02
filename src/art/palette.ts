@@ -189,6 +189,7 @@ export function makeButton(scene: Phaser.Scene, x: number, y: number, w: number,
     text.setY(y + dy);
   };
   draw();
+  g.setData('labelText', text); // lets the e2e hook name this button by its label
   g.setInteractive(new Phaser.Geom.Rectangle(x - w / 2, y - h / 2, w, h), Phaser.Geom.Rectangle.Contains);
   g.on('pointerdown', () => { if (enabled) { down = true; draw(); } });
   g.on('pointerout', () => { if (down) { down = false; draw(); } });

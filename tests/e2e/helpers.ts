@@ -126,19 +126,28 @@ export async function playPerfect(page: Page): Promise<void> {
   for (const p of plans) {
     const label = ITEM_LABEL[p.target as ItemId];
     let taken = false;
-    for (let attempt = 0; attempt < 4 && !taken; attempt++) {
+    for (let attempt = 0; attempt < 5 && !taken; attempt++) {
+      // A puzzle opened late by a slow frame is resolved first; the reopened item panel may already show the item.
+      if (await puzzleOpen(page)) {
+        await resolveGate(page);
+        await waitScene(page, 'Room');
+        await waitIdle(page);
+        if (await pollTap(page, label, 3_000)) { taken = true; break; }
+      }
       await gotoRoom(page, p.room);
       await waitIdle(page);
       await tapAt(page, p.x, p.y);
       await page.waitForTimeout(700);
-      if ((await scenes(page)).some((k) => k.startsWith('Puzzle'))) {
+      if (process.env.BOT_DEBUG) console.log('BOT', p.target, 'attempt', attempt, JSON.stringify(await scenes(page)));
+      if (await puzzleOpen(page)) {
         await resolveGate(page);
         await waitScene(page, 'Room');
         await waitIdle(page);
+        if (await pollTap(page, label, 3_000)) { taken = true; break; }
         await tapAt(page, p.x, p.y);
         await page.waitForTimeout(700);
       }
-      if (await tapMatch(page, label)) taken = true;
+      if (await pollTap(page, label, 6_000)) taken = true;
       else await tapMatch(page, '✕');
     }
     if (!taken) {
@@ -150,8 +159,26 @@ export async function playPerfect(page: Page): Promise<void> {
     }
     await page.waitForTimeout(900);
   }
-  await waitScene(page, 'Result', 40_000);
+  try {
+    await waitScene(page, 'Result', 90_000);
+  } catch (err) {
+    const seen = (await interactives(page)).filter((i) => i.label).map((i) => `${i.scene}:${i.label}`).slice(0, 20);
+    throw new Error(`never reached Result [active ${(await scenes(page)).join('+')}] tappable: ${seen.join(' | ')}\n${String(err)}`);
+  }
 }
+
+/** Taps the label as soon as it shows up (frames are slow under software GL, so a fixed wait is flaky). */
+async function pollTap(page: Page, label: string, ms: number): Promise<boolean> {
+  const end = Date.now() + ms;
+  while (Date.now() < end) {
+    if (await tapMatch(page, label)) return true;
+    if (await puzzleOpen(page)) return false; // let the caller resolve it
+    await page.waitForTimeout(250);
+  }
+  return false;
+}
+
+const puzzleOpen = async (page: Page): Promise<boolean> => (await scenes(page)).some((k) => k.startsWith('Puzzle'));
 
 async function waitIdle(page: Page): Promise<void> {
   await page.waitForFunction(() => {
@@ -164,7 +191,11 @@ async function waitIdle(page: Page): Promise<void> {
 async function resolveGate(page: Page): Promise<void> {
   for (let i = 0; i < 40; i++) {
     if (!(await scenes(page)).some((k) => k.startsWith('Puzzle'))) return;
-    if (await tapMatch(page, /skip/i)) return;
+    if (await tapMatch(page, 'Skip')) {
+      await page.waitForTimeout(900);
+      await tapWhenReady(page, 'Skip it'); // Skip asks to confirm
+      return;
+    }
     await page.waitForTimeout(500);
   }
 }

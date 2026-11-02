@@ -43,6 +43,8 @@ function isShown(o: Phaser.GameObjects.GameObject): boolean {
 }
 
 function labelOf(o: Phaser.GameObjects.GameObject): string {
+  const linked = o.getData('labelText') as { text?: unknown } | undefined;
+  if (linked && typeof linked.text === 'string') return linked.text;
   const t = o as unknown as { text?: unknown; list?: Phaser.GameObjects.GameObject[] };
   if (typeof t.text === 'string') return t.text;
   if (t.list) for (const c of t.list) { const l = labelOf(c); if (l) return l; }

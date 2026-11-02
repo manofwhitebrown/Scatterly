@@ -81,7 +81,9 @@
 
 - VERIFIED IN A REAL BROWSER (local Chromium 131 from the `@sparticuz/chromium` npm package, software GL, not committed): `puzzles.e2e.ts` passes for all 11 kinds x 3 difficulties (targets on screen, new kinds all >= 96x96 with no overlaps, hint+skip report `{skipped, hints:2}`) and the reference solution solves all 8 new scenes through their own handlers. Found and fixed on the way: (1) `interactives()` reported Graphics-based buttons at (0,0) instead of their hit-box centre, (2) a puzzle opened right after another closed was stopped by the queued stop, (3) under `?e2e=1` the 500 ms celebration timer never fired because this sandbox renders only a few fps and Phaser game time advances 16.7 ms per frame, so `succeed()` now reports at once in e2e.
 - Local run recipe: `npm i @sparticuz/chromium` in a temp dir, extract with `chromium.executablePath()`, then a local `playwright.local.config.ts` (git-excluded) with `executablePath` and `--no-sandbox --use-gl=angle --use-angle=swiftshader`.
-- Next: investigate the CI failure in game.e2e.ts (flow) and fix if it is mine; then boot-time measurement and Dollhouse hooks (iso kit from AI-4).
+- E2E BOT FIXED (all in a real Chromium): `game.e2e.ts` 10/10 and `puzzles.e2e.ts` 19/19 pass locally. What was wrong in the bot: `session()` hook looked on the scene (now `run.session`), `makeButton` buttons had no label for the hook (now `g.setData('labelText', text)`, one line in palette.ts), Skip now asks to confirm (bot taps "Skip it" after a 900 ms pause), fixed waits were too short at a few fps (item label is polled, Result wait is 90 s), a puzzle opened late by a slow frame is resolved before tapping the spot again (daily mode).
+- Local frame rate is a few fps (software GL), so any test that depends on game-time timers must poll, not sleep.
+- Next (was: investigate game.e2e); then boot-time measurement and Dollhouse hooks (iso kit from AI-4).
 - Not verified: how it looks/plays in a browser (no Playwright browser available locally; CI e2e will be the first run).
 
 ## Requests (new)
