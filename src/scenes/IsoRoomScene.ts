@@ -65,9 +65,12 @@ export class IsoRoomScene extends Phaser.Scene {
           return sp ? { x: sp.x + sp.w / 2, y: sp.y + sp.h / 2 } : null;
         },
       },
-      { goRoom: (room) => this.nav?.goTo(room) },
+      { goRoom: (room) => this.nav?.goTo(room), useHouse: true },
     );
-    this.nav = new RoomNav(this, view, run.hud, run.rooms, () => run.modalOpen(), (r) => run.feel.roomSwitch(r));
+    this.nav = new RoomNav(this, view, run.hud, run.rooms, () => run.modalOpen(), (r) => {
+      run.setCurrent(r);
+      run.feel.roomSwitch(r);
+    });
     if (flags().e2e) this.__e2e = { hotspots: () => view.hotspots(), doors: () => view.doors() };
     run.begin();
   }

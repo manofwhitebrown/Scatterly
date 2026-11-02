@@ -10,6 +10,8 @@ export interface HudHandlers {
   onClues(): void;
   onHint(): void;
   onRoom(room: RoomId): void;
+  /** HUD v3: when set, a 96x96 house button replaces the room tabs. */
+  onHouse?(): void;
 }
 
 export interface HudConfig {
@@ -44,6 +46,7 @@ export class Hud {
   private readonly badgeText: Phaser.GameObjects.Text;
   private readonly hintBtn: Button;
   private readonly clueBtn: Button;
+  private houseBtn: Button | null = null;
   private lastSec = -1;
   private tone = 0;
   private clueCount = -1;
@@ -61,13 +64,19 @@ export class Hud {
 
     this.root.add(new Button(scene, 52, 32, 56, 'II', cfg.handlers.onPause, { fontSize: 28, height: 56 }));
 
-    for (const room of ROOM_ORDER) {
-      const tab = new Button(scene, 0, 32, TAB_W, ROOM_LABEL[room], () => cfg.handlers.onRoom(room), {
-        fontSize: 24,
-        height: 56,
-      });
-      this.tabs.set(room, tab);
-      this.root.add(tab);
+    const onHouse = cfg.handlers.onHouse;
+    if (onHouse) {
+      this.houseBtn = new Button(scene, 190, 32, 180, 'House', onHouse, { fontSize: 28, height: 56 });
+      this.root.add(this.houseBtn);
+    } else {
+      for (const room of ROOM_ORDER) {
+        const tab = new Button(scene, 0, 32, TAB_W, ROOM_LABEL[room], () => cfg.handlers.onRoom(room), {
+          fontSize: 24,
+          height: 56,
+        });
+        this.tabs.set(room, tab);
+        this.root.add(tab);
+      }
     }
     this.setRooms(cfg.rooms);
     this.setActive(cfg.active);
@@ -187,7 +196,7 @@ export class Hud {
   }
 
   flashTab(room: RoomId): void {
-    const tab = this.tabs.get(room);
+    const tab = this.tabs.get(room) ?? this.houseBtn;
     if (!tab) return;
     this.scene.tweens.killTweensOf(tab);
     tab.setAlpha(1);
@@ -203,6 +212,7 @@ export class Hud {
 
   destroy(): void {
     for (const tab of this.tabs.values()) this.scene.tweens.killTweensOf(tab);
+    if (this.houseBtn) this.scene.tweens.killTweensOf(this.houseBtn);
     this.scene.tweens.killTweensOf(this.badge);
     this.scene.tweens.killTweensOf(this.clueBtn);
     this.scene.tweens.killTweensOf(this.timerText);

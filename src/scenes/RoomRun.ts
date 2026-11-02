@@ -19,6 +19,7 @@ import { RoomClock } from './RoomClock';
 import { RoomFeel } from './RoomFeel';
 import { RoomFlow } from './RoomFlow';
 import { RoomGate } from './RoomGate';
+import { RoomHouse } from './RoomHouse';
 
 /** What the run controller needs from whichever room view (flat or isometric) is on screen. */
 export interface RunView {
@@ -31,6 +32,8 @@ export interface RunView {
 
 export interface RunHost {
   goRoom(room: RoomId): void;
+  /** True for views that use the Dollhouse (HUD v3: house button instead of room tabs). */
+  useHouse?: boolean;
 }
 
 /**
@@ -67,6 +70,7 @@ export class RoomRun {
   private finished = false;
   private hintsUsed = 0;
   private mounted = false;
+  private house!: RoomHouse;
 
   constructor(private readonly scene: Phaser.Scene, data: RoomSceneData) {
     this.mode = data.mode;
@@ -101,6 +105,7 @@ export class RoomRun {
     const s = this.scene;
     this.view = view;
     this.host = host;
+    this.house = new RoomHouse(s, this.session, this.scenario, this.spotRoom, this.rooms, this.start, (room) => this.host.goRoom(room));
     this.hud = new Hud(s, {
       targets: this.scenario.targets,
       timed: this.mode === 'rush',
@@ -111,6 +116,7 @@ export class RoomRun {
         onClues: () => this.openBoard(),
         onHint: () => this.useHint(),
         onRoom: (room) => this.host.goRoom(room),
+        onHouse: this.host.useHouse ? () => this.openHouse() : undefined,
       },
     });
     sfx.setRoomAmbience(this.start);
@@ -146,6 +152,7 @@ export class RoomRun {
       hideOverlays: () => {
         this.inspect.hide(true);
         this.board.hide();
+        this.house.close();
       },
     });
     this.gate = new RoomGate(s, this.scenario, {
@@ -175,7 +182,8 @@ export class RoomRun {
       this.resolving ||
       this.inspect.isOpen ||
       this.board.isOpen ||
-      this.card.isOpen
+      this.card.isOpen ||
+      this.house.isOpen
     );
   }
 
@@ -206,8 +214,21 @@ export class RoomRun {
     sfx.play('tap', { step: 3 });
   }
 
+  /** Dollhouse overlay: the clock keeps running, spot taps are ignored while it is open. */
+  openHouse(): void {
+    if (this.modalOpen()) return;
+    this.inspect.hide(true);
+    this.house.open();
+  }
+
+  /** Views report room changes so the Dollhouse can highlight the current room. */
+  setCurrent(room: RoomId): void {
+    this.house.setCurrent(room);
+  }
+
   destroy(): void {
     if (!this.mounted) return;
+    this.house.close();
     const s = this.scene;
     s.events.off(Phaser.Scenes.Events.RESUME, this.clock.resync, this.clock);
     this.back.destroy();
@@ -329,7 +350,8 @@ export class RoomRun {
   }
 
   private onBack(): void {
-    if (this.flow.paused) this.flow.closePause();
+    if (this.house.isOpen) this.house.close();
+    else if (this.flow.paused) this.flow.closePause();
     else if (this.board.isOpen) this.board.hide();
     else if (this.inspect.isOpen) this.inspect.hide();
     else this.flow.openPause();

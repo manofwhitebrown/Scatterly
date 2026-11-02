@@ -46,15 +46,16 @@ tap/open/empty/found/take/clue/hint/room/urgent/win/lose: src/scenes/RoomFeel.ts
 - D1 Phase 0 skeletons (contract v3 landed): `IsoRoomScene` registered under `SCENE.Room` when `?view=iso` (default stays `RoomScene`), `HouseScene` registered under `SCENE.House` (tiles for the 5 rooms, locked rooms dark, tap picks a room or goes to Menu; no progress numbers or zoom yet). `IsoRoomView` draws placeholder shells and 3-shade boxes from `Spot.iso`, hit areas = iso screen box through the existing `pickSpot` (>= 96x96, nearest centre), long-press marks via new `ui/PressZone`, padlock badge from the start on gated containers, depth-sorted once. `RoomMarks` and `RoomNav` now depend on small interfaces (`MarkHost`, `RoomSwitcher`) so both views share them. Under `?e2e=1` the iso scene exposes `scene.__e2e.hotspots()` (`{spotId, x, y}` in game px).
 - AI-4's iso kit landed: `IsoRoomView` now draws baked `tex.isoShell` + `tex.isoSpot(kind, open)` images (origin = top vertex via `boxTexture(ISO_DIMS[kind])`, position = `isoToScreen` + room origin, depth-sorted once with `depthKey`). Hit boxes and art both use the canonical `ISO_DIMS` footprint of the kind (`ui/isoGrid.placementOf`), so they always agree. Padlock badge is a tiny Graphics per gated container, hidden once opened. `ui/isoGrid.ts` wraps AI-4's `isoToScreen`. Room origin is (640, 200); the shell is the default 8x8 until AI-2 publishes room cols/rows.
 - Door hotspots: `IsoRoomView` builds an arrow badge + 96x96 zone per `LAYOUTS[room].doors` entry (right wall at (at,0), left wall at (0,at), height 2), tap goes through `RoomNav.goTo` (so blocked while a modal is open, and only to unlocked rooms). `scene.__e2e.doors()` lists them. Not yet: door art, props from `PROPS`, shimmer, hop-out items, zoom to lock.
+- HUD v3 + Dollhouse (D4/D5 part): `Hud` takes optional `handlers.onHouse`; when set a 180x56 'House' button (hit area >= 96x96 via Button) replaces the room tabs (iso view only; flat view keeps tabs). House button opens the Dollhouse as an overlay scene (`RoomHouse` -> `scene.launch(SCENE.House, {overlay, ...})`), the clock keeps running, spot taps are ignored while it is open (`modalOpen`), Esc/Back/Close and pause close it, and leaving the Room stops it. `HouseScene` places tiles from `HOUSE_MAP`, draws AI-4's baked shells scaled 0.4 (queued one per frame via `prefetchRoomShells`, swapped in as they appear), shows `searched/total · locks · clues` per room (pure `houseProgress.roomProgress`, counts only, no spoilers), highlights the current room, dark tile + padlock for locked rooms, tap = camera pan+zoom 300 ms then `goRoom` (cut when reduced motion or low-fx). G11: House button + room tile = 2 taps from any room.
 - Art review for AI-4 (due per brief): keys and anchors work as documented; `ensureRoomShell` is called lazily per room on first show.
 
 ## Waiting on others
 - AI-2 `LAYOUTS` / `HOUSE_MAP` / real Spot `iso` (current `iso` is AI-1's placeholder derived from the old pixel boxes, so pieces can sit outside the 8x8 shell and overlap until real layout data lands).
-- Still to build: door hotspots, open/closed textures, shimmer, hop-out items, camera zoom to lock, Dollhouse progress and zoom, HUD v3, notebook facts, Puzzle Book, Result story, tutorial.
+- Still to build: shimmer, hop-out items, camera zoom to lock, Dollhouse progress and zoom, HUD v3, notebook facts, Puzzle Book, Result story, tutorial.
 
 ## Verified (commands run, repo at AI-3 iso-art commit)
 - `npx tsc --noEmit`: clean.
-- `npm test`: 114 passed (incl. tests/ui-iso.test.ts).
+- `npm test`: see latest run below.
 - `npm run build`: green, JS 401.0 KB gzip (budget 520).
 
 ## Not verified
