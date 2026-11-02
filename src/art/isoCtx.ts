@@ -9,16 +9,17 @@ const HH = ISO.tileH / 2;
 const U = ISO.unitH;
 
 /** Drawing context for one furniture piece. a runs along gx, b along gy, z is height in units. */
-export interface Ctx { g: G; w: number; d: number; h: number; ox: number; oy: number; base: number; open: boolean }
+export interface Ctx { g: G; w: number; d: number; h: number; ox: number; oy: number; base: number; open: boolean; k?: number }
 export type Pt = [number, number];
 
-export function mkCtx(g: G, dims: IsoDims, base: number, open: boolean, ox: number, oy: number): Ctx {
-  return { g, w: dims.w, d: dims.d, h: dims.h, ox, oy, base, open };
+export function mkCtx(g: G, dims: IsoDims, base: number, open: boolean, ox: number, oy: number, k = 1): Ctx {
+  return { g, w: dims.w, d: dims.d, h: dims.h, ox, oy, base, open, k };
 }
 
 /** Screen point of footprint coordinate (a, b) at height z. */
 export function P(c: Ctx, a: number, b: number, z: number): Pt {
-  return [c.ox + (a - b) * HW, c.oy + (a + b) * HH - z * U];
+  const k = c.k ?? 1;
+  return [c.ox + (a - b) * HW * k, c.oy + (a + b) * HH * k - z * U * k];
 }
 
 export function quad(c: Ctx, pts: Pt[], color: number, alpha = 1): void {

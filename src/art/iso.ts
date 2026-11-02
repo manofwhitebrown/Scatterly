@@ -47,3 +47,14 @@ export function boxTexture(dims: IsoDims): { w: number; h: number; ox: number; o
     oy: hh + PAD,
   };
 }
+
+/** Wall pieces on the left wall (plane gx = 0) are drawn like right-wall pieces with w/d swapped and mirrored with flipX. */
+export function isLeftWall(iso: IsoPlacement): boolean {
+  return (iso.gz ?? 0) > 0 && iso.gx === 0 && iso.gy > 0;
+}
+
+/** Display info for any iso sprite: flip, and the origin fractions that make setOrigin(originX, originY) hit isoToScreen(gx, gy, gz). */
+export function spriteInfo(iso: IsoPlacement, extraH = 0): { flip: boolean; originX: number; originY: number; w: number; h: number } {
+  const t = boxTexture({ w: iso.w, d: iso.d, h: iso.h + extraH });
+  return { flip: isLeftWall(iso), originX: t.ox / t.w, originY: t.oy / t.h, w: t.w, h: t.h };
+}
