@@ -8,7 +8,10 @@ import { RoomMarks } from './RoomMarks';
 import { RoomNav } from './RoomNav';
 import { RoomRun } from './RoomRun';
 
-interface E2eHooks { hotspots(): Array<{ spotId: string; x: number; y: number }> }
+interface E2eHooks {
+  hotspots(): Array<{ spotId: string; x: number; y: number }>;
+  doors(): Array<{ to: string; x: number; y: number }>;
+}
 
 /** Isometric room, selected by `?view=iso`. Shares every rule with the flat room through RoomRun. */
 export class IsoRoomScene extends Phaser.Scene {
@@ -45,6 +48,9 @@ export class IsoRoomScene extends Phaser.Scene {
       (id) => run.scenario.gates[id] !== undefined && !run.session.isOpened(id),
       (spot) => run.onSpot(spot),
       (spot) => run.onLong(spot),
+      (to) => {
+        if (run.rooms.includes(to)) this.nav?.goTo(to);
+      },
     );
     this.view = view;
     view.show(run.start, 0);
@@ -62,7 +68,7 @@ export class IsoRoomScene extends Phaser.Scene {
       { goRoom: (room) => this.nav?.goTo(room) },
     );
     this.nav = new RoomNav(this, view, run.hud, run.rooms, () => run.modalOpen(), (r) => run.feel.roomSwitch(r));
-    if (flags().e2e) this.__e2e = { hotspots: () => view.hotspots() };
+    if (flags().e2e) this.__e2e = { hotspots: () => view.hotspots(), doors: () => view.doors() };
     run.begin();
   }
 

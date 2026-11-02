@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ISO_DIMS, boxTexture, depthKey, isoToScreen } from '../art/iso';
 import { ensureRoomShell, shellSize } from '../art/isoShell';
+import { LAYOUTS } from '../content/layout';
 import { isLowFx } from '../core/perf';
 import type { GameSession } from '../logic';
 import { tex } from '../shared/types';
@@ -11,7 +12,8 @@ import { COLOR } from '../ui/theme';
 import { ROOM_ORIGIN, placementOf, project, screenSpots } from '../ui/isoGrid';
 
 interface SpotView { spot: Spot; img: Phaser.GameObjects.Image; lock: Phaser.GameObjects.Graphics | null }
-interface Layer { box: Phaser.GameObjects.Container; spots: Map<SpotId, SpotView>; list: Spot[]; zone: PressZone }
+interface DoorView { to: RoomId; x: number; y: number; arrow: Phaser.GameObjects.Graphics }
+interface Layer { box: Phaser.GameObjects.Container; spots: Map<SpotId, SpotView>; list: Spot[]; zone: PressZone; doors: DoorView[] }
 
 /** Small padlock badge, drawn once per gated container; visible from the start so the player can plan. */
 function makePadlock(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Graphics {
@@ -20,6 +22,15 @@ function makePadlock(scene: Phaser.Scene, x: number, y: number): Phaser.GameObje
   g.fillStyle(COLOR.amber, 1).fillRect(-9, -4, 18, 14);
   g.lineStyle(3, COLOR.amber, 1).strokeCircle(0, -6, 6);
   g.fillStyle(COLOR.ink, 1).fillRect(-2, 1, 4, 5);
+  return g;
+}
+
+/** Door arrow badge; a 96x96 zone sits over it so it is easy to hit. */
+function makeArrow(scene: Phaser.Scene, x: number, y: number, wall: 'left' | 'right'): Phaser.GameObjects.Graphics {
+  const g = scene.add.graphics().setPosition(x, y);
+  const dir = wall === 'left' ? -1 : 1;
+  g.fillStyle(COLOR.plateEdge, 0.9).fillCircle(0, 0, 28);
+  g.fillStyle(COLOR.cream, 1).fillTriangle(-12 * dir, -14, -12 * dir, 14, 14 * dir, 0);
   return g;
 }
 
@@ -35,6 +46,7 @@ export class IsoRoomView {
     private readonly isLocked: (id: SpotId) => boolean,
     private readonly onTap: (spot: Spot) => void,
     private readonly onLong: (spot: Spot) => void,
+    private readonly onDoor: (to: RoomId) => void,
   ) {}
 
   get room(): RoomId | null {
@@ -53,6 +65,12 @@ export class IsoRoomView {
     this.current = room;
     next.box.setVisible(true);
     if (this.pulseSpot !== null) this.queuePulse(this.pulseSpot);
+  }
+
+  /** Door arrow centres of the current room (G11 navigation tests). */
+  doors(): Array<{ to: RoomId; x: number; y: number }> {
+    const layer = this.current !== null ? this.layers.get(this.current) : undefined;
+    return layer ? layer.doors.map((d) => ({ to: d.to, x: d.x, y: d.y })) : [];
   }
 
   attach(room: RoomId, obj: Phaser.GameObjects.GameObject): void {
@@ -97,11 +115,19 @@ export class IsoRoomView {
   destroy(): void {
     for (const layer of this.layers.values()) {
       for (const v of layer.spots.values()) this.scene.tweens.killTweensOf(v.img);
+      for (const d of layer.doors) this.scene.tweens.killTweensOf(d.arrow);
       layer.zone.destroy();
       layer.box.destroy(true);
     }
     this.layers.clear();
     this.current = null;
+  }
+
+  private flashArrow(g: Phaser.GameObjects.Graphics): void {
+    if (isLowFx(this.scene.game)) return;
+    this.scene.tweens.killTweensOf(g);
+    g.setAlpha(0.5);
+    this.scene.tweens.add({ targets: g, alpha: 1, duration: 120 });
   }
 
   private hop(v: SpotView, px: number, repeat: number): void {
@@ -158,7 +184,20 @@ export class IsoRoomView {
       onLong: this.onLong,
     });
     box.add(zone.zone);
-    const layer: Layer = { box, spots, list, zone };
+    const doors: DoorView[] = [];
+    for (const d of LAYOUTS[room].doors) {
+      const p = d.wall === 'right' ? project(o, d.at + 0.5, 0, 2) : project(o, 0, d.at + 0.5, 2);
+      const arrow = makeArrow(this.scene, p.x, p.y, d.wall);
+      const hit = this.scene.add.zone(p.x, p.y, 96, 96).setInteractive({ useHandCursor: true });
+      hit.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+        if (this.current !== room || pointer.getDistance() > 16) return;
+        this.flashArrow(arrow);
+        this.onDoor(d.to);
+      });
+      box.add([arrow, hit]);
+      doors.push({ to: d.to, x: p.x, y: p.y, arrow });
+    }
+    const layer: Layer = { box, spots, list, zone, doors };
     this.layers.set(room, layer);
     return layer;
   }

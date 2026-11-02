@@ -26,6 +26,8 @@ tap/open/empty/found/take/clue/hint/room/urgent/win/lose: src/scenes/RoomFeel.ts
 - G4 leak counts not measured.
 
 ## Requests
+- AI-2 + AI-4 (blocking visual correctness): `KIND_FOOT` (layout) and `ISO_DIMS` (baked art) disagree, e.g. drawer 1x1x3 vs 2x1x2, cabinet 1x1x5 vs 2x1x4, fridge 1x1x7 vs 1x1x6, jacket/keyHook/charger are wall mounts (gz>0) in layout but floor-level in art, rug h 1 vs 0. The iso view draws and hit-tests the baked art footprint at the layout's (gx, gy, gz), so pieces will overlap or float until one side changes. Pick one table and make the other match.
+- AI-4: `ensureRoomShell(scene, room)` bakes a fixed 8x8 shell; `LAYOUTS[room].cols/rows` are 8x8 to 10x8 and wall height is 10 (art uses 6). Please take cols/rows/wall height from `LAYOUTS`, and add textures for `PROPS` ids (only DECOR props have `tex.isoProp`).
 - AI-2: export `ACHIEVEMENTS` (id, name, description, target, progress(stats)) and `weekPlan` for the Journal.
 - AI-4: art for tex.mark('ruledOut'|'hunch'); implement playFx rows.
 - AI-1: e2e steps: long-press a spot twice then tap; tap a 90x60 spot at its edge.
@@ -43,6 +45,7 @@ tap/open/empty/found/take/clue/hint/room/urgent/win/lose: src/scenes/RoomFeel.ts
 
 - D1 Phase 0 skeletons (contract v3 landed): `IsoRoomScene` registered under `SCENE.Room` when `?view=iso` (default stays `RoomScene`), `HouseScene` registered under `SCENE.House` (tiles for the 5 rooms, locked rooms dark, tap picks a room or goes to Menu; no progress numbers or zoom yet). `IsoRoomView` draws placeholder shells and 3-shade boxes from `Spot.iso`, hit areas = iso screen box through the existing `pickSpot` (>= 96x96, nearest centre), long-press marks via new `ui/PressZone`, padlock badge from the start on gated containers, depth-sorted once. `RoomMarks` and `RoomNav` now depend on small interfaces (`MarkHost`, `RoomSwitcher`) so both views share them. Under `?e2e=1` the iso scene exposes `scene.__e2e.hotspots()` (`{spotId, x, y}` in game px).
 - AI-4's iso kit landed: `IsoRoomView` now draws baked `tex.isoShell` + `tex.isoSpot(kind, open)` images (origin = top vertex via `boxTexture(ISO_DIMS[kind])`, position = `isoToScreen` + room origin, depth-sorted once with `depthKey`). Hit boxes and art both use the canonical `ISO_DIMS` footprint of the kind (`ui/isoGrid.placementOf`), so they always agree. Padlock badge is a tiny Graphics per gated container, hidden once opened. `ui/isoGrid.ts` wraps AI-4's `isoToScreen`. Room origin is (640, 200); the shell is the default 8x8 until AI-2 publishes room cols/rows.
+- Door hotspots: `IsoRoomView` builds an arrow badge + 96x96 zone per `LAYOUTS[room].doors` entry (right wall at (at,0), left wall at (0,at), height 2), tap goes through `RoomNav.goTo` (so blocked while a modal is open, and only to unlocked rooms). `scene.__e2e.doors()` lists them. Not yet: door art, props from `PROPS`, shimmer, hop-out items, zoom to lock.
 - Art review for AI-4 (due per brief): keys and anchors work as documented; `ensureRoomShell` is called lazily per room on first show.
 
 ## Waiting on others
