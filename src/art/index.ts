@@ -9,6 +9,7 @@ import { drawSpot } from './spots';
 import { drawItem } from './items';
 import { CLUE_ICONS, drawIcon } from './icons';
 import { drawDecor } from './decor';
+import { isoTasks } from './isoKit';
 
 interface Task { key: string; w: number; h: number; draw: (g: G) => void }
 
@@ -23,6 +24,7 @@ function buildTasks(): Task[] {
   for (const id of ITEM_IDS) tasks.push({ key: tex.item(id), w: 96, h: 96, draw: (g) => drawItem(g, id) });
   for (const id of CLUE_ICONS) tasks.push({ key: tex.icon(id), w: 64, h: 64, draw: (g) => drawIcon(g, id) });
   for (const def of DECOR) tasks.push({ key: tex.decor(def.id), w: Math.max(1, Math.round(def.w)), h: Math.max(1, Math.round(def.h)), draw: (g) => drawDecor(g, def) });
+  for (const t of isoTasks()) tasks.push(t);
   return tasks;
 }
 
