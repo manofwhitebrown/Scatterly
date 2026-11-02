@@ -33,3 +33,6 @@
 - Not verified: how effects look or feel on a device; fps with effects; G4 leak counts (no e2e step yet for fx).
 - Blocked: iso kit v0 needs Contract v3 (Spot.iso, IsoPlacement, ISO) from AI-1; types.ts is still SAVE_VERSION 2. Waiting.
 - Next: audio (ambience beds, puzzle sounds, limiter, 12 voices), then iso kit once v3 lands.
+- Verified (audio): src/audio split into engine.ts (lazy AudioContext, master gain + DynamicsCompressor limiter, noise buffers), voices.ts (VoiceBook: steal-oldest, budget music 5 + ambience 2 + sfx 5 = 12), recipes.ts (adds click, success x3 variants, unlock, bell, fanfare), ambience.ts (5 room beds, ~0.6 s crossfade, resumes after pause), music.ts (adaptive: kick above intensity 0.3, hats above 0.6, tempo x1.08 at 1.0), sfx.ts facade. Mutes (suspends ctx) when hidden, resumes on unlock()/visible. No throw without an AudioContext (tests/audio.test.ts).
+- Verified: `tsc` clean, `npm test` 54/54, build green. Chord voicing reduced from 4 to 2 notes to stay inside the 12-voice budget (sound changes slightly).
+- Not verified: how it sounds on a device (balance, limiter behaviour, bed loudness, crossfade clicks); the real Web Audio path has no automated test (needs a browser). Callers still need to call sfx.setIntensity (Rush last 20 s) and sfx.setRoomAmbience on room switch (AI-3/AI-1).
