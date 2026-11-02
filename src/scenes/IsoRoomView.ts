@@ -11,7 +11,7 @@ import { pickSpot } from '../ui/hit';
 import { COLOR, isCalm } from '../ui/theme';
 import { ROOM_ORIGIN, nearestUnsearched, placementOf, project, screenSpots } from '../ui/isoGrid';
 
-interface SpotView { spot: Spot; img: Phaser.GameObjects.Image; lock: Phaser.GameObjects.Graphics | null }
+interface SpotView { spot: Spot; img: Phaser.GameObjects.Image; lock: Phaser.GameObjects.Graphics | null; check: Phaser.GameObjects.Graphics | null }
 interface DoorView { to: RoomId; x: number; y: number; arrow: Phaser.GameObjects.Graphics }
 interface Layer { box: Phaser.GameObjects.Container; spots: Map<SpotId, SpotView>; list: Spot[]; zone: PressZone; doors: DoorView[] }
 
@@ -22,6 +22,14 @@ function makePadlock(scene: Phaser.Scene, x: number, y: number): Phaser.GameObje
   g.fillStyle(COLOR.amber, 1).fillRect(-9, -4, 18, 14);
   g.lineStyle(3, COLOR.amber, 1).strokeCircle(0, -6, 6);
   g.fillStyle(COLOR.ink, 1).fillRect(-2, 1, 4, 5);
+  return g;
+}
+
+/** Green check badge for a searched container: shape + colour, so it is not colour alone. */
+function makeCheck(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Graphics {
+  const g = scene.add.graphics().setPosition(x, y);
+  g.fillStyle(COLOR.plateEdge, 0.9).fillCircle(0, 0, 20);
+  g.lineStyle(5, COLOR.green, 1).beginPath().moveTo(-9, 1).lineTo(-3, 8).lineTo(10, -8).strokePath();
   return g;
 }
 
@@ -102,6 +110,10 @@ export class IsoRoomView {
     const opened = this.session.isOpened(id);
     v.img.setTexture(tex.isoSpot(v.spot.kind, opened));
     v.lock?.setVisible(!opened && this.isLocked(id));
+    if (opened && !v.check) {
+      v.check = makeCheck(this.scene, v.spot.x + v.spot.w - 26, v.spot.y + 22);
+      this.layers.get(v.spot.room)?.box.add(v.check);
+    }
   }
 
   playAction(spot: Spot): void {
@@ -233,7 +245,7 @@ export class IsoRoomView {
         lock = makePadlock(this.scene, m.x, m.y - 6);
         box.add(lock);
       }
-      spots.set(src.id, { spot, img, lock });
+      spots.set(src.id, { spot, img, lock, check: null });
     }
     const zone = new PressZone(this.scene, {
       active: () => this.current === room,

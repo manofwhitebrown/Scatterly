@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import { PUZZLE_SCENE } from '../shared/types';
-import type { Gate, PuzzleResult, Scenario, Spot } from '../shared/types';
+import type { Clue, Gate, PuzzleResult, Scenario, Spot } from '../shared/types';
 import { sceneExists } from '../ui/theme';
 import { puzzleLaunchData } from './RoomPuzzle';
 
@@ -10,6 +10,8 @@ export interface GateHooks {
   countHint(): void;
   reinspect(spot: Spot): void;
   warn(msg: string): void;
+  /** Clues found so far, ordered for the puzzle's notes drawer. */
+  notes(): Clue[];
 }
 
 /** Puzzle gate launching. Keeps the Room resume inside onDone (scene contract). */
@@ -30,7 +32,7 @@ export class RoomGate {
       this.hooks.reinspect(spot);
       return;
     }
-    const data = puzzleLaunchData(this.scenario, spot, gate, (r) => this.done(spot, r));
+    const data = puzzleLaunchData(this.scenario, spot, gate, this.hooks.notes(), (r) => this.done(spot, r));
     const open = (): void => {
       this.hooks.setPuzzleOpen(true);
       this.scene.scene.pause();

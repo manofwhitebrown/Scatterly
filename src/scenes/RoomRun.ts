@@ -7,6 +7,7 @@ import type { GameMode, Gate, InspectOutcome, ItemId, PlayerProfile, RoomId, Roo
 import { Button } from '../ui/Button';
 import { ClueBoard } from '../ui/ClueBoard';
 import { Hud } from '../ui/Hud';
+import { orderNotes } from '../ui/clueFacts';
 import { InspectPanel } from '../ui/InspectPanel';
 import { Toast } from '../ui/Toast';
 import { Dim, SIZE, getProfile, go, isCalm, makeText, vibrate } from '../ui/theme';
@@ -169,6 +170,7 @@ export class RoomRun {
       countHint: () => this.countHint(),
       reinspect: (spot) => this.reinspect(spot),
       warn: (m) => this.toast.show(m, 'warn'),
+      notes: () => orderNotes(this.session.discoveredClues(), this.board.pinned),
     });
     this.back = new RoomBack(s, () => this.onBack());
     this.mounted = true;
