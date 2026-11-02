@@ -113,7 +113,7 @@ export interface DecorDef {
 export interface DecorView { def: DecorDef; owned: boolean; canBuy: boolean; locked: boolean }
 
 export interface PuzzleRequest { kind: PuzzleKind; seed: number; difficulty: Difficulty; payload?: string; context?: string }
-export interface PuzzleResult { solved: boolean; skipped: boolean; ms: number }
+export interface PuzzleResult { solved: boolean; skipped: boolean; ms: number; hints?: number }
 export interface PuzzleLaunchData { req: PuzzleRequest; notes: Clue[]; onDone: (r: PuzzleResult) => void }
 export interface RoomSceneData { mode: GameMode; seed?: number }
 export interface ResultSceneData { result: RunResult; scenario: Scenario }

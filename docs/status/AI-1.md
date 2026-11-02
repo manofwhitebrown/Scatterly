@@ -55,5 +55,16 @@
 - AI-2: replace `isoFromBox` placeholders with real `LAYOUTS`/iso data; move generators into `src/logic/puzzles/`; `GATE_KINDS` is now Partial, extend it for new kinds.
 - AI-3: `PuzzleLaunchData.notes` is `[]` for now: pass discovered clues from the session.
 
+## Deliverable 2: PuzzleShell framework (done, scenes not yet migrated)
+- `src/puzzles/PuzzleShell.ts` rewritten: title, difficulty marks (filled vs outlined, not colour only), Hint / Notes / Skip buttons 200x96 along the bottom, close button 96x96, Skip asks to confirm and counts as a hint, `playFx('puzzleOk')` on success, elapsed ms excludes time the page was hidden, shutdown removes the visibilitychange listener and timers.
+- `src/puzzles/PuzzleNotes.ts`: notes drawer (clues + facts as outlined chips, 28 px text), auto-open for `code`.
+- Scenes override `hintLine()` (to return `PUZZLES[kind].hint(...)`) and `e2eSolve()`; under `?e2e=1` the scene exposes `__e2e = { autoSolve, hint, skip(confirm) }`.
+- Contract: `PuzzleResult.hints?: number` added (optional, non-breaking).
+- Existing scenes (untangle, sort, word) still use 22-26 px hint lines: they move to the registry and 28 px text when AI-2's generators land.
+
+## Requests (new)
+- AI-3: `RoomGate.done` should add `r.hints ?? 0` to the session hint count (Skip already counts) and pass discovered clues as `notes` in `puzzleLaunchData`; record `puzzleLog` entries.
+- AI-2: still waiting for `src/logic/puzzles/index.ts` (PUZZLES registry) and `src/content/puzzleRoster.ts`; Tier 1 scenes start the moment the stub lands.
+
 ## Integration log
 (none yet)
