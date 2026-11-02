@@ -69,7 +69,9 @@
 - LAYOUT FIX (my bug, caught by review against the 720 px screen): the first `code` and `target` layouts ran into the 96 px bottom bar and the code Enter row was partly off-screen. Now: shared `Keypad.ts` (6 columns, Back/OK as the 6th column, ends at y=610), geometry constants in `layout.ts` (plain data), notes drawer narrowed to 340 px and the hint banner moved to the top of the panel. `tests/puzzle-layout.test.ts` guards rows against the bar and the drawer.
 - `lights` DONE (LightsScene.ts, 97 lines): 3x3 to 5x5, every cell 96 px (3 px gaps; a 5x5 grid ends at y=608, above the bar), lit = dark tile + round lamp (shape and colour), Reset, press counter; win via `PUZZLES.lights.check(spec, presses)`. The shell title moved up 8 px so a 5x5 grid fits under it.
 - `slide` DONE (SlideScene.ts, 98 lines): 3x3, 96 px numbered tiles, tap a neighbour of the gap, non-neighbour taps play the error sound, Reset, move counter; win via `PUZZLES.slide.check(spec, taps)`.
-- Next: pipes, mastermind, memory.
+- `pipes` DONE (PipesScene.ts): 3x3 to 5x5, 96 px tiles, tap rotates clockwise, water flow is computed for display (wet pipes blue, dry grey, rings fill when reached, source is a diamond) while the win is decided by `PUZZLES.pipes.check`. Request to AI-2: export `connected()` from pipes.ts so the scene does not carry a 20-line copy of the flood fill.
+- `mastermind` DONE (MastermindScene.ts + Symbols.ts): six symbols that differ in shape AND colour (circle, square, triangle, diamond, star, cross), 96 px palette, tap a filled slot to clear it, "Check" enabled only when full, history of up to 9 rows ("2 fit, 1 near"), "Try n of max"; running out of tries clears the board (the answer list stays within `maxAttempts`, so the puzzle remains winnable).
+- Next: memory (then e2e bot v3, boot-time measurement, Dollhouse hooks).
 - Not verified: how it looks/plays in a browser (no Playwright browser available locally; CI e2e will be the first run).
 
 ## Requests (new)

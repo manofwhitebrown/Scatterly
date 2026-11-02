@@ -28,6 +28,12 @@ describe('puzzle layout guards', () => {
     expect(PY + 120 + 3 * 96 + 2 * 6).toBeLessThanOrEqual(BAR_TOP);
     expect(PX + 740 + 110).toBeLessThanOrEqual(PX + PW);
   });
+  it('mastermind: history, palette and Check button fit above the bar', () => {
+    const history = PY + 90 + 9 * 46; // up to 9 attempts
+    expect(history).toBeLessThanOrEqual(BAR_TOP);
+    expect(PY + 508 + 48).toBeLessThanOrEqual(BAR_TOP);
+    expect(PX + 720 + 162).toBeLessThanOrEqual(PX + PW);
+  });
   it('keys are at least 96 px', () => {
     expect(KEY).toBeGreaterThanOrEqual(96);
   });
