@@ -1,0 +1,8 @@
+# Asset licence ledger
+
+Every file under `assets/` needs a line here (`scripts/check-assets.mjs`). Allowed: CC0/public domain supplied by the owner, assets we build ourselves, OFL fonts.
+
+| Name | Author | URL | Licence | Date | Added by | Covers |
+|---|---|---|---|---|---|---|
+| Kenney Furniture Kit 2.0 | Kenney | https://www.kenney.nl | CC0 1.0 (http://creativecommons.org/publicdomain/zero/1.0/) | 2026-11-02 | AI-4 | Source 3D models (OBJ) rendered by `tools/render3d` into `assets/frames/prop/*` and `assets/frames/spot/*` (marked K in ASSET-LIST). Raw pack stays OUTSIDE the repo. |
+| Scatterly built art (pixel DSL, materials, voxel sprites) | AI-4 for the owner | this repo | owner's own work | 2026-11-02 | AI-4 | Everything marked B or A in ASSET-LIST (`assets/frames/**`, `tools/materials`, `tools/pixelart`). |
