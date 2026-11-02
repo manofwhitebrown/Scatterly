@@ -17,6 +17,9 @@ export function items(codes: string): ItemId[] {
 }
 
 /** Closed containers that may be locked by a puzzle gate. */
+/** Owner decision (Phase 4): at most this many interactive pieces per room, bought storage included. */
+export const MAX_SPOTS_PER_ROOM = 12;
+
 export const LOCKABLE_KINDS: readonly SpotKind[] = ['drawer', 'cabinet', 'fridge', 'wardrobe', 'basket', 'bin', 'bagSpot', 'shoeRack', 'tv'];
 
 // [name, kind, label, action, capacity, plausible codes, optional bottom edge override]

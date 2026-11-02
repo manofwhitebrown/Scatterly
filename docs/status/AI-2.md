@@ -90,3 +90,20 @@
 ### Requests
 - AI-1: when you adopt the logic generators in the scenes, add the kinds to `IMPLEMENTED` and tell me; I then add them to `ENABLED`.
 - AI-4: please review `KIND_FOOT`/`PROPS` against your iso art footprints (a kind whose art needs a different footprint: tell me the numbers and I change the data, the tests will tell if it still fits).
+
+## Phase 4 (AI-2)
+
+### Done (pushed)
+- ENABLED now lists all 11 IMPLEMENTED kinds (roster test green).
+- 5000-seed fairness test `tests/logic.fairness.test.ts` (3 modes x 3 profiles, all kinds): valid + solvable, ~2 s.
+- Owner default: max 12 interactive pieces per room incl. bought storage (`MAX_SPOTS_PER_ROOM`, `roomFull`, `spotCount`; `buyDecor`/`listDecor.canBuy` refuse). Current counts: kitchen 12, bedroom 12, entrance 11 (+1 max), living 11, bathroom 9. So the kitchen tray and bedroom dock cannot be bought until the layout/new rooms add capacity (rule works as the owner asked; flagging the effect).
+
+### Verified
+- `npm test`: 22 files, 215 tests pass; `npm run build`: JS 427.8 KB gzip.
+
+### Not verified / not started
+- Deliverables 2-13 (world layout v2, path, replay, builder, chill, Tier 2/3 generators, levels 1-5, case builder, session sim, snapshot) are not started. Order per brief.
+
+### Requests
+- Owner: confirm that the storage purchases above (tray, dock, most entrance storage) being blocked is intended, or raise the cap.
+- AI-4: Art Bible v1 + Asset List (prop/decor ids) before I add >= 80 decor items and 25-40 props per room.

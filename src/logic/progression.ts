@@ -1,7 +1,7 @@
 import { DECOR, storageSpot } from '../content/decor';
-import { HOUSE } from '../content/house';
+import { HOUSE, MAX_SPOTS_PER_ROOM } from '../content/house';
 import type {
-  DecorView, ItemId, PlayerProfile, PuzzleStat, RunResult, Spot, SpotId,
+  DecorDef, DecorView, ItemId, PlayerProfile, PuzzleStat, RunResult, Spot, SpotId,
 } from '../shared/types';
 import { earnedAchievements } from './achievements';
 
@@ -16,11 +16,22 @@ export function allSpots(profile: PlayerProfile): Spot[] {
   return out;
 }
 
+/** Interactive pieces currently in a room: house spots plus owned storage. */
+export function spotCount(profile: PlayerProfile, room: Spot['room']): number {
+  return allSpots(profile).filter((s) => s.room === room).length;
+}
+
+/** True when buying `def` would push its room over MAX_SPOTS_PER_ROOM (cosmetics never do). */
+export function roomFull(profile: PlayerProfile, def: DecorDef): boolean {
+  return def.kind === 'storage' && spotCount(profile, def.room) >= MAX_SPOTS_PER_ROOM;
+}
+
 export function listDecor(profile: PlayerProfile): DecorView[] {
   return DECOR.map((def) => {
     const owned = profile.owned.includes(def.id);
     const locked = profile.day < def.unlockDay || !profile.unlockedRooms.includes(def.room);
-    return { def, owned, locked, canBuy: !owned && !locked && profile.coins >= def.price };
+    const canBuy = !owned && !locked && profile.coins >= def.price && !roomFull(profile, def);
+    return { def, owned, locked, canBuy };
   });
 }
 
