@@ -1,3 +1,4 @@
+import { LAYOUTS } from '../content/layout';
 import type { RoomId } from '../shared/types';
 
 export interface Theme {
@@ -19,15 +20,14 @@ export interface ShellSpec {
   cols: number; rows: number; theme: RoomId;
   doors: Array<{ wall: 'left' | 'right'; at: number }>;
   windows: Array<{ wall: 'left' | 'right'; at: number; w: number }>;
-  stairs: boolean;
-  rug: { a: number; b: number; w: number; d: number } | null;
 }
 
-/** Defaults until AI-2's LAYOUTS drive the shells. */
-export const DEFAULT_SPECS: Record<RoomId, ShellSpec> = {
-  entrance: { cols: 8, rows: 8, theme: 'entrance', doors: [{ wall: 'right', at: 5 }], windows: [{ wall: 'left', at: 1, w: 1.6 }], stairs: true, rug: { a: 3, b: 2, w: 2.5, d: 2 } },
-  living: { cols: 8, rows: 8, theme: 'living', doors: [{ wall: 'left', at: 5 }, { wall: 'right', at: 5.4 }], windows: [{ wall: 'right', at: 1.2, w: 2.6 }, { wall: 'left', at: 1.4, w: 1.8 }], stairs: false, rug: { a: 2.5, b: 2.5, w: 4, d: 3 } },
-  kitchen: { cols: 8, rows: 8, theme: 'kitchen', doors: [{ wall: 'left', at: 5 }], windows: [{ wall: 'right', at: 1.4, w: 2.6 }], stairs: false, rug: { a: 2.5, b: 3, w: 3.5, d: 1.5 } },
-  bedroom: { cols: 8, rows: 8, theme: 'bedroom', doors: [{ wall: 'right', at: 5.4 }], windows: [{ wall: 'left', at: 1.4, w: 2.4 }, { wall: 'right', at: 1.6, w: 1.8 }], stairs: true, rug: { a: 3, b: 3, w: 3, d: 2.4 } },
-  bathroom: { cols: 8, rows: 8, theme: 'bathroom', doors: [{ wall: 'left', at: 5 }], windows: [{ wall: 'right', at: 3.2, w: 1.6 }], stairs: false, rug: { a: 3, b: 3.5, w: 2, d: 1.5 } },
-};
+/** Shell spec straight from AI-2's layout data (room size, doors, windows). */
+export function specFor(room: RoomId): ShellSpec {
+  const l = LAYOUTS[room];
+  return {
+    cols: l.cols, rows: l.rows, theme: room,
+    doors: l.doors.map((d) => ({ wall: d.wall, at: d.at })),
+    windows: l.windows.map((w) => ({ wall: w.wall, at: w.at, w: w.w })),
+  };
+}

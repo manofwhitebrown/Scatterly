@@ -53,6 +53,10 @@ describe('iso kit coverage', () => {
     }
     for (const d of DECOR) expect(keys).toContain(tex.isoProp(d.id));
   });
+  it('sprite footprints are the layout footprints', async () => {
+    const { KIND_FOOT } = await import('../src/content/layout');
+    for (const k of Object.keys(SPOT_SIZE)) expect(ISO_DIMS[k as keyof typeof ISO_DIMS]).toBe(KIND_FOOT[k as keyof typeof KIND_FOOT]);
+  });
   it('room shells fit the 960x640 limit', () => {
     const s = shellSize(DEFAULT_ROOM.cols, DEFAULT_ROOM.rows);
     expect(s.w).toBeLessThanOrEqual(SHELL_MAX.w);
@@ -63,14 +67,16 @@ describe('iso kit coverage', () => {
 
 describe('iso kit v1', () => {
   it('has a theme and a shell spec that fits for every room', async () => {
-    const { THEMES, DEFAULT_SPECS } = await import('../src/art/isoTheme');
+    const { THEMES, specFor } = await import('../src/art/isoTheme');
     for (const r of ROOM_ORDER) {
       expect(THEMES[r]).toBeDefined();
-      const sp = DEFAULT_SPECS[r];
+      const sp = specFor(r);
       const s = shellSize(sp.cols, sp.rows);
       expect(s.w).toBeLessThanOrEqual(SHELL_MAX.w);
       expect(s.h).toBeLessThanOrEqual(SHELL_MAX.h);
       expect(sp.doors.length).toBeGreaterThan(0);
+      for (const w of sp.windows) expect(w.at + w.w).toBeLessThanOrEqual(w.wall === 'left' ? sp.rows : sp.cols);
+      for (const d of sp.doors) expect(d.at + 1).toBeLessThanOrEqual(d.wall === 'left' ? sp.rows : sp.cols);
     }
     expect(new Set(ROOM_ORDER.map((r) => THEMES[r].wall)).size).toBe(5);
   });
