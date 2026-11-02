@@ -205,7 +205,9 @@ export abstract class PuzzleShell extends Phaser.Scene {
     this.solved = true;
     sfx.play(sound);
     playFx(this, 'puzzleOk', PX + PW / 2, PY + PH / 2);
-    this.time.delayedCall(500, () => this.finish({ solved: true, skipped: false }));
+    // Under ?e2e=1 report at once: software GL runs few frames per second and game time follows frames.
+    if (flags().e2e) this.finish({ solved: true, skipped: false });
+    else this.time.delayedCall(500, () => this.finish({ solved: true, skipped: false }));
   }
 
   private cancel(): void {

@@ -57,7 +57,12 @@ function collect(list: Phaser.GameObjects.GameObject[], scene: string, out: Inte
       const hit = o.input.hitArea as { width?: number; height?: number } | null;
       const w = hit?.width !== undefined ? hit.width * Math.abs(c.scaleX ?? 1) : c.displayWidth ?? 0;
       const h = hit?.height !== undefined ? hit.height * Math.abs(c.scaleY ?? 1) : c.displayHeight ?? 0;
-      out.push({ scene, label: labelOf(o), texture: c.texture?.key ?? '', x: m.tx, y: m.ty, w, h });
+      // Graphics objects sit at (0,0) with an absolute hit rectangle; every other object's hit box is centred on its position.
+      const hr = hit as { x?: number; y?: number } | null;
+      const gfx = (o as unknown as { type?: string }).type === 'Graphics' && hr !== null && hr.x !== undefined && hr.y !== undefined;
+      const x = gfx ? m.tx + (hr.x ?? 0) + w / 2 : m.tx;
+      const y = gfx ? m.ty + (hr.y ?? 0) + h / 2 : m.ty;
+      out.push({ scene, label: labelOf(o), texture: c.texture?.key ?? '', x, y, w, h });
     }
     if (c.list) collect(c.list, scene, out);
   }
@@ -94,6 +99,7 @@ export function installE2e(game: Phaser.Game, stats: FrameStats): void {
     lastPuzzleResult: null,
     openPuzzle: (kind, difficulty, seed) => {
       api.lastPuzzleResult = null;
+      if (game.scene.getScene(PUZZLE_SCENE[kind])) game.scene.stop(PUZZLE_SCENE[kind]); // queued ops run in order, so run() below starts a fresh scene
       game.scene.run(PUZZLE_SCENE[kind], { req: { kind, seed, difficulty }, notes: [], onDone: (r: PuzzleResult) => { api.lastPuzzleResult = r; } });
     },
     puzzleBot: () => {

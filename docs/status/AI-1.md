@@ -79,7 +79,9 @@
 - `tests/e2e/puzzles.e2e.ts`: for every implemented kind x difficulty 1-3: opens, every tappable stays on screen, new kinds have all targets >= 96x96 and none overlapping, Hint then confirmed Skip reports `{skipped:true, solved:false, hints:2}`; and for the 8 new kinds the reference solution solves the scene through its own handlers. No console errors, no logged errors.
 - This is the first real check of the layouts: until CI runs it, none of the new scenes has been seen running.
 
-- Next: read the first CI result for puzzles.e2e.ts and fix what it finds; then boot-time measurement and Dollhouse hooks (iso kit from AI-4).
+- VERIFIED IN A REAL BROWSER (local Chromium 131 from the `@sparticuz/chromium` npm package, software GL, not committed): `puzzles.e2e.ts` passes for all 11 kinds x 3 difficulties (targets on screen, new kinds all >= 96x96 with no overlaps, hint+skip report `{skipped, hints:2}`) and the reference solution solves all 8 new scenes through their own handlers. Found and fixed on the way: (1) `interactives()` reported Graphics-based buttons at (0,0) instead of their hit-box centre, (2) a puzzle opened right after another closed was stopped by the queued stop, (3) under `?e2e=1` the 500 ms celebration timer never fired because this sandbox renders only a few fps and Phaser game time advances 16.7 ms per frame, so `succeed()` now reports at once in e2e.
+- Local run recipe: `npm i @sparticuz/chromium` in a temp dir, extract with `chromium.executablePath()`, then a local `playwright.local.config.ts` (git-excluded) with `executablePath` and `--no-sandbox --use-gl=angle --use-angle=swiftshader`.
+- Next: investigate the CI failure in game.e2e.ts (flow) and fix if it is mine; then boot-time measurement and Dollhouse hooks (iso kit from AI-4).
 - Not verified: how it looks/plays in a browser (no Playwright browser available locally; CI e2e will be the first run).
 
 ## Requests (new)

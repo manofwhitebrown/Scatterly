@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { interactives, openGame, waitScene, watchConsole } from './helpers';
 import { IMPLEMENTED } from '../../src/puzzles/manifest';
 import { PUZZLE_SCENE } from '../../src/shared/types';
@@ -13,6 +14,10 @@ interface Box { label: string; x: number; y: number; w: number; h: number }
 
 const overlap = (a: Box, b: Box): boolean =>
   Math.abs(a.x - b.x) * 2 < a.w + b.w - 4 && Math.abs(a.y - b.y) * 2 < a.h + b.h - 4;
+
+async function closed(page: Page, kind: PuzzleKind): Promise<void> {
+  await page.waitForFunction((k) => window.__scatterly?.activeScenes().includes(k) === false, PUZZLE_SCENE[kind], { timeout: 10_000 });
+}
 
 for (const kind of IMPLEMENTED) {
   test(`${kind}: opens at every difficulty, targets are sized and on screen, hint then skip report correctly`, async ({ page }) => {
@@ -50,6 +55,7 @@ for (const kind of IMPLEMENTED) {
       expect(r?.skipped).toBe(true);
       expect(r?.solved).toBe(false);
       expect(r?.hints).toBe(2);
+      await closed(page, kind);
     }
     expect(soak.errors).toEqual([]);
     expect(await page.evaluate(() => window.__scatterly!.errors().length)).toBe(0);
@@ -69,6 +75,7 @@ for (const kind of NEW_KINDS) {
       const r = await page.evaluate(() => window.__scatterly!.lastPuzzleResult);
       expect(r?.solved, `${kind} d${d} solved`).toBe(true);
       expect(r?.skipped).toBe(false);
+      await closed(page, kind);
     }
     expect(soak.errors).toEqual([]);
   });
