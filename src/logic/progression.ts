@@ -1,8 +1,9 @@
 import { DECOR, storageSpot } from '../content/decor';
 import { HOUSE } from '../content/house';
 import type {
-  DecorView, ItemId, PlayerProfile, RunResult, Spot, SpotId,
+  DecorView, ItemId, PlayerProfile, PuzzleStat, RunResult, Spot, SpotId,
 } from '../shared/types';
+import { earnedAchievements } from './achievements';
 
 /** HOUSE plus every owned storage decor (which becomes a real spot). */
 export function allSpots(profile: PlayerProfile): Spot[] {
@@ -70,10 +71,39 @@ export function applyRun(profile: PlayerProfile, r: RunResult, today: string = l
   const unlockedRooms = day >= 6 && !profile.unlockedRooms.includes('bathroom')
     ? [...profile.unlockedRooms, 'bathroom' as const]
     : profile.unlockedRooms.slice();
-  return {
+  // Per-kind mastery from the puzzle log. A skipped puzzle never counts as solved.
+  const puzzles: Record<string, PuzzleStat> = {};
+  for (const [k, v] of Object.entries(profile.puzzles)) puzzles[k] = { ...v };
+  let solvedNow = 0;
+  for (const e of r.puzzleLog) {
+    const st = puzzles[e.kind] ?? { solved: 0, skipped: 0, bestMs: null };
+    if (e.skipped) st.skipped++;
+    else if (e.solved) {
+      st.solved++;
+      solvedNow++;
+      if (e.ms > 0 && (st.bestMs === null || e.ms < st.bestMs)) st.bestMs = e.ms;
+    }
+    puzzles[e.kind] = st;
+  }
+  const complete = r.stars > 0;
+  const stats = {
+    mornings: profile.stats.mornings + 1,
+    perfect: profile.stats.perfect + (r.stars === 3 ? 1 : 0),
+    itemsFound: profile.stats.itemsFound + r.found.length,
+    hintsUsed: profile.stats.hintsUsed + r.hintsUsed,
+    puzzlesSolved: profile.stats.puzzlesSolved + solvedNow,
+    bestStreak: Math.max(profile.stats.bestStreak, streak),
+    fastestMs: complete && r.timeMs > 0 ? (profile.stats.fastestMs === null ? r.timeMs : Math.min(profile.stats.fastestMs, r.timeMs)) : profile.stats.fastestMs,
+  };
+  const newWeek = profile.weekMorning >= 6;
+  const next: PlayerProfile = {
     ...profile,
-    day, streak, lastDailyDate, unlockedRooms,
+    day, streak, lastDailyDate, unlockedRooms, puzzles, stats,
+    weekMorning: newWeek ? 1 : profile.weekMorning + 1,
+    weekStars: (newWeek ? 0 : profile.weekStars) + r.stars,
     coins: profile.coins + r.coinsEarned,
     bestStars: { ...profile.bestStars, [r.scenarioId]: (r.stars > prev ? r.stars : prev) as 0 | 1 | 2 | 3 },
   };
+  const earned = earnedAchievements(profile, next, r);
+  return earned.length > 0 ? { ...next, achievements: [...next.achievements, ...earned] } : next;
 }

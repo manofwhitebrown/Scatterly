@@ -16,6 +16,7 @@ import { idealSearchCount, validateScenario } from './validator';
 
 const MODE_SALT: Record<GameMode, number> = { rush: 11, relaxed: 23, daily: 37 };
 const MAX_ATTEMPTS = 40;
+const PUZZLE_TIME_SLACK = 1.2;
 
 /** Local calendar date as an int, e.g. 20261101. */
 export function dailySeed(d: Date = new Date()): number {
@@ -126,6 +127,8 @@ function attempt(seed: number, mode: GameMode, w: World, salt: number, enabled: 
   const gateProfile: PlayerProfile = mode === 'daily' ? { ...w.profile, day: 6, puzzles: {} } : w.profile;
   addGatesV3(s, rng, { enabled, profile: gateProfile, big, spots: w.spots });
   s.parSearches = idealSearchCount(s) + 2;
+  // Puzzles take real time: give every gate the player has to open its par time plus slack.
+  s.timeLimitSec += Math.round((solveScenario(s).seconds * PUZZLE_TIME_SLACK) / 5) * 5;
   return s;
 }
 

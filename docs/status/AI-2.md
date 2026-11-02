@@ -56,6 +56,12 @@
 - Code lock rule change vs brief: difficulty 2 also allows a product of two facts (sums of two facts rarely reach 3 digits).
 - Existing tests updated to the new rules (day 1 now has exactly one easy gate; 'days 1-3' also checks days 2-3 <= 2 gates; template-count test ignores the guided title; clue text bound counts `{fact:}` as 2 digits).
 
+### Progression and balance (pushed with this update)
+- `applyRun` now folds `RunResult.puzzleLog` into `profile.puzzles` (solved / skipped / bestMs; skipped never counts as solved), updates `stats` (mornings, perfect, itemsFound, hintsUsed, puzzlesSolved, bestStreak, fastestMs), the week board (`weekMorning` 1..6 then wraps, `weekStars`) and `achievements`. Nothing updated these before. Still immutable.
+- `src/logic/achievements.ts`: `ACHIEVEMENTS` (15, ids stable and saved, with `name`/`desc`) and `earnedAchievements(before, after, run)`. The Journal currently prints raw ids: AI-3 can map them through `ACHIEVEMENTS` for names.
+- Time limit: the old formula ignored puzzles, so from day 5 an ideal player needed >80% of the Rush limit in over a third of mornings (63% by day 20). `timeLimitSec` now adds `solveScenario(s).seconds * 1.2` (par time of the gates on the ideal path). Ideal time / limit is now about 0.45 on every day, worst case 0.69 (`tests/sim/balance.test.ts`, 3 s per search assumed).
+- `tests/logic.progress.test.ts` (6 tests).
+
 ### Verified (commands run)
 - `PUZZLE_SEEDS=2000 npx vitest run tests/puzzles` -> 58 passed (2000 seeds x 3 difficulties x 11 kinds incl. generate -> solve -> check, wrong answers rejected, determinism, generate p99 <= 10 ms). A real bug was caught and fixed on the way (untangle jitter could remove the crossings after they were counted).
 - Layout mutation check: moving the TV onto the sideboard, and the bedroom wardrobe in front of the door, makes the tests fail as expected; restored.
@@ -65,7 +71,7 @@
 - Layout vs art footprints (AI-4 review) and layout look on screen: not seen rendered. Positions are by hand, only checked by the geometric tests.
 - G10 note: Entrance has 11 house spots + 5 storage decor = 16 interactive pieces once everything is bought (brief says 8-14). Ids may not change, so I kept it; owner decides whether to cap storage purchases in the entrance.
 - Median ideal-bot time per difficulty (G9) not measured yet; `parSeconds` is set (code 18/35/65, target 18/40/75, sequence 12/25/45, lights 20/40/70, slide 25/45/80, pipes 25/45/80, mastermind 25/50/80, memory 12/25/45, untangle 15/35/70, sort 14/25/50, word 12/25/50).
-- Still to do, in order: template growth 18 -> ~28 (facts exist now), `applyRun` puzzleLog + ACHIEVEMENTS, balance sim (tests/sim) with median ideal-bot times, fuzz extension to 5000 seeds, then Tier 2 kinds after the parity gate.
+- Still to do, in order: template growth 18 -> ~28 (facts exist now), median ideal-bot time per puzzle difficulty (G9), fuzz extension to 5000 seeds, then Tier 2 kinds after the parity gate.
 - Scene side (AI-1/AI-3): scenes must build code-lock `ctx.facts` from the clues listed in `Gate.needs` (in that order, `clue.facts` concatenated). Until `code` etc. are in `IMPLEMENTED` and `ENABLED` the live game only produces untangle/sort/word gates (now on lockable containers only).
 
 ### Layout conventions (for AI-3 / AI-4)
