@@ -42,6 +42,6 @@ describe('contract v3', () => {
     expect(parseFlags('').iso).toBe(false);
     expect(parseFlags('?view=iso').iso).toBe(true);
     expect(parseFlags('?view=flat').iso).toBe(false);
-    expect(parseFlags('?view=iso&debug=1&e2e=1')).toEqual({ iso: true, debug: true, e2e: true });
+    expect(parseFlags('?view=iso&debug=1&e2e=1')).toMatchObject({ iso: true, home: false, debug: true, e2e: true });
   });
 });

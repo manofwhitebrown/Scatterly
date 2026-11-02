@@ -19,7 +19,7 @@ const config: Phaser.Types.Core.GameConfig = {
   height: GAME_H,
   backgroundColor: '#2b2230',
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  render: { antialias: true, powerPreference: 'high-performance', pixelArt: false, roundPixels: true },
+  render: { antialias: false, powerPreference: 'high-performance', pixelArt: true, roundPixels: true },
   fps: { target: 60, smoothStep: true },
   input: { activePointers: 2, touch: { capture: true } },
   disableContextMenu: true,

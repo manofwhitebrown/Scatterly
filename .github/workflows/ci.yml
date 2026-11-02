@@ -3,7 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore: ['docs/**', '**/*.md']
   pull_request:
+    paths-ignore: ['docs/**', '**/*.md']
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -24,21 +26,28 @@ jobs:
         run: node scripts/secret-scan.mjs
       - run: npm test
       - run: npm run build
+      - name: Asset ledger and budgets
+        run: node scripts/check-assets.mjs
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
+      - name: E2E smoke (pull requests)
+        if: github.event_name == 'pull_request'
+        run: npx playwright test -g "boots to Menu|an uncaught error"
       - name: E2E flow (modes, pause, settings, error policy, background)
+        if: github.ref == 'refs/heads/main'
         run: npx playwright test game.e2e.ts
       - name: E2E puzzles (open, audit targets, auto-solve every implemented kind)
-        if: always()
+        if: always() && github.ref == 'refs/heads/main'
         run: npx playwright test puzzles.e2e.ts
       - name: E2E leaks and perf (50x restart, 4x CPU throttle)
-        if: always()
+        if: always() && github.ref == 'refs/heads/main'
         run: npx playwright test perf.e2e.ts
       - name: Perf regression gate (software GL, regression only)
+        if: github.ref == 'refs/heads/main'
         run: node scripts/perf-compare.mjs
       - uses: actions/upload-artifact@v4
         if: always()

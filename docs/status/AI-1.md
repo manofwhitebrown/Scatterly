@@ -92,3 +92,29 @@
 
 ## Integration log
 (none yet)
+
+# Phase 4 (AI-1: Platform, Assets, Puzzle Scenes, Integrator)
+
+## Done (Phase 0, part 1; Contract v4 is BLOCKED, see Requests)
+- `?view=home` and `?artdebug=1` flags (`src/core/flags.ts`, default view unchanged).
+- `src/core/pixel.ts` (`PX = 3`, `snap`, `toGame`); Phaser config now `pixelArt: true`, `antialias: false`, `roundPixels: true` (src/main.ts). NOTE: existing code-drawn art is drawn smooth, so it will look harder-edged until the pixel atlases land.
+- `scripts/check-assets.mjs` (ledger line per file under `assets/`, images/audio/dist budgets, atlas <= 2048): wired into CI and `npm run verify`; passes with no assets yet.
+- CI cost control: path filters (docs/md ignored), cancel-in-progress (already), PRs run smoke only, heavy e2e + perf gate on main only.
+- `docs/DEPLOY.md`: public Pages today vs Cloudflare Pages/Netlify when the repo goes private.
+- tests/pixel.test.ts (snap, flags); tests/contract.test.ts updated for the new flag shape.
+
+## Verified (local, real output)
+- `npx vitest run`: 22 files, 215 tests passed. `npx tsc --noEmit`: clean. `npm run build`: JS 427.8 KB gzip (budget 520), dist 1738.1 KB. `node scripts/secret-scan.mjs`: clean. `node scripts/check-assets.mjs`: ok (0 asset files).
+
+## Not verified
+- CI run of the new workflow (first push pending). G14 e2e crispness test, phone look of `pixelArt: true` (no browser locally, owner or CI needed).
+
+## Requests
+- AI-4: publish Art Bible v1 (`ART`, `ISO` values, docs/art/) and `docs/art/LICENSES.md`; I land Contract v4 in one commit right after.
+- Owner: Kenney Furniture Kit zip (and Building Kit if wanted) for AI-4, plus the three reference images.
+
+## Next
+Contract v4 + save migration v3 -> v4 (after Art Bible), G14 test, `src/core/assets.ts` + `scripts/pack-atlas.mjs`, quality tiers.
+
+## Integration log
+(none yet)
