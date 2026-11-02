@@ -36,3 +36,18 @@ export function screenSpots(o: IsoOrigin, spots: readonly Spot[]): Spot[] {
     return { ...s, x: b.x, y: b.y, w: b.w, h: b.h };
   });
 }
+
+/** Nearest unsearched container (capacity > 0) to `from`, by box centre. Used for the idle shimmer; says nothing about contents. */
+export function nearestUnsearched(list: readonly Spot[], searched: (id: Spot['id']) => boolean, from: { x: number; y: number }): Spot | null {
+  let best: Spot | null = null;
+  let bestD = Infinity;
+  for (const s of list) {
+    if (s.capacity <= 0 || searched(s.id)) continue;
+    const d = (s.x + s.w / 2 - from.x) ** 2 + (s.y + s.h / 2 - from.y) ** 2;
+    if (d < bestD) {
+      bestD = d;
+      best = s;
+    }
+  }
+  return best;
+}

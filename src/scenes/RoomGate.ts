@@ -20,7 +20,8 @@ export class RoomGate {
     private readonly hooks: GateHooks,
   ) {}
 
-  launch(spot: Spot, gate: Gate): void {
+  /** `before` runs first (the iso lock zoom) and calls `go` when the puzzle may open. */
+  launch(spot: Spot, gate: Gate, before?: (go: () => void) => void): void {
     const key = PUZZLE_SCENE[gate.kind];
     if (!sceneExists(this.scene, key)) {
       this.hooks.warn("That puzzle isn't available, so it opened anyway.");
@@ -30,9 +31,13 @@ export class RoomGate {
       return;
     }
     const data = puzzleLaunchData(this.scenario, spot, gate, (r) => this.done(spot, r));
-    this.hooks.setPuzzleOpen(true);
-    this.scene.scene.pause();
-    this.scene.scene.launch(key, data);
+    const open = (): void => {
+      this.hooks.setPuzzleOpen(true);
+      this.scene.scene.pause();
+      this.scene.scene.launch(key, data);
+    };
+    if (before) before(open);
+    else open();
   }
 
   private done(spot: Spot, r: PuzzleResult): void {

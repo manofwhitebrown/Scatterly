@@ -8,8 +8,8 @@ import { tex } from '../shared/types';
 import type { RoomId, Spot, SpotId } from '../shared/types';
 import { PressZone } from '../ui/PressZone';
 import { pickSpot } from '../ui/hit';
-import { COLOR } from '../ui/theme';
-import { ROOM_ORIGIN, placementOf, project, screenSpots } from '../ui/isoGrid';
+import { COLOR, isCalm } from '../ui/theme';
+import { ROOM_ORIGIN, nearestUnsearched, placementOf, project, screenSpots } from '../ui/isoGrid';
 
 interface SpotView { spot: Spot; img: Phaser.GameObjects.Image; lock: Phaser.GameObjects.Graphics | null }
 interface DoorView { to: RoomId; x: number; y: number; arrow: Phaser.GameObjects.Graphics }
@@ -39,6 +39,9 @@ export class IsoRoomView {
   private readonly layers = new Map<RoomId, Layer>();
   private current: RoomId | null = null;
   private pulseSpot: SpotId | null = null;
+  private idleSec = 0;
+  private lastTouch = { x: 640, y: 360 };
+  private readonly idleTimer: Phaser.Time.TimerEvent;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -47,7 +50,11 @@ export class IsoRoomView {
     private readonly onTap: (spot: Spot) => void,
     private readonly onLong: (spot: Spot) => void,
     private readonly onDoor: (to: RoomId) => void,
-  ) {}
+    private readonly canIdle: () => boolean,
+  ) {
+    this.idleTimer = scene.time.addEvent({ delay: 1000, loop: true, callback: this.idleTick, callbackScope: this });
+    scene.input.on('pointerdown', this.touch, this);
+  }
 
   get room(): RoomId | null {
     return this.current;
@@ -112,7 +119,36 @@ export class IsoRoomView {
     this.hop(v, 8, 3);
   }
 
+  /** Zoom the room (not the HUD) onto a lock, <= 250 ms, then call done. resetZoom undoes it. */
+  zoomTo(spot: Spot, done: () => void): void {
+    const box = this.current !== null ? this.layers.get(this.current)?.box : undefined;
+    if (!box || isLowFx(this.scene.game)) {
+      done();
+      return;
+    }
+    const k = 1.5;
+    this.scene.tweens.add({
+      targets: box,
+      scaleX: k,
+      scaleY: k,
+      x: 640 - k * (spot.x + spot.w / 2),
+      y: 360 - k * (spot.y + spot.h / 2),
+      duration: 220,
+      ease: 'Sine.easeIn',
+      onComplete: done,
+    });
+  }
+
+  resetZoom(): void {
+    for (const layer of this.layers.values()) {
+      this.scene.tweens.killTweensOf(layer.box);
+      layer.box.setPosition(0, 0).setScale(1);
+    }
+  }
+
   destroy(): void {
+    this.idleTimer.remove(false);
+    this.scene.input.off('pointerdown', this.touch, this);
     for (const layer of this.layers.values()) {
       for (const v of layer.spots.values()) this.scene.tweens.killTweensOf(v.img);
       for (const d of layer.doors) this.scene.tweens.killTweensOf(d.arrow);
@@ -121,6 +157,28 @@ export class IsoRoomView {
     }
     this.layers.clear();
     this.current = null;
+  }
+
+  private touch(p: Phaser.Input.Pointer): void {
+    this.idleSec = 0;
+    this.lastTouch = { x: p.x, y: p.y };
+  }
+
+  /** 1 Hz: after 10 s without input, shimmer the nearest unsearched container (never a hint, contents are not looked at). */
+  private idleTick(): void {
+    const layer = this.current !== null ? this.layers.get(this.current) : undefined;
+    if (!layer || isCalm(this.scene) || !this.canIdle()) {
+      this.idleSec = 0;
+      return;
+    }
+    if (++this.idleSec < 10) return;
+    this.idleSec = 0;
+    const spot = nearestUnsearched(layer.list, (id) => this.session.isOpened(id), this.lastTouch);
+    const v = spot ? layer.spots.get(spot.id) : undefined;
+    if (!v) return;
+    this.hop(v, 4, 2);
+    v.img.setTint(0xfff0b0);
+    this.scene.time.delayedCall(280, () => v.img.clearTint());
   }
 
   private flashArrow(g: Phaser.GameObjects.Graphics): void {

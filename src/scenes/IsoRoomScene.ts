@@ -51,6 +51,7 @@ export class IsoRoomScene extends Phaser.Scene {
       (to) => {
         if (run.rooms.includes(to)) this.nav?.goTo(to);
       },
+      () => !run.modalOpen(),
     );
     this.view = view;
     view.show(run.start, 0);
@@ -60,6 +61,8 @@ export class IsoRoomScene extends Phaser.Scene {
         playAction: (spot) => view.playAction(spot),
         refresh: (id) => view.refresh(id),
         pulse: (id) => view.queuePulse(id),
+        zoomTo: (spot, done) => view.zoomTo(spot, done),
+        resetZoom: () => view.resetZoom(),
         center: (id) => {
           const sp = view.spotOf(id);
           return sp ? { x: sp.x + sp.w / 2, y: sp.y + sp.h / 2 } : null;

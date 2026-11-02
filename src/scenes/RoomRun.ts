@@ -2,17 +2,18 @@ import Phaser from 'phaser';
 import { sfx } from '../audio/sfx';
 import { isLowFx } from '../core/perf';
 import { GameSession, allSpots, generateScenario } from '../logic';
-import { ITEM_LABEL, ROOM_ORDER, SCENE, tex } from '../shared/types';
-import type { GameMode, InspectOutcome, ItemId, PlayerProfile, RoomId, RoomSceneData, Scenario, Spot, SpotId } from '../shared/types';
+import { ITEM_LABEL, ROOM_ORDER, SCENE } from '../shared/types';
+import type { GameMode, Gate, InspectOutcome, ItemId, PlayerProfile, RoomId, RoomSceneData, Scenario, Spot, SpotId } from '../shared/types';
 import { Button } from '../ui/Button';
 import { ClueBoard } from '../ui/ClueBoard';
 import { Hud } from '../ui/Hud';
 import { InspectPanel } from '../ui/InspectPanel';
 import { Toast } from '../ui/Toast';
-import { DEPTH, Dim, SIZE, getProfile, go, isCalm, makeText, vibrate } from '../ui/theme';
+import { Dim, SIZE, getProfile, go, isCalm, makeText, vibrate } from '../ui/theme';
 import { timeUpCard } from './RoomCardConfigs';
 import { ModalCard } from './RoomCards';
-import { burst, flyItem } from './RoomFx';
+import { burst } from './RoomFx';
+import { RoomFlyouts } from './RoomFlyouts';
 import { finishRun } from './RoomFinish';
 import { RoomBack } from './RoomBack';
 import { RoomClock } from './RoomClock';
@@ -28,6 +29,9 @@ export interface RunView {
   pulse(spotId: SpotId): void;
   /** Screen centre of a spot, or null when unknown. */
   center(spotId: SpotId): { x: number; y: number } | null;
+  /** Optional (iso view): zoom the room onto a lock before its puzzle opens, then call done. */
+  zoomTo?(spot: Spot, done: () => void): void;
+  resetZoom?(): void;
 }
 
 export interface RunHost {
@@ -62,8 +66,8 @@ export class RoomRun {
   private flow!: RoomFlow;
   private gate!: RoomGate;
   private spotRoom = new Map<SpotId, RoomId>();
-  private flyImgs: Phaser.GameObjects.Image[] = [];
-  private flyIdx = 0;
+  private fly!: RoomFlyouts;
+  private inspectSpot: Spot | null = null;
   private unsubs: Array<() => void> = [];
   private puzzleOpen = false;
   private resolving = false;
@@ -129,9 +133,7 @@ export class RoomRun {
       onPoint: (room, spotId) => this.pointTo(room, spotId),
     });
     this.card = new ModalCard(s, this.dim);
-    for (let i = 0; i < 3; i++) {
-      this.flyImgs.push(s.add.image(0, 0, tex.item('keys')).setDepth(DEPTH.fly).setVisible(false));
-    }
+    this.fly = new RoomFlyouts(s);
     this.unsubs.push(this.session.on('clue', () => this.onClue()));
     this.unsubs.push(this.session.on('complete', () => this.onComplete()));
     this.clock = new RoomClock(
@@ -144,7 +146,10 @@ export class RoomRun {
     );
     s.events.on(Phaser.Scenes.Events.RESUME, this.clock.resync, this.clock);
     this.flow = new RoomFlow(s, this.card, this.scenario, this.mode, {
-      beginClock: () => this.beginClock(),
+      beginClock: () => {
+        this.clock.begin();
+        sfx.play('swoosh');
+      },
       resyncClock: () => this.clock.resync(),
       restart: () => s.scene.restart({ mode: this.mode, seed: this.seed } as RoomSceneData),
       quit: () => go(s, SCENE.Menu),
@@ -158,6 +163,7 @@ export class RoomRun {
     this.gate = new RoomGate(s, this.scenario, {
       setPuzzleOpen: (open) => {
         this.puzzleOpen = open;
+        if (!open) this.view.resetZoom?.();
       },
       solve: (spot, skipped) => this.session.solveGate(spot.id, skipped ? true : undefined),
       countHint: () => this.countHint(),
@@ -174,17 +180,8 @@ export class RoomRun {
   }
 
   modalOpen(): boolean {
-    return (
-      !this.clock.started ||
-      this.finished ||
-      this.flow.paused ||
-      this.puzzleOpen ||
-      this.resolving ||
-      this.inspect.isOpen ||
-      this.board.isOpen ||
-      this.card.isOpen ||
-      this.house.isOpen
-    );
+    const f = this.finished || this.flow.paused || this.puzzleOpen || this.resolving;
+    return !this.clock.started || f || this.inspect.isOpen || this.board.isOpen || this.card.isOpen || this.house.isOpen;
   }
 
   onSpot(spot: Spot): void {
@@ -246,20 +243,16 @@ export class RoomRun {
     this.mounted = false;
   }
 
-  private beginClock(): void {
-    this.clock.begin();
-    sfx.play('swoosh');
-  }
-
   private applyOutcome(spot: Spot, out: InspectOutcome): void {
     this.resolving = false;
     if (this.finished) return;
     if (out.kind === 'found') {
+      this.inspectSpot = spot;
       this.feel.opened(spot, out.items.length > 0);
       this.inspect.show(spot.label, out.items, out.clues, out.message);
     } else if (out.kind === 'locked') {
       const gate = out.gate ?? this.scenario.gates[spot.id];
-      if (gate) this.gate.launch(spot, gate);
+      if (gate) this.gate.launch(spot, gate, this.zoomBefore(spot));
       else this.toast.show("It won't budge.", 'warn');
     } else {
       this.feel.empty(spot);
@@ -283,13 +276,28 @@ export class RoomRun {
     }
     this.feel.taken();
     const to = this.hud.slotPos(item);
-    const img = this.flyImgs[this.flyIdx++ % Math.max(1, this.flyImgs.length)];
     const land = (): void => {
       this.hud.markFound(item);
       if (to) this.feel.landed(to.x, to.y);
     };
-    if (!to || !img || isCalm(this.scene)) land();
-    else flyItem(this.scene, img, item, { x, y }, to, land);
+    this.fly.item(item, this.flyOrigin() ?? { x, y }, to, isCalm(this.scene), land);
+  }
+
+  /** Iso view only: zoom onto the lock (<= 250 ms) before the puzzle opens; cut when motion is calm. */
+  private zoomBefore(spot: Spot): ((go: () => void) => void) | undefined {
+    if (!this.view.zoomTo || isCalm(this.scene) || isLowFx(this.scene.game)) return undefined;
+    return (go) => {
+      this.resolving = true;
+      this.view.zoomTo?.(spot, () => {
+        this.resolving = false;
+        go();
+      });
+    };
+  }
+
+  /** Iso view: things leave the furniture that was opened. Flat view: they leave the panel. */
+  private flyOrigin(): { x: number; y: number } | null {
+    return this.host.useHouse && this.inspectSpot ? this.view.center(this.inspectSpot.id) : null;
   }
 
   private onClue(): void {
@@ -298,6 +306,8 @@ export class RoomRun {
     this.hud.wiggleClues();
     const c = this.hud.cluePos;
     this.feel.clue(c.x, c.y);
+    const from = this.flyOrigin();
+    if (from && !isCalm(this.scene)) this.fly.clue(from, c, () => undefined);
   }
 
   private useHint(): void {

@@ -7,7 +7,7 @@ import { ISO } from '../src/shared/types';
 import type { Spot } from '../src/shared/types';
 import { pickSpot } from '../src/ui/hit';
 import { ISO_DIMS } from '../src/art/iso';
-import { isoBox, placementOf, project, screenSpots } from '../src/ui/isoGrid';
+import { isoBox, nearestUnsearched, placementOf, project, screenSpots } from '../src/ui/isoGrid';
 
 const O = { x: 100, y: 50 };
 
@@ -57,5 +57,20 @@ describe('iso grid', () => {
   it('draws and hit-tests spots with the canonical footprint of their kind', () => {
     const sofa = { ...(HOUSE[0] as Spot), kind: 'sofa' as const, iso: { gx: 1, gy: 2, w: 9, d: 9, h: 9 } };
     expect(placementOf(sofa)).toEqual({ gx: 1, gy: 2, gz: undefined, ...ISO_DIMS.sofa });
+  });
+
+  it('shimmers the nearest unsearched container to the last touch', () => {
+    const base = HOUSE[0] as Spot;
+    const mk = (id: string, gx: number, capacity: number): Spot => ({ ...base, id: id as Spot['id'], capacity, iso: { gx, gy: 3, w: 1, d: 1, h: 1 } });
+    const list = screenSpots(O, [mk('near', 2, 2), mk('far', 9, 2), mk('empty', 3, 0)]);
+    const at = (id: string): { x: number; y: number } => {
+      const s = list.find((l) => l.id === id) as Spot;
+      return { x: s.x + s.w / 2, y: s.y + s.h / 2 };
+    };
+    expect(nearestUnsearched(list, () => false, at('near'))?.id).toBe('near');
+    expect(nearestUnsearched(list, (id) => id === 'near', at('near'))?.id).toBe('far');
+    expect(nearestUnsearched(list, () => true, at('near'))).toBeNull();
+    // a spot that holds nothing (capacity 0) is never picked even when it is closest
+    expect(nearestUnsearched(list, (id) => id !== 'empty', at('empty'))).toBeNull();
   });
 });
