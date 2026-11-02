@@ -1,9 +1,14 @@
 import type Phaser from 'phaser';
 import type { GameSession } from '../logic';
 import { tex } from '../shared/types';
-import type { SpotId, SpotMark } from '../shared/types';
+import type { RoomId, Spot, SpotId, SpotMark } from '../shared/types';
 import { CSS, isCalm, makeText } from '../ui/theme';
-import type { RoomView } from './RoomView';
+
+/** What RoomMarks needs from a room view (flat or iso). */
+export interface MarkHost {
+  spotOf(id: SpotId): Spot | undefined;
+  attach(room: RoomId, obj: Phaser.GameObjects.GameObject): void;
+}
 
 type Badge = Phaser.GameObjects.Image | Phaser.GameObjects.Text;
 
@@ -16,7 +21,7 @@ export class RoomMarks {
 
   constructor(
     private readonly scene: Phaser.Scene,
-    private readonly view: RoomView,
+    private readonly view: MarkHost,
     session: GameSession,
   ) {
     this.off = session.on('mark', () => this.sync(session));

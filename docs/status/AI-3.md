@@ -41,20 +41,25 @@ tap/open/empty/found/take/clue/hint/room/urgent/win/lose: src/scenes/RoomFeel.ts
 ## Done
 - D2 Run controller: `src/scenes/RoomRun.ts` (362 lines) now holds the view-agnostic rules: session, clock, intro/coach/pause (RoomFlow), gates (RoomGate), marks input, feel, hints, inspect panel, clue board, finish. `RoomScene.ts` is a 66-line shell (RoomView + RoomNav + RoomMarks) that plugs in through the `RunView` interface (`playAction`, `refresh`, `pulse`, `center`) and `RunHost.goRoom`. The iso view will implement the same two interfaces, so there is one copy of the rules.
 
-## Waiting on others
-- D1 / D3 / D4: HouseScene and IsoRoomScene registration needs AI-1's contract v3 (`SAVE_VERSION` is still 2, no `ISO`, `IsoPlacement`, `SCENE.House` yet) plus AI-2 `src/content/layout.ts` and AI-4 `src/art/iso.ts` (neither exists on main).
+- D1 Phase 0 skeletons (contract v3 landed): `IsoRoomScene` registered under `SCENE.Room` when `?view=iso` (default stays `RoomScene`), `HouseScene` registered under `SCENE.House` (tiles for the 5 rooms, locked rooms dark, tap picks a room or goes to Menu; no progress numbers or zoom yet). `IsoRoomView` draws placeholder shells and 3-shade boxes from `Spot.iso`, hit areas = iso screen box through the existing `pickSpot` (>= 96x96, nearest centre), long-press marks via new `ui/PressZone`, padlock badge from the start on gated containers, depth-sorted once. `RoomMarks` and `RoomNav` now depend on small interfaces (`MarkHost`, `RoomSwitcher`) so both views share them. Under `?e2e=1` the iso scene exposes `scene.__e2e.hotspots()` (`{spotId, x, y}` in game px).
+- `src/ui/isoGrid.ts` holds an interim `project`/`isoBox`/`screenSpots`; replace with AI-4's `isoToScreen` when `src/art/iso.ts` lands (same 2:1 maths, tested in tests/ui-iso.test.ts).
 
-## Verified (commands run, repo at AI-3 D2 commit)
+## Waiting on others
+- AI-2 `LAYOUTS` / `HOUSE_MAP` / real Spot `iso` (current `iso` is AI-1's placeholder derived from the old pixel boxes, so the iso room is crowded and not a real room yet), AI-4 `src/art/iso.ts` + `tex.isoShell/isoSpot/isoProp` art (placeholders are drawn with Graphics for now).
+- Still to build: door hotspots, open/closed textures, shimmer, hop-out items, camera zoom to lock, Dollhouse progress and zoom, HUD v3, notebook facts, Puzzle Book, Result story, tutorial.
+
+## Verified (commands run, repo at AI-3 Phase 0 skeleton commit)
 - `npx tsc --noEmit`: clean.
-- `npm test`: 5 files, 46/46 passed.
-- `npm run build`: green, JS 391.4 KB gzip (before the refactor: 391.1 KB; budget 450, Phase 0 raises it to 520).
+- `npm test`: 8 files, 63/63 passed (incl. new tests/ui-iso.test.ts).
+- `npm run build`: green, JS 395.9 KB gzip (budget 520).
 
 ## Not verified
+- `?view=iso` and the Dollhouse skeleton were never run in a browser (no GL/browser here); CI e2e covers the default view only until AI-1 adds an iso run.
 - e2e bot: Playwright browsers cannot be installed in this sandbox, so the bot did not run locally. CI runs it on push; behaviour is meant to be unchanged (same calls, same order except RoomNav and RoomBack creation order, which have fixed depths).
 - Feel, fps and anything visual: owner on a device with `?debug=1`.
 - G4 leak counts not measured yet.
 
 ## Requests
-- AI-1: contract v3 commit (see "Waiting on others").
+- AI-1: add an e2e run on `?view=iso&e2e=1` that taps `scene.__e2e.hotspots()` (Room scene key is `Room`).
 - AI-2: `LAYOUTS`, `HOUSE_MAP`, Spot `iso` data; `ACHIEVEMENTS` and `weekPlan` (still outstanding from Phase 2).
 - AI-4: `src/art/iso.ts` (`isoToScreen`, `depthKey`, `tex.isoShell/isoSpot/isoProp`); real `playFx`.

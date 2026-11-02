@@ -3,7 +3,13 @@ import type { RoomId } from '../shared/types';
 import { Button } from '../ui/Button';
 import { Hud } from '../ui/Hud';
 import { DEPTH } from '../ui/theme';
-import { RoomView } from './RoomView';
+
+/** What RoomNav needs from a room view (flat or iso). */
+export interface RoomSwitcher {
+  readonly room: RoomId | null;
+  readonly switching: boolean;
+  show(room: RoomId, dir: number): void;
+}
 
 /** Edge arrows, room tabs and arrow keys: all room switching goes through here. */
 export class RoomNav {
@@ -12,7 +18,7 @@ export class RoomNav {
 
   constructor(
     private readonly scene: Phaser.Scene,
-    private readonly view: RoomView,
+    private readonly view: RoomSwitcher,
     private readonly hud: Hud,
     private readonly rooms: RoomId[],
     private readonly blocked: () => boolean,
