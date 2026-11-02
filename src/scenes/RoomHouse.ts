@@ -17,6 +17,7 @@ export class RoomHouse {
     private readonly rooms: readonly RoomId[],
     start: RoomId,
     private readonly goRoom: (room: RoomId) => void,
+    private readonly timeLeft: () => number | null,
   ) {
     this.shown = start;
   }
@@ -36,6 +37,7 @@ export class RoomHouse {
       overlay: true,
       current: this.shown,
       unlocked: this.rooms,
+      timeLeft: this.timeLeft,
       progress: (room: RoomId) => roomProgress(this.session, this.scenario, this.spotRoom, room),
       onPick: (room: RoomId) => this.goRoom(room),
       onClose: () => {

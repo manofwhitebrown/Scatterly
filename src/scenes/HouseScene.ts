@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
-import { prefetchRoomShells } from '../art/isoShell';
-import { HOUSE_MAP } from '../content/layout';
+import { ISO_BADGE } from '../art/isoBadges';
 import { isLowFx } from '../core/perf';
-import { SCENE, tex } from '../shared/types';
+import { SCENE } from '../shared/types';
 import type { RoomId } from '../shared/types';
 import { Button } from '../ui/Button';
-import { COLOR, CSS, DEPTH, ROOM_LABEL, SIZE, enterFade, getProfile, go, isCalm, makeText } from '../ui/theme';
+import { COLOR, CSS, DEPTH, ROOM_LABEL, SIZE, enterFade, getProfile, go, isCalm, makeText, fmtClock } from '../ui/theme';
+import { buildHouseTiles } from './houseTiles';
 import type { RoomProgress } from './houseProgress';
 
 export interface HouseSceneData {
@@ -16,19 +16,17 @@ export interface HouseSceneData {
   progress?: (room: RoomId) => RoomProgress;
   onPick?: (room: RoomId) => void;
   onClose?: () => void;
+  /** Seconds left in a rush morning (null/absent: untimed). Shown top-right because the overlay covers the HUD. */
+  timeLeft?: () => number | null;
 }
 
-const SCALE = 0.4;
 const ZOOM_MS = 300;
-const COL_X = 300;
-const COL_STEP = 340;
-const FLOOR_Y = [440, 215] as const;
 
 /** Dollhouse: the whole home as room tiles on two floors; tap a room to zoom in and go there. */
 export class HouseScene extends Phaser.Scene {
   private data0: HouseSceneData = {};
   private picked = false;
-  private pending: Array<{ room: RoomId; img: Phaser.GameObjects.Image }> = [];
+  private timer: Phaser.GameObjects.Text | null = null;
 
   constructor() {
     super(SCENE.House);
@@ -37,7 +35,7 @@ export class HouseScene extends Phaser.Scene {
   init(data: HouseSceneData): void {
     this.data0 = data ?? {};
     this.picked = false;
-    this.pending = [];
+    this.timer = null;
   }
 
   create(): void {
@@ -51,22 +49,15 @@ export class HouseScene extends Phaser.Scene {
       this.cameras.main.setBackgroundColor(COLOR.bg);
     }
     const unlocked = d.unlocked ?? getProfile(this).unlockedRooms;
-    for (const slot of HOUSE_MAP) {
-      const x = COL_X + slot.col * COL_STEP;
-      const y = FLOOR_Y[slot.floor];
-      const open = unlocked.includes(slot.room);
-      const img = this.add.image(x, y, tex.isoShell(slot.room)).setScale(SCALE).setOrigin(0.5, 0.5);
-      img.setVisible(false);
-      this.pending.push({ room: slot.room, img });
-      if (!open) img.setTint(0x555555);
-      if (d.current === slot.room) this.add.graphics().lineStyle(6, COLOR.amber, 1).strokeRoundedRect(x - 112, y - 78, 224, 156, 14);
-      this.label(slot.room, x, y, open, d.progress?.(slot.room));
-      const hit = this.add.zone(x, y, 224, 176).setInteractive({ useHandCursor: true });
+    for (const t of buildHouseTiles(this, unlocked)) {
+      if (d.current === t.room) this.add.graphics().lineStyle(6, COLOR.amber, 1).strokeRoundedRect(t.x - 112, t.y - 78, 224, 156, 14);
+      this.label(t.room, t.x, t.y, t.open, d.progress?.(t.room));
+      const hit = this.add.zone(t.x, t.y, 224, 176).setInteractive({ useHandCursor: true });
       hit.on('pointerup', (p: Phaser.Input.Pointer) => {
-        if (open && p.getDistance() <= 16) this.choose(slot.room, x, y);
+        if (t.open && p.getDistance() <= 16) this.choose(t.room, t.x, t.y);
       });
     }
-    this.bakeShells();
+    if (d.timeLeft) this.showTimer(d.timeLeft);
     new Button(this, 640, 668, 320, d.overlay ? 'Close' : 'Back', () => this.close(), { variant: 'primary' }).setDepth(DEPTH.hud);
     this.input.keyboard?.on('keydown-ESC', this.close, this);
   }
@@ -74,10 +65,7 @@ export class HouseScene extends Phaser.Scene {
   private label(room: RoomId, x: number, y: number, open: boolean, pr: RoomProgress | undefined): void {
     makeText(this, x, y + 88, ROOM_LABEL[room], { fontSize: `${SIZE.label}px`, fontStyle: 'bold', color: open ? CSS.cream : CSS.muted }).setOrigin(0.5);
     if (!open) {
-      const g = this.add.graphics().setPosition(x, y);
-      g.fillStyle(COLOR.plateEdge, 0.9).fillCircle(0, 0, 30);
-      g.fillStyle(COLOR.amber, 1).fillRect(-12, -6, 24, 18);
-      g.lineStyle(4, COLOR.amber, 1).strokeCircle(0, -9, 8);
+      this.add.image(x, y, ISO_BADGE.padlock).setDisplaySize(64, 64);
       return;
     }
     if (pr) {
@@ -86,16 +74,15 @@ export class HouseScene extends Phaser.Scene {
     }
   }
 
-  /** Shells bake one per frame through AI-4's queue; each image appears as its texture does. */
-  private bakeShells(): void {
-    this.reveal();
-    if (this.pending.every((p) => p.img.visible)) return;
-    prefetchRoomShells(this, this.pending.map((p) => p.room));
-    this.time.addEvent({ delay: 60, loop: true, callback: this.reveal, callbackScope: this });
-  }
-
-  private reveal(): void {
-    for (const p of this.pending) if (!p.img.visible && this.textures.exists(tex.isoShell(p.room))) p.img.setVisible(true);
+  /** 1 Hz clock for rush mornings; the overlay hides the HUD timer. */
+  private showTimer(left: () => number | null): void {
+    const draw = (): void => {
+      const v = left();
+      this.timer?.setText(v === null ? '' : `Time ${fmtClock(Math.ceil(v))}`);
+    };
+    this.timer = makeText(this, 1240, 40, '', { fontSize: `${SIZE.label}px`, fontStyle: 'bold', color: CSS.amber }).setOrigin(1, 0.5).setDepth(DEPTH.hud);
+    draw();
+    this.time.addEvent({ delay: 1000, loop: true, callback: draw });
   }
 
   private choose(room: RoomId, x: number, y: number): void {

@@ -5,6 +5,7 @@ import { SCENE, tex } from '../shared/types';
 import { Button } from '../ui/Button';
 import { Toast } from '../ui/Toast';
 import { CSS, SIZE, enterFade, getProfile, go, makeText } from '../ui/theme';
+import { buildHouseTiles } from './houseTiles';
 
 export class MenuScene extends Phaser.Scene {
   constructor() {
@@ -14,6 +15,7 @@ export class MenuScene extends Phaser.Scene {
   create(): void {
     enterFade(this);
     const profile = getProfile(this);
+    buildHouseTiles(this, profile.unlockedRooms, 0.5); // the dollhouse, dimmed, behind the menu
     const toast = new Toast(this, 640);
 
     makeText(this, 640, 128, 'Scatterly', { fontSize: `${SIZE.title}px`, fontStyle: 'bold', color: CSS.amber }).setOrigin(0.5);

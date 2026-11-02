@@ -1,7 +1,11 @@
 import Phaser from 'phaser';
 import { ISO_DIMS, boxTexture, depthKey, isoToScreen } from '../art/iso';
+import { ISO_BADGE } from '../art/isoBadges';
+import { propSpriteInfo } from '../art/isoProps';
 import { ensureRoomShell, shellSize } from '../art/isoShell';
-import { LAYOUTS } from '../content/layout';
+import { specFor } from '../art/isoTheme';
+import { LAYOUTS, PROPS } from '../content/layout';
+import type { Prop } from '../content/layout';
 import { isLowFx } from '../core/perf';
 import type { GameSession } from '../logic';
 import { tex } from '../shared/types';
@@ -11,26 +15,13 @@ import { pickSpot } from '../ui/hit';
 import { COLOR, isCalm } from '../ui/theme';
 import { ROOM_ORIGIN, nearestUnsearched, placementOf, project, screenSpots } from '../ui/isoGrid';
 
-interface SpotView { spot: Spot; img: Phaser.GameObjects.Image; lock: Phaser.GameObjects.Graphics | null; check: Phaser.GameObjects.Graphics | null }
+interface SpotView { spot: Spot; img: Phaser.GameObjects.Image; lock: Phaser.GameObjects.Image | null; check: Phaser.GameObjects.Image | null }
 interface DoorView { to: RoomId; x: number; y: number; arrow: Phaser.GameObjects.Graphics }
 interface Layer { box: Phaser.GameObjects.Container; spots: Map<SpotId, SpotView>; list: Spot[]; zone: PressZone; doors: DoorView[] }
 
-/** Small padlock badge, drawn once per gated container; visible from the start so the player can plan. */
-function makePadlock(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Graphics {
-  const g = scene.add.graphics().setPosition(x, y);
-  g.fillStyle(COLOR.plateEdge, 0.9).fillCircle(0, 0, 20);
-  g.fillStyle(COLOR.amber, 1).fillRect(-9, -4, 18, 14);
-  g.lineStyle(3, COLOR.amber, 1).strokeCircle(0, -6, 6);
-  g.fillStyle(COLOR.ink, 1).fillRect(-2, 1, 4, 5);
-  return g;
-}
-
-/** Green check badge for a searched container: shape + colour, so it is not colour alone. */
-function makeCheck(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Graphics {
-  const g = scene.add.graphics().setPosition(x, y);
-  g.fillStyle(COLOR.plateEdge, 0.9).fillCircle(0, 0, 20);
-  g.lineStyle(5, COLOR.green, 1).beginPath().moveTo(-9, 1).lineTo(-3, 8).lineTo(10, -8).strokePath();
-  return g;
+/** Badge image from AI-4's baked badge textures (padlock on gated containers, check on searched ones). */
+function badge(scene: Phaser.Scene, key: string, x: number, y: number): Phaser.GameObjects.Image {
+  return scene.add.image(x, y, key);
 }
 
 /** Door arrow badge; a 96x96 zone sits over it so it is easy to hit. */
@@ -111,7 +102,7 @@ export class IsoRoomView {
     v.img.setTexture(tex.isoSpot(v.spot.kind, opened));
     v.lock?.setVisible(!opened && this.isLocked(id));
     if (opened && !v.check) {
-      v.check = makeCheck(this.scene, v.spot.x + v.spot.w - 26, v.spot.y + 22);
+      v.check = badge(this.scene, ISO_BADGE.check, v.spot.x + v.spot.w - 26, v.spot.y + 22);
       this.layers.get(v.spot.room)?.box.add(v.check);
     }
   }
@@ -221,31 +212,46 @@ export class IsoRoomView {
     const box = this.scene.add.container(0, 0).setVisible(false);
     ensureRoomShell(this.scene, room);
     if (this.scene.textures.exists(tex.isoShell(room))) {
-      const s = shellSize();
+      const spec = specFor(room);
+      const s = shellSize(spec.cols, spec.rows);
       box.add(this.scene.add.image(o.x, o.y, tex.isoShell(room)).setOrigin(s.ox / s.w, s.oy / s.h));
     }
-    // depth-sort once: back (small key) to front
+    // depth-sort once, props and furniture together: back (small key) to front
     const raw = (this.session.spotsIn(room) ?? []).slice();
     raw.sort((a, b) => depthKey(placementOf(a)) - depthKey(placementOf(b)));
     const list = screenSpots(o, raw);
+    const order: Array<{ key: number; prop?: Prop; i?: number }> = [
+      ...(PROPS[room] ?? []).map((prop) => ({ key: depthKey(prop.iso), prop })),
+      ...raw.map((src, i) => ({ key: depthKey(placementOf(src)), i })),
+    ].sort((a, b) => a.key - b.key);
     const spots = new Map<SpotId, SpotView>();
-    for (const [i, spot] of list.entries()) {
-      const src = raw[i];
-      if (!src) continue;
-      const dims = ISO_DIMS[src.kind];
-      const bt = boxTexture(dims);
+    for (const it of order) {
+      if (it.prop) {
+        const info = propSpriteInfo(it.prop);
+        if (!this.scene.textures.exists(info.key)) continue;
+        const at = isoToScreen(it.prop.iso.gx, it.prop.iso.gy, it.prop.iso.gz ?? 0);
+        box.add(this.scene.add.image(o.x + at.x, o.y + at.y, info.key).setOrigin(info.originX, info.originY).setFlipX(info.flip));
+        continue;
+      }
+      const src = it.i !== undefined ? raw[it.i] : undefined;
+      const spot = it.i !== undefined ? list[it.i] : undefined;
+      if (!src || !spot) continue;
+      const bt = boxTexture(ISO_DIMS[src.kind]);
       const at = isoToScreen(src.iso.gx, src.iso.gy, src.iso.gz ?? 0);
       const img = this.scene.add
         .image(o.x + at.x, o.y + at.y, tex.isoSpot(src.kind, this.session.isOpened(src.id)))
         .setOrigin(bt.ox / bt.w, bt.oy / bt.h);
       box.add(img);
-      let lock: Phaser.GameObjects.Graphics | null = null;
-      if (this.isLocked(src.id)) {
-        const m = project(o, src.iso.gx + dims.w / 2, src.iso.gy + dims.d / 2, (src.iso.gz ?? 0) + dims.h);
-        lock = makePadlock(this.scene, m.x, m.y - 6);
-        box.add(lock);
-      }
-      spots.set(src.id, { spot, img, lock, check: null });
+      spots.set(src.id, { spot, img, lock: null, check: null });
+    }
+    // padlock badges last, so no piece of furniture can cover them
+    for (const v of spots.values()) {
+      if (!this.isLocked(v.spot.id)) continue;
+      const dims = ISO_DIMS[v.spot.kind];
+      const iso = v.spot.iso;
+      const m = project(o, iso.gx + dims.w / 2, iso.gy + dims.d / 2, (iso.gz ?? 0) + dims.h);
+      v.lock = badge(this.scene, ISO_BADGE.padlock, m.x, m.y - 6);
+      box.add(v.lock);
     }
     const zone = new PressZone(this.scene, {
       active: () => this.current === room,

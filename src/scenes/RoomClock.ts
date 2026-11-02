@@ -5,6 +5,11 @@ import { Hud } from '../ui/Hud';
 /** Morning clock. Ticks every 250 ms and counts time only while `frozen()` is false. */
 export class RoomClock {
   elapsed = 0;
+
+  /** Seconds left in a rush morning, or null when untimed. */
+  remainingSec(): number | null {
+    return this.limitSec === null ? null : Math.max(0, this.limitSec - this.elapsed / 1000);
+  }
   started = false;
   private last = 0;
 

@@ -110,7 +110,7 @@ export class RoomRun {
     const s = this.scene;
     this.view = view;
     this.host = host;
-    this.house = new RoomHouse(s, this.session, this.scenario, this.spotRoom, this.rooms, this.start, (room) => this.host.goRoom(room));
+    this.house = new RoomHouse(s, this.session, this.scenario, this.spotRoom, this.rooms, this.start, (room) => this.host.goRoom(room), () => this.clock?.remainingSec() ?? null);
     this.hud = new Hud(s, {
       targets: this.scenario.targets,
       timed: this.mode === 'rush',
