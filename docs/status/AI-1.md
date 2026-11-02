@@ -64,7 +64,8 @@
 
 ## Tier 1 scenes
 - `code` DONE (src/puzzles/CodeScene.ts, 134 lines): 5x2 digit keys + Back/Enter, all 96 px tall, sits left of the notes drawer; facts come from `notes[].facts` via `PUZZLES.code.generate(seed, d, { facts })`; wrong code shows "X Not the code (n)" and a shake (skipped under reducedMotion); `hintLine()` uses `PUZZLES.code.hint`; `e2eSolve()` types the reference answer through `press`/`enter`. Added to `IMPLEMENTED`.
-- Next: target, sequence, lights, slide, pipes, mastermind, memory.
+- `target` DONE (src/puzzles/TargetScene.ts): 96 px number tiles (consumed when used, result becomes a new tile), 4 operator keys, Undo and Reset (state is replayed from `history`, so undo cannot drift), selection shown by a bold outline ring plus a "7 x ? " line (not colour only), invalid ops (non-whole divide, below 1) show "X That does not work". Win via `PUZZLES.target.check(spec, history)`. `e2eSolve` taps tile, operator, tile for each reference step.
+- Next: sequence, lights, slide, pipes, mastermind, memory.
 - Not verified: how it looks/plays in a browser (no Playwright browser available locally; CI e2e will be the first run).
 
 ## Requests (new)
