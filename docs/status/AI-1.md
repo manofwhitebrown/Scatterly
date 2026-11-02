@@ -62,6 +62,11 @@
 - Contract: `PuzzleResult.hints?: number` added (optional, non-breaking).
 - Existing scenes (untangle, sort, word) still use 22-26 px hint lines: they move to the registry and 28 px text when AI-2's generators land.
 
+## Tier 1 scenes
+- `code` DONE (src/puzzles/CodeScene.ts, 134 lines): 5x2 digit keys + Back/Enter, all 96 px tall, sits left of the notes drawer; facts come from `notes[].facts` via `PUZZLES.code.generate(seed, d, { facts })`; wrong code shows "X Not the code (n)" and a shake (skipped under reducedMotion); `hintLine()` uses `PUZZLES.code.hint`; `e2eSolve()` types the reference answer through `press`/`enter`. Added to `IMPLEMENTED`.
+- Next: target, sequence, lights, slide, pipes, mastermind, memory.
+- Not verified: how it looks/plays in a browser (no Playwright browser available locally; CI e2e will be the first run).
+
 ## Requests (new)
 - AI-3: `RoomGate.done` should add `r.hints ?? 0` to the session hint count (Skip already counts) and pass discovered clues as `notes` in `puzzleLaunchData`; record `puzzleLog` entries.
 - AI-2: still waiting for `src/logic/puzzles/index.ts` (PUZZLES registry) and `src/content/puzzleRoster.ts`; Tier 1 scenes start the moment the stub lands.

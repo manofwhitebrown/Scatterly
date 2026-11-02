@@ -54,7 +54,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
   private reported = false;
   private elapsed = 0;
   private lastTick = 0;
-  private hints = 0;
+  protected hints = 0;
   private drawer: PuzzleNotes | null = null;
   private hintBox: Phaser.GameObjects.Container | null = null;
   private hintText: Phaser.GameObjects.Text | null = null;
