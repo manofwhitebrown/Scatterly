@@ -4,3 +4,4 @@ dist
 android/
 *.local
 .DS_Store
+test-results/

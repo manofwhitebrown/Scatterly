@@ -81,8 +81,14 @@ export function installE2e(game: Phaser.Game, stats: FrameStats): void {
     errors: () => errorLog(),
     activeScenes: () => game.scene.getScenes(true).map((s) => s.scene.key),
     session: () => {
-      const room = game.scene.getScene('Room') as unknown as { session?: unknown } | null;
-      return game.scene.isActive('Room') && room ? room.session ?? null : null;
+      // Room (flat) and IsoRoom keep the session inside their RoomRun (`run`); older builds kept it on the scene.
+      for (const key of ['Room', 'IsoRoom']) {
+        if (!game.scene.isActive(key)) continue;
+        const sc = game.scene.getScene(key) as unknown as { run?: { session?: unknown } | null; session?: unknown } | null;
+        const found = sc?.run?.session ?? sc?.session;
+        if (found) return found;
+      }
+      return null;
     },
     injectError: (key) => {
       const sc = game.scene.getScene(key);
