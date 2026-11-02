@@ -67,7 +67,15 @@ describe('fairness over many seeds', () => {
       const s = generateScenario(seed, 'relaxed', fresh());
       expect(s.difficulty).toBe(1);
       expect(s.targets.length).toBe(2);
-      expect(Object.keys(s.gates)).toEqual([]);
+      // Day 1 is the fixed guided morning: exactly one easy puzzle. Days 2-3 may have up to 2 gates.
+      const gates = Object.values(s.gates);
+      expect(gates.length).toBe(1);
+      expect(gates[0]?.difficulty).toBe(1);
+    }
+    for (let seed = 1; seed <= 100; seed++) {
+      const s = generateScenario(seed, 'relaxed', { ...fresh(), day: 2 + (seed % 2) });
+      expect(s.difficulty).toBe(1);
+      expect(Object.keys(s.gates).length).toBeLessThanOrEqual(2);
     }
   });
   it('never places in locked rooms and uses every template eventually', () => {
@@ -78,6 +86,7 @@ describe('fairness over many seeds', () => {
       seen.add(s.title);
     }
     for (let seed = 1; seed <= 600; seed++) seen.add(generateScenario(seed, 'relaxed', rich).title);
+    seen.delete('Your First Morning');
     expect(seen.size).toBe(TEMPLATES.length);
   });
   it('tidy homes use the home spot and emit a strong habit clue', () => {
@@ -112,7 +121,8 @@ describe('fairness over many seeds', () => {
           if (l.roomOf) expect(t.slots[l.roomOf]).toBeDefined();
         }
         const tokens = (c.text.match(/\{where:/g) ?? []).length;
-        expect(c.text.replace(/\{where:[A-Za-z0-9]+\}/g, '').length + tokens * longest).toBeLessThan(101);
+        const flat = c.text.replace(/\{where:[A-Za-z0-9]+\}/g, '').replace(/\{fact:[a-z]+\}/g, '99');
+        expect(flat.length + tokens * longest, c.title).toBeLessThan(101);
       }
     }
   });

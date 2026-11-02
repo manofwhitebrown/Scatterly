@@ -1,17 +1,18 @@
 import { STORAGE_SPOTS, anySpot } from '../content/decor';
-import { WORD_GATES } from '../content/phrases';
+import { ENABLED } from '../content/puzzleRoster';
 import { TEMPLATES } from '../content/templates';
 import type { SlotDef, Template } from '../content/templates';
 import type {
-  Difficulty, Gate, GameMode, ItemId, PlayerProfile, PuzzleKind, RoomId, Scenario, Spot, SpotId,
+  Difficulty, GameMode, ItemId, PlayerProfile, PuzzleKind, RoomId, Scenario, Spot, SpotId,
 } from '../shared/types';
 import { buildClues } from './clues';
 import { expand, simulateEvening } from './evening';
 import type { SlotMap } from './evening';
+import { addGatesV3 } from './gates';
 import { allSpots } from './progression';
 import { Rng, deriveSeed } from './rng';
 import { solveScenario } from './solver';
-import { gateCosts, idealSearchCount, validateScenario } from './validator';
+import { idealSearchCount, validateScenario } from './validator';
 
 const MODE_SALT: Record<GameMode, number> = { rush: 11, relaxed: 23, daily: 37 };
 const MAX_ATTEMPTS = 40;
@@ -99,43 +100,7 @@ function resolveSlots(t: Template, w: World, rng: Rng): Resolved | null {
   return { slots, habit };
 }
 
-const GATE_KINDS: Partial<Record<PuzzleKind, string[]>> = {
-  untangle: ['charger', 'drawer', 'bagSpot', 'jacket', 'basket'],
-  sort: ['drawer', 'cabinet', 'basket', 'papers', 'wardrobe', 'bin'],
-  word: ['drawer', 'cabinet', 'wardrobe', 'fridge', 'papers'],
-};
-
-function makeGate(kind: PuzzleKind, difficulty: Difficulty, rng: Rng): Gate {
-  if (kind === 'word') {
-    const [word, hint] = rng.pick(WORD_GATES);
-    return { kind, difficulty, payload: word, context: hint };
-  }
-  if (kind === 'untangle') return { kind, difficulty, payload: 'cables', context: 'A knot of cords blocks the way.' };
-  return { kind, difficulty, payload: 'colour', context: 'It is crammed with odds and ends.' };
-}
-
-function addGates(s: Scenario, t: Template, rng: Rng): void {
-  const wanted = s.difficulty - 1;
-  if (wanted <= 0) return;
-  const kinds = t.gates ?? (['untangle', 'sort', 'word'] as PuzzleKind[]);
-  const candidates = rng.shuffle(s.targets.map((i) => s.placement[i]).filter((x): x is SpotId => !!x));
-  for (const id of candidates) {
-    if (Object.keys(s.gates).length >= wanted) break;
-    const sp = anySpot(id);
-    if (!sp || sp.room === s.startRoom || s.gates[id]) continue;
-    const ok = kinds.filter((k) => (GATE_KINDS[k] ?? []).includes(sp.kind));
-    if (ok.length === 0) continue;
-    s.gates[id] = makeGate(rng.pick(ok), s.difficulty, rng);
-    const costs = gateCosts(s);
-    const bad = s.targets.some((i) => {
-      const p = s.placement[i];
-      return p !== undefined && (costs.get(p) ?? 0) > 1;
-    });
-    if (bad) delete s.gates[id];
-  }
-}
-
-function attempt(seed: number, mode: GameMode, w: World, salt: number): Scenario {
+function attempt(seed: number, mode: GameMode, w: World, salt: number, enabled: readonly PuzzleKind[]): Scenario {
   const rng = new Rng(deriveSeed(seed, salt * 101 + MODE_SALT[mode]));
   const difficulty: Difficulty = mode === 'daily' ? 2 : pickDifficulty(w.profile.day, rng);
   const eligible = TEMPLATES.filter((t) => t.base <= difficulty && w.unlocked.has(t.start)
@@ -149,13 +114,17 @@ function attempt(seed: number, mode: GameMode, w: World, salt: number): Scenario
   const { steps, placement } = simulateEvening(t, resolved.slots, rng);
   const habit = new Map<ItemId, SpotId>();
   for (const [item, id] of resolved.habit) if (targets.includes(item)) habit.set(item, id);
-  const clues = buildClues(t, resolved.slots, targets, habit, difficulty);
+  const factRng = new Rng(deriveSeed(seed, salt * 101 + MODE_SALT[mode] + 9000));
+  const clues = buildClues(t, resolved.slots, targets, habit, difficulty, factRng);
   const s: Scenario = {
     id: `${mode}-${seed}`, seed, title: t.title, intro: expand(t.intro, resolved.slots, 1), difficulty,
     startRoom: t.start, evening: steps, targets, placement, clues, gates: {},
     timeLimitSec: Math.max(60, Math.round((25 * targets.length + 20 * difficulty) / 5) * 5), parSearches: 0,
   };
-  addGates(s, t, rng);
+  const big = mode !== 'daily' && w.profile.day >= 12 && rng.chance(0.12);
+  // The daily must be the same for everyone: gates ignore the player's day and puzzle history.
+  const gateProfile: PlayerProfile = mode === 'daily' ? { ...w.profile, day: 6, puzzles: {} } : w.profile;
+  addGatesV3(s, rng, { enabled, profile: gateProfile, big, spots: w.spots });
   s.parSearches = idealSearchCount(s) + 2;
   return s;
 }
@@ -187,12 +156,56 @@ export function fallbackScenario(seed: number, mode: GameMode): Scenario {
   };
 }
 
+/**
+ * Day 1: a fixed, friendly morning with two targets and one easy puzzle (the keys sit in a jammed drawer).
+ * Uses the first enabled kind from untangle / sort / word so it always has a working scene.
+ */
+export function guidedScenario(seed: number, mode: GameMode, enabled: readonly PuzzleKind[] = ENABLED): Scenario {
+  const s = fallbackScenario(seed, mode);
+  const kind = (['untangle', 'sort', 'word'] as PuzzleKind[]).find((k) => enabled.includes(k));
+  const evening = s.evening.map((e) => (e.n === 2
+    ? { ...e, spotId: 'entrance.console', note: 'You dropped your keys in the console drawer and shoved it shut.' }
+    : e));
+  s.id = `${mode}-${seed}-guided`;
+  s.title = 'Your First Morning';
+  s.intro = 'Welcome home. Your keys and phone are somewhere. Follow the note, and mind the stuck drawer.';
+  s.evening = evening;
+  s.placement = { keys: 'entrance.console', phone: 'living.sofa' };
+  s.clues = [{
+    id: 'c1', spotId: 'bedroom.charger', title: 'Reminder note', icon: 'note',
+    text: 'Note: keys in the hall console drawer, phone in the sofa cushions.',
+    links: [
+      { spotId: 'entrance.console', item: 'keys', strength: 'strong' },
+      { spotId: 'living.sofa', item: 'phone', strength: 'strong' },
+    ],
+  }];
+  if (kind) {
+    s.gates = { 'entrance.console': kind === 'word'
+      ? { kind, difficulty: 1, payload: 'KEYS', context: 'What you are looking for.' }
+      : kind === 'sort'
+        ? { kind, difficulty: 1, payload: 'colour', context: 'It is crammed with odds and ends.' }
+        : { kind, difficulty: 1, payload: 'cables', context: 'A knot of cords blocks the way.' } };
+  }
+  s.parSearches = idealSearchCount(s) + 2;
+  return s;
+}
+
+export interface GenerateOptions {
+  /** Override the enabled puzzle kinds (tests, balance sims). Defaults to ENABLED. */
+  enabled?: readonly PuzzleKind[];
+}
+
 /** Deterministic per (seed, mode, relevant profile). Retries with derived seeds until valid. */
-export function generateScenario(seed: number, mode: GameMode, profile: PlayerProfile): Scenario {
+export function generateScenario(seed: number, mode: GameMode, profile: PlayerProfile, opts: GenerateOptions = {}): Scenario {
+  const enabled = opts.enabled ?? ENABLED;
+  if (profile.day <= 1 && mode !== 'daily') {
+    const g = guidedScenario(seed, mode, enabled);
+    if (validateScenario(g, profile).length === 0) return g;
+  }
   const w = makeWorld(profile);
   for (let salt = 0; salt < MAX_ATTEMPTS; salt++) {
     try {
-      const s = attempt(seed, mode, w, salt);
+      const s = attempt(seed, mode, w, salt, enabled);
       if (validateScenario(s, profile).length === 0 && solveScenario(s).ok) return s;
     } catch {
       // try the next derived seed

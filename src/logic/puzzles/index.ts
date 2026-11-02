@@ -34,5 +34,6 @@ export const PUZZLES: { [K in LogicPuzzleKind]: PuzzleDef<PuzzleTypes[K]['spec']
 };
 export { feedback } from './mastermind';
 export { crossings } from './untangle';
+export { codeFeasible } from './codeLock';
 export type { Pt } from './untangle';
 export type { Fact, PuzzleCtx, PuzzleDef } from './types';

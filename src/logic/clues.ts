@@ -3,7 +3,9 @@ import type { ClueDef } from '../content/templateKit';
 import type { Template } from '../content/templateKit';
 import { expand, whereText } from './evening';
 import type { SlotMap } from './evening';
-import type { Clue, ClueLink, ItemId, SpotId } from '../shared/types';
+import { FACT_KINDS } from '../content/facts';
+import type { Rng } from './rng';
+import type { Clue, ClueFact, ClueLink, ItemId, SpotId } from '../shared/types';
 
 const HABIT_TEXT: Record<ItemId, string> = {
   keys: 'Sticky note in your hand: "Keys go {w}. Always."',
@@ -36,7 +38,7 @@ function buildLinks(def: ClueDef, slots: SlotMap, targets: ItemId[], habit: Map<
 
 /** Derives clues from the simulated evening plus, for tidy homes, a strong habit note. */
 export function buildClues(
-  t: Template, slots: SlotMap, targets: ItemId[], habit: Map<ItemId, SpotId>, difficulty: number,
+  t: Template, slots: SlotMap, targets: ItemId[], habit: Map<ItemId, SpotId>, difficulty: number, rng?: Rng,
 ): Clue[] {
   const clues: Clue[] = [];
   for (const def of t.clues) {
@@ -44,10 +46,17 @@ export function buildClues(
     if (def.links.length > 0 && links.length === 0) continue;
     const spotId = slots[def.slot];
     if (!spotId) continue;
-    clues.push({
-      id: `c${clues.length + 1}`, spotId, title: def.title, icon: def.icon, links,
-      text: expand(def.text, slots, difficulty),
-    });
+    const facts: ClueFact[] = [];
+    let text = def.text;
+    for (const key of def.facts ?? []) {
+      const k = FACT_KINDS[key];
+      const value = rng ? rng.int(k.lo, k.hi) : Math.round((k.lo + k.hi) / 2);
+      facts.push({ key, label: k.label, value });
+      text = text.replace(`{fact:${key}}`, String(value));
+    }
+    const clue: Clue = { id: `c${clues.length + 1}`, spotId, title: def.title, icon: def.icon, links, text: expand(text, slots, difficulty) };
+    if (facts.length > 0) clue.facts = facts;
+    clues.push(clue);
   }
   const entrySpot = slots.e1;
   if (entrySpot) {

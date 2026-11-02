@@ -1,3 +1,4 @@
+import type { FactKey } from './facts';
 import type {
   ClueIcon, Difficulty, EveningVerb, ItemId, PuzzleKind, RoomId, SpotAction,
 } from '../shared/types';
@@ -37,6 +38,8 @@ export interface ClueDef {
   /** Extra token {where:slot}: plain spot name on difficulty 1, an oblique hint above. */
   text: string;
   links: LinkDef[];
+  /** Fact keys rolled per seed; the text must contain a matching {fact:key} token for each. */
+  facts?: FactKey[];
 }
 
 export interface Template {

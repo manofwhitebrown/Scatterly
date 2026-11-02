@@ -1,6 +1,9 @@
 import { STORAGE_SPOTS, anySpot } from '../content/decor';
 import { HOUSE } from '../content/house';
+import { PUZZLE_KINDS } from '../shared/types';
 import type { PlayerProfile, Scenario, Spot, SpotId } from '../shared/types';
+import { codeFeasible } from './puzzles';
+import { gateBudget } from './gateBudget';
 
 /** Spots relevant to a scenario: the whole house plus any storage decor it mentions. */
 export function scenarioSpots(s: Scenario): Spot[] {
@@ -80,17 +83,17 @@ export function idealSearchCount(s: Scenario): number {
     queue = next;
   }
   const used = new Set<SpotId>();
-  for (const t of s.targets) {
-    let p: SpotId | null | undefined = s.placement[t];
-    if (!p) continue;
-    if (!parent.has(p)) {
-      used.add(p);
-      continue;
-    }
-    while (p) {
-      used.add(p);
-      p = parent.get(p);
-    }
+  const chain = (start: SpotId | undefined): void => {
+    let p: SpotId | null | undefined = start;
+    if (!p) return;
+    if (!parent.has(p)) { used.add(p); return; }
+    while (p) { used.add(p); p = parent.get(p); }
+  };
+  for (const t of s.targets) chain(s.placement[t]);
+  // A code lock on the path also needs the clues that carry its numbers.
+  for (const [gid, g] of Object.entries(s.gates)) {
+    if (!used.has(gid)) continue;
+    for (const cid of g.needs ?? []) chain(s.clues.find((c) => c.id === cid)?.spotId);
   }
   return used.size;
 }
@@ -165,8 +168,32 @@ export function validateScenario(s: Scenario, profile?: PlayerProfile): string[]
 
   // Gates.
   const gateIds = Object.keys(s.gates);
-  if (gateIds.length > s.difficulty) errs.push('too many gates');
-  for (const id of gateIds) if (!get(id)) errs.push(`gate on unknown spot ${id}`);
+  if (gateIds.length > (profile ? Math.max(gateBudget(profile.day), 6) : 6)) errs.push('too many gates');
+  let d3 = 0;
+  for (const id of gateIds) {
+    const sp = get(id);
+    const g = s.gates[id];
+    if (!sp || !g) { errs.push(`gate on unknown spot ${id}`); continue; }
+    if (!sp.lockable) errs.push(`gate on non-lockable spot ${id}`);
+    if (!(PUZZLE_KINDS as readonly string[]).includes(g.kind)) errs.push(`gate ${id} has unknown kind`);
+    if (g.difficulty === 3) d3++;
+    if (g.kind !== 'code' && g.needs) errs.push(`gate ${id} has needs but is not a code lock`);
+    if (g.kind === 'code') {
+      const facts = [];
+      const needs = g.needs ?? [];
+      if (needs.length < 1 || needs.length > 3) errs.push(`code gate ${id} needs ${needs.length} clues`);
+      for (const cid of needs) {
+        const c = s.clues.find((x) => x.id === cid);
+        if (!c || !c.facts || c.facts.length === 0) { errs.push(`code gate ${id} needs missing clue ${cid}`); continue; }
+        if (c.spotId === id || s.gates[c.spotId]) errs.push(`code gate ${id} needs a clue behind a gate`);
+        facts.push(...c.facts);
+      }
+      const want = g.difficulty === 3 ? 3 : 2;
+      if (new Set(facts.map((f) => f.key)).size < want || !codeFeasible(facts, g.difficulty)) errs.push(`code gate ${id} facts cannot make a code`);
+    }
+  }
+  if (d3 > 1) errs.push('more than one difficulty-3 gate');
+  if (d3 > 0 && profile && profile.day < 8) errs.push('difficulty-3 gate before day 8');
 
   // Fairness: every target must be reachable through a clue chain with at most one gate.
   const cost = gateCosts(s);

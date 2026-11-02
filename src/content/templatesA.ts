@@ -25,8 +25,8 @@ export const TEMPLATES_A: Template[] = [
       { v: 'sleep', room: 'bedroom', note: 'You were asleep before the credits. The remote is still missing too.' },
     ],
     clues: [
-      { slot: 'e1', icon: 'wrapper', title: 'Takeaway menu', text: 'Menu, PAID. Keys: {where:keys}. Wallet: {where:wallet}.', links: [strong('keys', 'keys'), strong('wallet', 'wallet')] },
-      { slot: 'e2', icon: 'note', title: 'Doorstep scribble', text: 'The pad says "driver outside". Your phone sat {where:phone}.', links: [strong('phone', 'phone')] },
+      { slot: 'e1', icon: 'wrapper', title: 'Takeaway menu', text: 'Menu, total {fact:receipt}. Keys: {where:keys}. Wallet: {where:wallet}.', links: [strong('keys', 'keys'), strong('wallet', 'wallet')], facts: ['receipt'] },
+      { slot: 'e2', icon: 'note', title: 'Doorstep scribble', text: 'Pad: driver, flat {fact:flat}. Phone sat {where:phone}.', links: [strong('phone', 'phone')], facts: ['flat'] },
     ],
   },
   {
@@ -52,8 +52,8 @@ export const TEMPLATES_A: Template[] = [
       { v: 'sleep', room: 'bedroom', note: 'You fell asleep mid-lemon-thought.' },
     ],
     clues: [
-      { slot: 'e1', icon: 'receipt', title: 'Shop receipt', text: 'Receipt: 3 lemons, 1 regret. Wallet: {where:wallet}.', links: [strong('wallet', 'wallet')] },
-      { slot: 'e2', icon: 'bagTag', title: 'Bag tag', text: 'Torn tag. Keys: {where:keys}. Work bag: {where:bag}.', links: [strong('keys', 'keys'), strong('bag', 'bag')] },
+      { slot: 'e1', icon: 'receipt', title: 'Shop receipt', text: 'Receipt: total {fact:receipt}. Wallet: {where:wallet}.', links: [strong('wallet', 'wallet')], facts: ['receipt'] },
+      { slot: 'e2', icon: 'bagTag', title: 'Bag tag', text: 'Torn tag, no. {fact:tag}. Keys: {where:keys}. Work bag: {where:bag}.', links: [strong('keys', 'keys'), strong('bag', 'bag')], facts: ['tag'] },
     ],
   },
   {
@@ -76,8 +76,8 @@ export const TEMPLATES_A: Template[] = [
       { v: 'sleep', room: 'bedroom', note: 'You slept to the sound of rain being smug.' },
     ],
     clues: [
-      { slot: 'e1', icon: 'stain', title: 'Wet footprints', text: 'A damp trail ends where the keys went: {where:keys}.', links: [strong('keys', 'keys')] },
-      { slot: 'e2', icon: 'laundry', title: 'Soggy scarf', text: 'Scarf, soaked. Wallet: {where:wallet}. Phone: {where:phone}.', links: [strong('wallet', 'wallet'), strong('phone', 'phone')] },
+      { slot: 'e1', icon: 'stain', title: 'Wet footprints', text: 'Damp trail, flat {fact:flat}. Keys went: {where:keys}.', facts: ['flat'], links: [strong('keys', 'keys')] },
+      { slot: 'e2', icon: 'laundry', title: 'Soggy scarf', text: 'Scarf, {fact:laundry} wet things. Wallet: {where:wallet}. Phone: {where:phone}.', links: [strong('wallet', 'wallet'), strong('phone', 'phone')], facts: ['laundry'] },
     ],
   },
   {
@@ -101,8 +101,8 @@ export const TEMPLATES_A: Template[] = [
       { v: 'sleep', room: 'bedroom', note: 'You slept the sleep of the well-carbed.' },
     ],
     clues: [
-      { slot: 'e1', icon: 'wrapper', title: 'Risotto bowl', text: 'A greasy bowl, one fingerprint. Glasses: {where:glasses}.', links: [strong('glasses', 'glasses')] },
-      { slot: 'e2', icon: 'photo', title: 'Steamy snap', text: 'Blurry photo, steamed lens. Phone: {where:phone}. Keys: {where:keys}.', links: [strong('phone', 'phone'), strong('keys', 'keys')] },
+      { slot: 'e1', icon: 'wrapper', title: 'Risotto bowl', text: 'Greasy bowl, recipe p.{fact:page}. Glasses: {where:glasses}.', links: [strong('glasses', 'glasses')], facts: ['page'] },
+      { slot: 'e2', icon: 'photo', title: 'Steamy snap', text: 'Photo, flat {fact:flat}. Phone: {where:phone}. Keys: {where:keys}.', facts: ['flat'], links: [strong('phone', 'phone'), strong('keys', 'keys')] },
     ],
   },
   {
@@ -151,7 +151,7 @@ export const TEMPLATES_A: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'note', title: 'Sticky note', text: '"CHARGE THE PHONE." It sat {where:phone}, not charging.', links: [strong('phone', 'phone')] },
-      { slot: 'e2', icon: 'text', title: 'Battery alert', text: 'Screenshot: 4%. Earbuds: {where:earbuds}. Keys: {where:keys}.', links: [strong('earbuds', 'earbuds'), strong('keys', 'keys')] },
+      { slot: 'e2', icon: 'text', title: 'Battery alert', text: 'Screenshot: {fact:charge}%. Earbuds: {where:earbuds}. Keys: {where:keys}.', facts: ['charge'], links: [strong('earbuds', 'earbuds'), strong('keys', 'keys')] },
     ],
   },
   {
@@ -175,7 +175,7 @@ export const TEMPLATES_A: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'stain', title: 'Potting-soil ring', text: 'A ring of soil. Keys: {where:keys}.', links: [strong('keys', 'keys')] },
-      { slot: 'e2', icon: 'note', title: 'Plant tag', text: '"Water weekly." Glasses: {where:glasses}. Earbuds: {where:earbuds}.', links: [strong('glasses', 'glasses'), strong('earbuds', 'earbuds')] },
+      { slot: 'e2', icon: 'note', title: 'Plant tag', text: 'Plant tag {fact:ptag}. Glasses: {where:glasses}. Earbuds: {where:earbuds}.', facts: ['ptag'], links: [strong('glasses', 'glasses'), strong('earbuds', 'earbuds')] },
     ],
   },
   {
@@ -198,8 +198,8 @@ export const TEMPLATES_A: Template[] = [
       { v: 'sleep', room: 'living', note: 'You closed your eyes "for a second" and stayed until morning.' },
     ],
     clues: [
-      { slot: 'e1', icon: 'mug', title: 'Cold tea', text: 'A mug of tea gone cold. Phone: {where:phone}.', links: [strong('phone', 'phone')] },
-      { slot: 'e2', icon: 'ticket', title: 'Cinema stub', text: 'Stub from Tuesday. Wallet: {where:wallet}. Shoes: {where:shoes}.', links: [strong('wallet', 'wallet'), strong('shoes', 'shoes')] },
+      { slot: 'e1', icon: 'mug', title: 'Cold tea', text: 'Mug number {fact:mugs} of the day, cold. Phone: {where:phone}.', links: [strong('phone', 'phone')], facts: ['mugs'] },
+      { slot: 'e2', icon: 'ticket', title: 'Cinema stub', text: 'Stub, seat {fact:seat}. Wallet: {where:wallet}. Shoes: {where:shoes}.', links: [strong('wallet', 'wallet'), strong('shoes', 'shoes')], facts: ['seat'] },
     ],
   },
 ];

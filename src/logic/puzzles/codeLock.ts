@@ -28,6 +28,7 @@ function pairs(facts: readonly Fact[], d: Difficulty): Cand[] {
     } else {
       out.push({ rule: `Code = ${a.label} + ${b.label}`, value: num(a.value + b.value), used: [a, b] });
       if (a.value > b.value) out.push({ rule: `Code = ${a.label} - ${b.label}`, value: num(a.value - b.value), used: [a, b] });
+      if (d === 2 && a.key < b.key) out.push({ rule: `Code = ${a.label} x ${b.label}`, value: num(a.value * b.value), used: [a, b] });
     }
   }
   return out;
@@ -96,3 +97,8 @@ export const codePuzzle: PuzzleDef<CodeSpec, string> = {
   },
   parSeconds: (d) => (d === 1 ? 18 : d === 2 ? 35 : 65),
 };
+
+/** True when these facts can produce a valid 3-4 digit code at this difficulty (seed independent). */
+export function codeFeasible(facts: readonly Fact[], d: Difficulty): boolean {
+  return candidates(facts, d).length > 0;
+}

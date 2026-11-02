@@ -46,6 +46,16 @@
 - `src/content/layout.ts` (+ `layoutSpots.ts`, `layoutProps.ts`): `LAYOUTS` (5 rooms, 8x8 to 10x8, doors for entrance-living, living-kitchen, living-bedroom (stairs), bedroom-bathroom, windows), `HOUSE_MAP`, `KIND_FOOT`, `spotIso`, `DECOR_ISO`, `PROPS` (6 per room), hand-placed iso for all 55 spots + 7 storage slots + 8 cosmetic decor. `house.ts`/`decor.ts` now take `iso` from it (isoFromBox removed). No spot or decor id changed.
 - Tests: `tests/puzzles/puzzles.test.ts` (per kind x 3 difficulties), `tests/puzzles/roster.test.ts`, `tests/logic.layout.test.ts` (29 tests: ids/footprints, bounds, no overlaps incl. all storage owned, wall mounts touch a wall, doors/windows clear, free floor connected, free neighbour per spot, door symmetry, HOUSE_MAP).
 
+### Scenario v3 (pushed with this update)
+- `src/logic/gates.ts` (+ `gateBudget.ts`): density by day (1 / 2 / 3 / 4 gates; Big Search up to 6, rare, day 12+), lockable containers only, about half the gates are decoys (spots holding no target/clue), kind variety (fresh kinds first, skipped kinds down-weighted from `profile.puzzles`), at most one difficulty-3 gate and only from day 8 (ties to scenario difficulty 3), `code` weighted x3 when the clues can support it. The daily ignores day and puzzle history (gate profile fixed), so it is still identical for everyone.
+- Code locks: `Gate.needs` = clue ids that carry the facts; need-clues are never behind a gate (`gatesFair`, validator). Clue facts: 14 fact kinds in `src/content/facts.ts`, 31 clues across the 18 templates carry one (`ClueDef.facts` + `{fact:key}` in text; values rolled per seed into `Clue.facts`).
+- Validator: gates must be lockable, kind valid, <= 1 difficulty-3, none before day 8, code gate needs valid and feasible. Solver: opens need-clue spots before a code gate, returns `seconds` (sum of `parSeconds` of gates it opens); `idealSearchCount` includes the need-clue chains.
+- Day 1 (non-daily): `guidedScenario` = fixed morning, 2 targets, one difficulty-1 gate on `entrance.console` using the first enabled of untangle/sort/word. `generateScenario(seed, mode, profile, { enabled? })` accepts a roster override for tests/sims.
+- `tests/logic.gates.test.ts` (12 tests, all Tier-1 kinds enabled): density, lockable only, validity + solvability, difficulty-3 rule, decoy share, variety, every kind appears, code locks always producible at launch, solver seconds, determinism, day-1.
+- Timing (400 mornings, day 12, all kinds): generateScenario p50 0.3 ms, p99 9 ms, 0 fallbacks.
+- Code lock rule change vs brief: difficulty 2 also allows a product of two facts (sums of two facts rarely reach 3 digits).
+- Existing tests updated to the new rules (day 1 now has exactly one easy gate; 'days 1-3' also checks days 2-3 <= 2 gates; template-count test ignores the guided title; clue text bound counts `{fact:}` as 2 digits).
+
 ### Verified (commands run)
 - `PUZZLE_SEEDS=2000 npx vitest run tests/puzzles` -> 58 passed (2000 seeds x 3 difficulties x 11 kinds incl. generate -> solve -> check, wrong answers rejected, determinism, generate p99 <= 10 ms). A real bug was caught and fixed on the way (untangle jitter could remove the crossings after they were counted).
 - Layout mutation check: moving the TV onto the sideboard, and the bedroom wardrobe in front of the door, makes the tests fail as expected; restored.
@@ -55,7 +65,8 @@
 - Layout vs art footprints (AI-4 review) and layout look on screen: not seen rendered. Positions are by hand, only checked by the geometric tests.
 - G10 note: Entrance has 11 house spots + 5 storage decor = 16 interactive pieces once everything is bought (brief says 8-14). Ids may not change, so I kept it; owner decides whether to cap storage purchases in the entrance.
 - Median ideal-bot time per difficulty (G9) not measured yet; `parSeconds` is set (code 18/35/65, target 18/40/75, sequence 12/25/45, lights 20/40/70, slide 25/45/80, pipes 25/45/80, mastermind 25/50/80, memory 12/25/45, untangle 15/35/70, sort 14/25/50, word 12/25/50).
-- Still to do, in order: Scenario v3 (gate density, `lockable` only, 40% padlocked, day-1 guided), clue `facts` + `needs` + template growth (18 -> ~28), validator/solver for code locks, `applyRun` puzzleLog + ACHIEVEMENTS, balance sim (tests/sim), fuzz extension to 5000 seeds, then Tier 2 kinds after the parity gate.
+- Still to do, in order: template growth 18 -> ~28 (facts exist now), `applyRun` puzzleLog + ACHIEVEMENTS, balance sim (tests/sim) with median ideal-bot times, fuzz extension to 5000 seeds, then Tier 2 kinds after the parity gate.
+- Scene side (AI-1/AI-3): scenes must build code-lock `ctx.facts` from the clues listed in `Gate.needs` (in that order, `clue.facts` concatenated). Until `code` etc. are in `IMPLEMENTED` and `ENABLED` the live game only produces untangle/sort/word gates (now on lockable containers only).
 
 ### Layout conventions (for AI-3 / AI-4)
 - gx runs along the RIGHT wall (plane gy = 0), gy along the LEFT wall (plane gx = 0); cell (0,0) is the back corner; front/open edges are gx = cols and gy = rows. Door/window `at`: wall 'right' -> gx, wall 'left' -> gy. Door entry cell = (at,0) on the right wall, (0,at) on the left wall; always free floor.

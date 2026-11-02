@@ -28,7 +28,7 @@ export const TEMPLATES_B: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'laundry', title: 'Odd sock', text: 'One sock, no partner. Pockets were emptied {where:m1}.', links: [weak('m1', 'keys'), weak('m1', 'wallet')] },
-      { slot: 'm1', icon: 'receipt', title: 'Detergent receipt', text: 'Pod receipt. Keys: {where:keys}. Wallet: {where:wallet}.', links: [strong('keys', 'keys'), strong('wallet', 'wallet')] },
+      { slot: 'm1', icon: 'receipt', title: 'Detergent receipt', text: 'Receipt {fact:receipt}, {fact:laundry} loads. Keys: {where:keys}. Wallet: {where:wallet}.', links: [strong('keys', 'keys'), strong('wallet', 'wallet')], facts: ['receipt', 'laundry'] },
       { slot: 'e2', icon: 'note', title: 'Wash note', text: '"Wash 40." ID: {where:officeId}. Glasses: {where:glasses}.', links: [strong('officeId', 'officeId'), strong('glasses', 'glasses')] },
     ],
   },
@@ -57,8 +57,8 @@ export const TEMPLATES_B: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'mug', title: 'Warm mug', text: 'A mug, still warm. Tea for two; look {where:m1}.', links: [weak('m1', 'phone'), weak('m1', 'glasses')] },
-      { slot: 'm1', icon: 'mug', title: 'Two mugs', text: 'Two mugs, two teabags. Phone: {where:phone}. Glasses: {where:glasses}.', links: [strong('phone', 'phone'), strong('glasses', 'glasses')] },
-      { slot: 'e2', icon: 'photo', title: 'Doorstep selfie', text: 'Selfie with a friend. Keys: {where:keys}. Earbuds: {where:earbuds}.', links: [strong('keys', 'keys'), strong('earbuds', 'earbuds')] },
+      { slot: 'm1', icon: 'mug', title: 'Two mugs', text: 'Mug count {fact:mugs}. Phone: {where:phone}. Glasses: {where:glasses}.', links: [strong('phone', 'phone'), strong('glasses', 'glasses')], facts: ['mugs'] },
+      { slot: 'e2', icon: 'photo', title: 'Doorstep selfie', text: 'Selfie, flat {fact:flat}. Keys: {where:keys}. Earbuds: {where:earbuds}.', facts: ['flat'], links: [strong('keys', 'keys'), strong('earbuds', 'earbuds')] },
     ],
   },
   {
@@ -86,8 +86,8 @@ export const TEMPLATES_B: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'note', title: 'Torn pad page', text: 'Spirals, stars, and "see pad". The pad lives {where:m1}.', links: [weak('m1', 'phone'), weak('m1', 'earbuds')] },
-      { slot: 'm1', icon: 'note', title: 'Recipe scrawl', text: 'Recipe, crossed out. Phone: {where:phone}. Earbuds: {where:earbuds}.', links: [strong('phone', 'phone'), strong('earbuds', 'earbuds')] },
-      { slot: 'e2', icon: 'text', title: 'Missed-call list', text: 'Voicemail scribble. Glasses: {where:glasses}. Wallet: {where:wallet}.', links: [strong('glasses', 'glasses'), strong('wallet', 'wallet')] },
+      { slot: 'm1', icon: 'note', title: 'Recipe scrawl', text: 'Recipe p.{fact:page}. Phone: {where:phone}. Earbuds: {where:earbuds}.', facts: ['page'], links: [strong('phone', 'phone'), strong('earbuds', 'earbuds')] },
+      { slot: 'e2', icon: 'text', title: 'Missed-call list', text: 'Voicemail: {fact:calls} missed. Glasses: {where:glasses}. Wallet: {where:wallet}.', facts: ['calls'], links: [strong('glasses', 'glasses'), strong('wallet', 'wallet')] },
     ],
   },
   {
@@ -114,8 +114,8 @@ export const TEMPLATES_B: Template[] = [
       { v: 'sleep', room: 'bedroom', note: 'You slept like someone who had definitely worked out.' },
     ],
     clues: [
-      { slot: 'e1', icon: 'laundry', title: 'Gym towel', text: 'Towel smells of effort. The locker tag went {where:m1}.', links: [weak('m1', 'bag'), weak('m1', 'shoes')] },
-      { slot: 'm1', icon: 'bagTag', title: 'Locker tag', text: 'Locker 14. Work bag: {where:bag}. Shoes: {where:shoes}.', links: [strong('bag', 'bag'), strong('shoes', 'shoes')] },
+      { slot: 'e1', icon: 'laundry', title: 'Gym towel', text: 'Towel number {fact:laundry}, smells of effort. Tag went {where:m1}.', links: [weak('m1', 'bag'), weak('m1', 'shoes')], facts: ['laundry'] },
+      { slot: 'm1', icon: 'bagTag', title: 'Locker tag', text: 'Locker {fact:tag}. Work bag: {where:bag}. Shoes: {where:shoes}.', links: [strong('bag', 'bag'), strong('shoes', 'shoes')], facts: ['tag'] },
       { slot: 'e2', icon: 'wrapper', title: 'Protein wrapper', text: 'Wrapper, chocolate-brown. Keys: {where:keys}. Earbuds: {where:earbuds}.', links: [strong('keys', 'keys'), strong('earbuds', 'earbuds')] },
     ],
   },
@@ -144,8 +144,8 @@ export const TEMPLATES_B: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'note', title: 'Checklist', text: 'Checklist: "tidy EVERYTHING". The master list is {where:m1}.', links: [weak('m1', 'keys'), weak('m1', 'wallet')] },
-      { slot: 'm1', icon: 'note', title: 'Tidy-up list', text: 'List: keys {where:keys}; wallet {where:wallet}.', links: [strong('keys', 'keys'), strong('wallet', 'wallet')] },
-      { slot: 'e2', icon: 'stain', title: 'Duster smudge', text: 'Dust trail. ID: {where:officeId}. Glasses: {where:glasses}.', links: [strong('officeId', 'officeId'), strong('glasses', 'glasses')] },
+      { slot: 'm1', icon: 'note', title: 'Tidy-up list', text: 'List p.{fact:page}: keys {where:keys}; wallet {where:wallet}.', facts: ['page'], links: [strong('keys', 'keys'), strong('wallet', 'wallet')] },
+      { slot: 'e2', icon: 'stain', title: 'Duster smudge', text: 'Dust trail, flat {fact:flat}. ID: {where:officeId}. Glasses: {where:glasses}.', facts: ['flat'], links: [strong('officeId', 'officeId'), strong('glasses', 'glasses')] },
     ],
   },
   {
@@ -173,8 +173,8 @@ export const TEMPLATES_B: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'wrapper', title: 'Bubble wrap', text: 'Half-popped bubble wrap. The courier slip is {where:m1}.', links: [weak('m1', 'keys'), weak('m1', 'officeId')] },
-      { slot: 'm1', icon: 'receipt', title: 'Courier slip', text: 'Slip, signed. Keys: {where:keys}. ID: {where:officeId}.', links: [strong('keys', 'keys'), strong('officeId', 'officeId')] },
-      { slot: 'e2', icon: 'ticket', title: 'Gift tag', text: 'Gift tag. Wallet: {where:wallet}. Phone: {where:phone}.', links: [strong('wallet', 'wallet'), strong('phone', 'phone')] },
+      { slot: 'm1', icon: 'receipt', title: 'Courier slip', text: 'Slip, flat {fact:flat}. Keys: {where:keys}. ID: {where:officeId}.', facts: ['flat'], links: [strong('keys', 'keys'), strong('officeId', 'officeId')] },
+      { slot: 'e2', icon: 'ticket', title: 'Gift tag', text: 'Gift tag, seat {fact:seat}. Wallet: {where:wallet}. Phone: {where:phone}.', facts: ['seat'], links: [strong('wallet', 'wallet'), strong('phone', 'phone')] },
     ],
   },
   {
@@ -202,8 +202,8 @@ export const TEMPLATES_B: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'stain', title: 'Wet footprints', text: 'Damp prints lead to {where:m1}, in the bathroom.', links: [weak('m1', 'glasses'), weak('m1', 'phone')] },
-      { slot: 'm1', icon: 'note', title: 'Soggy bookmark', text: 'Bookmark, wrinkled. Glasses: {where:glasses}. Phone: {where:phone}.', links: [strong('glasses', 'glasses'), strong('phone', 'phone')] },
-      { slot: 'e2', icon: 'text', title: 'Bath playlist', text: 'Playlist screenshot. Earbuds: {where:earbuds}. Keys: {where:keys}.', links: [strong('earbuds', 'earbuds'), strong('keys', 'keys')] },
+      { slot: 'm1', icon: 'note', title: 'Soggy bookmark', text: 'Bookmark, page {fact:page}. Glasses: {where:glasses}. Phone: {where:phone}.', facts: ['page'], links: [strong('glasses', 'glasses'), strong('phone', 'phone')] },
+      { slot: 'e2', icon: 'text', title: 'Bath playlist', text: 'Playlist, track {fact:track}. Earbuds: {where:earbuds}. Keys: {where:keys}.', facts: ['track'], links: [strong('earbuds', 'earbuds'), strong('keys', 'keys')] },
     ],
   },
   {
@@ -235,9 +235,9 @@ export const TEMPLATES_B: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'note', title: 'Yellow note', text: '"SHOES!!!" Turn to {where:m1} for the timetable.', links: [weak('m1', 'officeId'), weak('m1', 'shoes')] },
-      { slot: 'm1', icon: 'ticket', title: 'Train timetable', text: 'Timetable, highlighted. The checklist is {where:m2}.', links: [weak('m2', 'officeId'), weak('m2', 'shoes'), strong('wallet', 'wallet'), strong('keys', 'keys')] },
+      { slot: 'm1', icon: 'ticket', title: 'Train timetable', text: 'Timetable, platform {fact:platform}. The checklist is {where:m2}.', links: [weak('m2', 'officeId'), weak('m2', 'shoes'), strong('wallet', 'wallet'), strong('keys', 'keys')], facts: ['platform'] },
       { slot: 'm2', icon: 'note', title: 'Checklist', text: 'Ticked: ID {where:officeId}; shoes {where:shoes}.', links: [strong('officeId', 'officeId'), strong('shoes', 'shoes')] },
-      { slot: 'e2', icon: 'bagTag', title: 'Itinerary', text: 'Itinerary, folded. Work bag: {where:bag}.', links: [strong('bag', 'bag')] },
+      { slot: 'e2', icon: 'bagTag', title: 'Itinerary', text: 'Itinerary, bag tag {fact:tag}. Work bag: {where:bag}.', links: [strong('bag', 'bag')], facts: ['tag'] },
     ],
     gates: ['word', 'sort', 'untangle'],
   },
@@ -269,8 +269,8 @@ export const TEMPLATES_B: Template[] = [
     clues: [
       { slot: 'e1', icon: 'stain', title: 'Candle wax', text: 'A wax drip trails toward {where:m1}.', links: [weak('m1', 'phone'), weak('m1', 'keys')] },
       { slot: 'm1', icon: 'note', title: 'Candle-lit note', text: 'Scrawl: "phone {where:phone}". More at {where:m2}.', links: [strong('phone', 'phone'), weak('m2', 'keys'), weak('m2', 'glasses')] },
-      { slot: 'm2', icon: 'note', title: 'Fuse-box note', text: 'Note: keys {where:keys}; specs {where:glasses}.', links: [strong('keys', 'keys'), strong('glasses', 'glasses')] },
-      { slot: 'e2', icon: 'ticket', title: 'Receipt', text: 'Receipt from the day. Wallet: {where:wallet}.', links: [strong('wallet', 'wallet')] },
+      { slot: 'm2', icon: 'note', title: 'Fuse-box note', text: 'Fuse {fact:fuse}: keys {where:keys}; specs {where:glasses}.', facts: ['fuse'], links: [strong('keys', 'keys'), strong('glasses', 'glasses')] },
+      { slot: 'e2', icon: 'ticket', title: 'Receipt', text: 'Receipt: total {fact:receipt}. Wallet: {where:wallet}.', links: [strong('wallet', 'wallet')], facts: ['receipt'] },
     ],
     gates: ['word', 'untangle'],
   },
@@ -301,8 +301,8 @@ export const TEMPLATES_B: Template[] = [
     ],
     clues: [
       { slot: 'e1', icon: 'photo', title: 'Polaroid', text: 'Polaroid, everyone grinning. The guest list is {where:m1}.', links: [weak('m1', 'keys'), weak('m1', 'phone')] },
-      { slot: 'm1', icon: 'note', title: 'Guest list', text: 'List with notes. Phone: {where:phone}. More {where:m2}.', links: [strong('phone', 'phone'), weak('m2', 'keys'), weak('m2', 'bag')] },
-      { slot: 'm2', icon: 'note', title: 'Playlist note', text: 'Note: keys {where:keys}; bag {where:bag}.', links: [strong('keys', 'keys'), strong('bag', 'bag')] },
+      { slot: 'm1', icon: 'note', title: 'Guest list', text: 'Guest count {fact:guests}. Phone: {where:phone}. More {where:m2}.', facts: ['guests'], links: [strong('phone', 'phone'), weak('m2', 'keys'), weak('m2', 'bag')] },
+      { slot: 'm2', icon: 'note', title: 'Playlist note', text: 'Track {fact:track}: keys {where:keys}; bag {where:bag}.', links: [strong('keys', 'keys'), strong('bag', 'bag')], facts: ['track'] },
       { slot: 'e2', icon: 'wrapper', title: 'Party popper', text: 'Popper, spent. Earbuds: {where:earbuds}.', links: [strong('earbuds', 'earbuds')] },
     ],
     gates: ['sort', 'untangle', 'word'],
