@@ -2,8 +2,9 @@ import type Phaser from 'phaser';
 import { SPOT_SIZE, tex } from '../shared/types';
 import type { DecorDef, SpotKind } from '../shared/types';
 import { DECOR } from '../logic';
-import { ISO_DIMS } from './iso';
 import { boxTextureFor, KIND_COLOR } from './isoBox';
+import { badgeTasks } from './isoBadges';
+import { drawFurniture, furnitureSize } from './isoFurniture';
 import type { G } from './palette';
 
 export interface IsoTask { key: string; w: number; h: number; draw: (g: G) => void }
@@ -21,15 +22,16 @@ function propColor(def: DecorDef): number {
 export function isoTasks(): IsoTask[] {
   const tasks: IsoTask[] = [];
   for (const kind of Object.keys(SPOT_SIZE) as SpotKind[]) {
-    const t = boxTextureFor(ISO_DIMS[kind]);
-    tasks.push({ key: tex.isoSpot(kind), w: t.w, h: t.h, draw: (g) => t.draw(g, KIND_COLOR[kind], false) });
-    tasks.push({ key: tex.isoSpot(kind, true), w: t.w, h: t.h, draw: (g) => t.draw(g, KIND_COLOR[kind], true) });
+    const { w, h } = furnitureSize(kind);
+    tasks.push({ key: tex.isoSpot(kind), w, h, draw: (g) => drawFurniture(g, kind, KIND_COLOR[kind], false) });
+    tasks.push({ key: tex.isoSpot(kind, true), w, h, draw: (g) => drawFurniture(g, kind, KIND_COLOR[kind], true) });
   }
   for (const def of DECOR) {
     const dims = { w: Math.max(1, def.iso.w), d: Math.max(1, def.iso.d), h: Math.max(0, def.iso.h) };
     const t = boxTextureFor(dims);
     tasks.push({ key: tex.isoProp(def.id), w: t.w, h: t.h, draw: (g) => t.draw(g, propColor(def), false) });
   }
+  for (const b of badgeTasks()) tasks.push(b);
   return tasks;
 }
 

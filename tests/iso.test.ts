@@ -60,3 +60,37 @@ describe('iso kit coverage', () => {
     expect(ROOM_ORDER.map((r) => tex.isoShell(r))).toHaveLength(5);
   });
 });
+
+describe('iso kit v1', () => {
+  it('has a theme and a shell spec that fits for every room', async () => {
+    const { THEMES, DEFAULT_SPECS } = await import('../src/art/isoTheme');
+    for (const r of ROOM_ORDER) {
+      expect(THEMES[r]).toBeDefined();
+      const sp = DEFAULT_SPECS[r];
+      const s = shellSize(sp.cols, sp.rows);
+      expect(s.w).toBeLessThanOrEqual(SHELL_MAX.w);
+      expect(s.h).toBeLessThanOrEqual(SHELL_MAX.h);
+      expect(sp.doors.length).toBeGreaterThan(0);
+    }
+    expect(new Set(ROOM_ORDER.map((r) => THEMES[r].wall)).size).toBe(5);
+  });
+  it('plans badges with distinct keys including both mark textures', async () => {
+    const { badgeTasks, ISO_BADGE } = await import('../src/art/isoBadges');
+    const keys = badgeTasks().map((b) => b.key);
+    expect(new Set(keys).size).toBe(keys.length);
+    expect(keys).toContain(tex.mark('ruledOut'));
+    expect(keys).toContain(tex.mark('hunch'));
+    expect(keys).toContain(ISO_BADGE.padlock);
+  });
+  it('furniture textures stay small (total RGBA estimate under 3 MB)', async () => {
+    const { furnitureSize } = await import('../src/art/isoFurniture');
+    let bytes = 0;
+    for (const k of Object.keys(SPOT_SIZE)) {
+      const s = furnitureSize(k as keyof typeof ISO_DIMS);
+      expect(s.w).toBeLessThanOrEqual(400);
+      expect(s.h).toBeLessThanOrEqual(400);
+      bytes += s.w * s.h * 4 * 2;
+    }
+    expect(bytes).toBeLessThan(3 * 1024 * 1024);
+  });
+});

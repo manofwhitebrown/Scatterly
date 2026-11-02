@@ -4,6 +4,8 @@ import { shade } from './palette';
 
 const HW = ISO.tileW / 2;
 const HH = ISO.tileH / 2;
+/** Transparent margin around every furniture texture so open parts (drawers, doors, lids) never clip. */
+export const PAD = 18;
 
 /** Screen position (relative to the room origin) of the TOP vertex of the cell (gx, gy) at height gz (height units). */
 export function isoToScreen(gx: number, gy: number, gz = 0): { x: number; y: number } {
@@ -46,9 +48,9 @@ export const ISO_DIMS: Record<SpotKind, IsoDims> = {
 export function boxTexture(dims: IsoDims): { w: number; h: number; ox: number; oy: number } {
   const hh = Math.max(0, dims.h) * ISO.unitH;
   return {
-    w: Math.ceil((dims.w + dims.d) * HW) + 2,
-    h: Math.ceil((dims.w + dims.d) * HH + hh) + 2,
-    ox: dims.d * HW + 1,
-    oy: hh + 1,
+    w: Math.ceil((dims.w + dims.d) * HW) + 2 * PAD,
+    h: Math.ceil((dims.w + dims.d) * HH + hh) + 2 * PAD,
+    ox: dims.d * HW + PAD,
+    oy: hh + PAD,
   };
 }
