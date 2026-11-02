@@ -42,16 +42,17 @@ tap/open/empty/found/take/clue/hint/room/urgent/win/lose: src/scenes/RoomFeel.ts
 - D2 Run controller: `src/scenes/RoomRun.ts` (362 lines) now holds the view-agnostic rules: session, clock, intro/coach/pause (RoomFlow), gates (RoomGate), marks input, feel, hints, inspect panel, clue board, finish. `RoomScene.ts` is a 66-line shell (RoomView + RoomNav + RoomMarks) that plugs in through the `RunView` interface (`playAction`, `refresh`, `pulse`, `center`) and `RunHost.goRoom`. The iso view will implement the same two interfaces, so there is one copy of the rules.
 
 - D1 Phase 0 skeletons (contract v3 landed): `IsoRoomScene` registered under `SCENE.Room` when `?view=iso` (default stays `RoomScene`), `HouseScene` registered under `SCENE.House` (tiles for the 5 rooms, locked rooms dark, tap picks a room or goes to Menu; no progress numbers or zoom yet). `IsoRoomView` draws placeholder shells and 3-shade boxes from `Spot.iso`, hit areas = iso screen box through the existing `pickSpot` (>= 96x96, nearest centre), long-press marks via new `ui/PressZone`, padlock badge from the start on gated containers, depth-sorted once. `RoomMarks` and `RoomNav` now depend on small interfaces (`MarkHost`, `RoomSwitcher`) so both views share them. Under `?e2e=1` the iso scene exposes `scene.__e2e.hotspots()` (`{spotId, x, y}` in game px).
-- `src/ui/isoGrid.ts` holds an interim `project`/`isoBox`/`screenSpots`; replace with AI-4's `isoToScreen` when `src/art/iso.ts` lands (same 2:1 maths, tested in tests/ui-iso.test.ts).
+- AI-4's iso kit landed: `IsoRoomView` now draws baked `tex.isoShell` + `tex.isoSpot(kind, open)` images (origin = top vertex via `boxTexture(ISO_DIMS[kind])`, position = `isoToScreen` + room origin, depth-sorted once with `depthKey`). Hit boxes and art both use the canonical `ISO_DIMS` footprint of the kind (`ui/isoGrid.placementOf`), so they always agree. Padlock badge is a tiny Graphics per gated container, hidden once opened. `ui/isoGrid.ts` wraps AI-4's `isoToScreen`. Room origin is (640, 200); the shell is the default 8x8 until AI-2 publishes room cols/rows.
+- Art review for AI-4 (due per brief): keys and anchors work as documented; `ensureRoomShell` is called lazily per room on first show.
 
 ## Waiting on others
-- AI-2 `LAYOUTS` / `HOUSE_MAP` / real Spot `iso` (current `iso` is AI-1's placeholder derived from the old pixel boxes, so the iso room is crowded and not a real room yet), AI-4 `src/art/iso.ts` + `tex.isoShell/isoSpot/isoProp` art (placeholders are drawn with Graphics for now).
+- AI-2 `LAYOUTS` / `HOUSE_MAP` / real Spot `iso` (current `iso` is AI-1's placeholder derived from the old pixel boxes, so pieces can sit outside the 8x8 shell and overlap until real layout data lands).
 - Still to build: door hotspots, open/closed textures, shimmer, hop-out items, camera zoom to lock, Dollhouse progress and zoom, HUD v3, notebook facts, Puzzle Book, Result story, tutorial.
 
-## Verified (commands run, repo at AI-3 Phase 0 skeleton commit)
+## Verified (commands run, repo at AI-3 iso-art commit)
 - `npx tsc --noEmit`: clean.
-- `npm test`: 8 files, 63/63 passed (incl. new tests/ui-iso.test.ts).
-- `npm run build`: green, JS 395.9 KB gzip (budget 520).
+- `npm test`: 114 passed (incl. tests/ui-iso.test.ts).
+- `npm run build`: green, JS 401.0 KB gzip (budget 520).
 
 ## Not verified
 - `?view=iso` and the Dollhouse skeleton were never run in a browser (no GL/browser here); CI e2e covers the default view only until AI-1 adds an iso run.

@@ -1,9 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('phaser', () => ({ default: {}, Scenes: { Events: {} } }));
+
 import { HOUSE } from '../src/content/house';
 import { ISO } from '../src/shared/types';
 import type { Spot } from '../src/shared/types';
 import { pickSpot } from '../src/ui/hit';
-import { isoBox, project, screenSpots } from '../src/ui/isoGrid';
+import { ISO_DIMS } from '../src/art/iso';
+import { isoBox, placementOf, project, screenSpots } from '../src/ui/isoGrid';
 
 const O = { x: 100, y: 50 };
 
@@ -48,5 +52,10 @@ describe('iso grid', () => {
       expect(s.w).toBeGreaterThan(0);
       expect(s.h).toBeGreaterThan(0);
     }
+  });
+
+  it('draws and hit-tests spots with the canonical footprint of their kind', () => {
+    const sofa = { ...(HOUSE[0] as Spot), kind: 'sofa' as const, iso: { gx: 1, gy: 2, w: 9, d: 9, h: 9 } };
+    expect(placementOf(sofa)).toEqual({ gx: 1, gy: 2, gz: undefined, ...ISO_DIMS.sofa });
   });
 });

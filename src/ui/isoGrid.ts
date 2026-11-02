@@ -1,18 +1,22 @@
-import { ISO } from '../shared/types';
+import { ISO_DIMS, isoToScreen } from '../art/iso';
 import type { IsoPlacement, Spot } from '../shared/types';
 
-/** Where grid cell (0,0) sits on screen for a room view. */
+/** Where grid cell (0,0)'s top vertex sits on screen for a room view. */
 export interface IsoOrigin { x: number; y: number }
-export const ROOM_ORIGIN: IsoOrigin = { x: 520, y: 190 };
+export const ROOM_ORIGIN: IsoOrigin = { x: 640, y: 200 };
 
 export interface ScreenBox { x: number; y: number; w: number; h: number }
 
-/**
- * Local 2:1 projection of a grid point. Interim helper: AI-4's `src/art/iso.ts` owns
- * `isoToScreen`; swap this for it once it lands (same maths).
- */
+/** Screen position of a grid point for a room whose origin is `o` (AI-4's projection, offset). */
 export function project(o: IsoOrigin, gx: number, gy: number, gz = 0): { x: number; y: number } {
-  return { x: o.x + ((gx - gy) * ISO.tileW) / 2, y: o.y + ((gx + gy) * ISO.tileH) / 2 - gz * ISO.unitH };
+  const p = isoToScreen(gx, gy, gz);
+  return { x: o.x + p.x, y: o.y + p.y };
+}
+
+/** The footprint a spot is drawn and hit-tested with: its grid cell plus the canonical size of its kind. */
+export function placementOf(s: Pick<Spot, 'kind' | 'iso'>): IsoPlacement {
+  const d = ISO_DIMS[s.kind];
+  return { gx: s.iso.gx, gy: s.iso.gy, gz: s.iso.gz, w: d.w, d: d.d, h: d.h };
 }
 
 /** Screen bounding box of an extruded footprint (left and right corners, top and bottom of the box). */
@@ -28,7 +32,7 @@ export function isoBox(o: IsoOrigin, p: IsoPlacement): ScreenBox {
 /** Spot copies whose x,y,w,h are the iso footprint's screen box, so `pickSpot` (>= 96x96, nearest centre) is reused. */
 export function screenSpots(o: IsoOrigin, spots: readonly Spot[]): Spot[] {
   return spots.map((s) => {
-    const b = isoBox(o, s.iso);
+    const b = isoBox(o, placementOf(s));
     return { ...s, x: b.x, y: b.y, w: b.w, h: b.h };
   });
 }
