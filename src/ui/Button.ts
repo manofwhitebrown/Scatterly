@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { sfx } from '../audio/sfx';
-import { COLOR, CSS, SIZE, buzz, drawPlate, makeText } from './theme';
+import { COLOR, CSS, SIZE, buzz, drawPlate, isCalm, makeText } from './theme';
 
 export type ButtonVariant = 'primary' | 'plain' | 'danger';
 export interface ButtonOptions {
@@ -114,6 +114,10 @@ export class Button extends Phaser.GameObjects.Container {
 
   private scaleTo(s: number, ms: number): void {
     this.scene.tweens.killTweensOf(this);
+    if (isCalm(this.scene)) {
+      this.setScale(s);
+      return;
+    }
     this.scene.tweens.add({ targets: this, scaleX: s, scaleY: s, duration: ms, ease: 'Quad.easeOut' });
   }
 

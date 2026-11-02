@@ -42,3 +42,14 @@ describe('Result story', () => {
     expect(revealStepMs(100)).toBe(120);
   });
 });
+
+describe('Achievement book', () => {
+  it('lists every achievement with names and flags earned ones', async () => {
+    const { achievementRows, achievementCount } = await import('../src/scenes/achievementBook');
+    const rows = achievementRows(['first-morning', 'not-a-real-id']);
+    expect(rows.length).toBeGreaterThanOrEqual(15);
+    expect(rows.find((r) => r.id === 'first-morning')).toMatchObject({ name: 'First Morning', earned: true });
+    expect(rows.filter((r) => r.earned)).toHaveLength(1);
+    expect(achievementCount(['first-morning'])).toEqual({ earned: 1, total: rows.length });
+  });
+});

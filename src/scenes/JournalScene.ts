@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { PUZZLE_KINDS, SCENE } from '../shared/types';
 import type { PuzzleStat } from '../shared/types';
+import { achievementCount, achievementRows } from './achievementBook';
 import { bookEntries } from './puzzleBook';
 import { Button } from '../ui/Button';
 import { ScrollArea } from '../ui/ScrollArea';
@@ -60,14 +61,13 @@ export class JournalScene extends Phaser.Scene {
     y += 20;
     y = this.buildBook(layer, board, p.puzzles, y);
     layer.addAt(board, 0);
-    layer.add(makeText(this, 80, y, 'Achievements', { fontSize: `${SIZE.heading}px`, fontStyle: 'bold', color: CSS.amber }).setOrigin(0, 0));
+    const { earned, total } = achievementCount(p.achievements);
+    layer.add(makeText(this, 80, y, `Achievements  ${earned} / ${total}`, { fontSize: `${SIZE.heading}px`, fontStyle: 'bold', color: CSS.amber }).setOrigin(0, 0));
     y += 60;
-    if (p.achievements.length === 0) {
-      layer.add(makeText(this, 80, y, 'Play a morning to earn your first one.', { fontSize: `${SIZE.body}px`, color: CSS.muted }).setOrigin(0, 0));
-      y += 44;
-    }
-    for (const id of p.achievements) {
-      layer.add(makeText(this, 80, y, `★ ${id}`, { fontSize: `${SIZE.body}px` }).setOrigin(0, 0));
+    for (const row of achievementRows(p.achievements)) {
+      const mark = row.earned ? '★' : '☆';
+      layer.add(makeText(this, 80, y, `${mark} ${row.name}`, { fontSize: `${SIZE.body}px`, color: row.earned ? CSS.amber : CSS.muted }).setOrigin(0, 0));
+      layer.add(makeText(this, 420, y, row.desc, { fontSize: `${SIZE.body}px`, color: row.earned ? CSS.cream : CSS.muted }).setOrigin(0, 0));
       y += 44;
     }
 
