@@ -37,8 +37,8 @@ export interface RunView {
 
 export interface RunHost {
   goRoom(room: RoomId): void;
-  /** True for views that use the Dollhouse (HUD v3: house button instead of room tabs). */
-  useHouse?: boolean;
+  useHouse?: boolean; // views with the Dollhouse (HUD v3: house button instead of room tabs)
+  tutorial?(): boolean; // starts the guided tutorial (relaxed mornings); true when it started
 }
 
 /**
@@ -135,8 +135,7 @@ export class RoomRun {
     });
     this.card = new ModalCard(s, this.dim);
     this.fly = new RoomFlyouts(s);
-    this.unsubs.push(this.session.on('clue', () => this.onClue()));
-    this.unsubs.push(this.session.on('complete', () => this.onComplete()));
+    this.unsubs.push(this.session.on('clue', () => this.onClue()), this.session.on('complete', () => this.onComplete()));
     this.clock = new RoomClock(
       s,
       this.mode === 'rush' ? this.scenario.timeLimitSec : null,
@@ -160,6 +159,7 @@ export class RoomRun {
         this.board.hide();
         this.house.close();
       },
+      tutorial: this.host.tutorial,
     });
     this.gate = new RoomGate(s, this.scenario, {
       setPuzzleOpen: (open) => {
@@ -180,6 +180,8 @@ export class RoomRun {
   begin(): void {
     this.flow.intro();
   }
+
+  get boardOpen(): boolean { return this.board.isOpen; }
 
   modalOpen(): boolean {
     const f = this.finished || this.flow.paused || this.puzzleOpen || this.resolving;

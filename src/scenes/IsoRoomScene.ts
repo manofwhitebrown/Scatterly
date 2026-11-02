@@ -7,6 +7,7 @@ import { IsoRoomView } from './IsoRoomView';
 import { RoomMarks } from './RoomMarks';
 import { RoomNav } from './RoomNav';
 import { RoomRun } from './RoomRun';
+import { RoomTutorial } from './RoomTutorial';
 
 interface E2eHooks {
   hotspots(): Array<{ spotId: string; x: number; y: number }>;
@@ -22,6 +23,7 @@ export class IsoRoomScene extends Phaser.Scene {
   private view: IsoRoomView | null = null;
   private nav: RoomNav | null = null;
   private marks: RoomMarks | null = null;
+  private tut: RoomTutorial | null = null;
 
   constructor() {
     super(SCENE.Room);
@@ -68,7 +70,15 @@ export class IsoRoomScene extends Phaser.Scene {
           return sp ? { x: sp.x + sp.w / 2, y: sp.y + sp.h / 2 } : null;
         },
       },
-      { goRoom: (room) => this.nav?.goTo(room), useHouse: true },
+      {
+        goRoom: (room) => this.nav?.goTo(room),
+        useHouse: true,
+        tutorial: () => {
+          if (run.mode !== 'relaxed') return false;
+          this.tut = new RoomTutorial(this, run, view);
+          return true;
+        },
+      },
     );
     this.nav = new RoomNav(this, view, run.hud, run.rooms, () => run.modalOpen(), (r) => {
       run.setCurrent(r);
@@ -79,6 +89,8 @@ export class IsoRoomScene extends Phaser.Scene {
   }
 
   private cleanup(): void {
+    this.tut?.destroy();
+    this.tut = null;
     this.nav?.destroy();
     this.marks?.destroy();
     this.run?.destroy();

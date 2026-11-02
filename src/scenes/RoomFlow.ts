@@ -12,6 +12,8 @@ export interface FlowHooks {
   quit(): void;
   canPause(): boolean;
   hideOverlays(): void;
+  /** Iso view: start the guided tutorial instead of the coach cards; returns true when it took over. */
+  tutorial?(): boolean;
 }
 
 /** Intro, coach and pause/quit modals for a morning. Owns the `paused` flag. */
@@ -33,8 +35,10 @@ export class RoomFlow {
   private afterIntro(): void {
     this.card.hide();
     const p = getProfile(this.scene);
-    if (p.day === 1 || !p.tutorialDone) this.showCoach(0);
-    else this.hooks.beginClock();
+    if (p.day === 1 || !p.tutorialDone) {
+      if (this.hooks.tutorial?.()) this.hooks.beginClock();
+      else this.showCoach(0);
+    } else this.hooks.beginClock();
   }
 
   private showCoach(step: number): void {
