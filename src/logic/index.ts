@@ -5,3 +5,7 @@ export { generateScenario, dailySeed } from './generator';
 export { applyRun, allSpots, listDecor, buyDecor, homeSpotCandidates, setHomeSpot } from './progression';
 export { HOUSE } from '../content/house';
 export { DECOR } from '../content/decor';
+export { pathTo, pathLengthCells, doorCell, standCells, isWalkable, blockedCells } from './path';
+export type { Cell, PathOptions } from './path';
+export { replayScript, replayDuration } from './replay';
+export type { ReplayStep } from './replay';

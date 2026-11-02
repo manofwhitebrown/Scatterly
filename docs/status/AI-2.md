@@ -99,11 +99,18 @@
 - Owner default: max 12 interactive pieces per room incl. bought storage (`MAX_SPOTS_PER_ROOM`, `roomFull`, `spotCount`; `buyDecor`/`listDecor.canBuy` refuse). Current counts: kitchen 12, bedroom 12, entrance 11 (+1 max), living 11, bathroom 9. So the kitchen tray and bedroom dock cannot be bought until the layout/new rooms add capacity (rule works as the owner asked; flagging the effect).
 
 ### Verified
-- `npm test`: 22 files, 215 tests pass; `npm run build`: JS 427.8 KB gzip.
+- `npm test`: 26 files, 232 tests pass; `npm run build`: JS 427.9 KB gzip.
+
+- `src/logic/path.ts`: `pathTo(room, from, to, opts?)` A* (4-neighbour, deterministic, [] if unreachable, blocked target -> ends beside it), `pathLengthCells` (-1 unreachable), `doorCell`, `standCells(room, spotId)`, `blockedCells`, `isWalkable`. `opts.owned` (storage ids) and `opts.extra` (builder footprints). Uses the CURRENT 5-room layouts; picks up layout v2 automatically. Tests: tests/logic.path.test.ts (6).
+- `src/logic/replay.ts`: `replayScript(scenario, run?)` -> `ReplayStep[] {t, room, spotId?, verb, icon, itemId?, found?}`, `replayDuration`. Icon key = `icon/<item>` else `icon/<verb>` (AI-4: please add `icon/<verb>` for the 10 verbs). Test: replay ends where each item ended up, 600 scenarios. Tests: tests/logic.replay.test.ts (4).
 
 ### Not verified / not started
-- Deliverables 2-13 (world layout v2, path, replay, builder, chill, Tier 2/3 generators, levels 1-5, case builder, session sim, snapshot) are not started. Order per brief.
+- Deliverables 2, 5-13 (world layout v2, builder, chill/pet, Tier 2/3 generators, levels 1-5, case builder, session sim, snapshot).
 
 ### Requests
 - Owner: confirm that the storage purchases above (tray, dock, most entrance storage) being blocked is intended, or raise the cap.
 - AI-4: Art Bible v1 + Asset List (prop/decor ids) before I add >= 80 decor items and 25-40 props per room.
+
+### Notes for AI-1/3/4
+- AI-1: Contract v4 `ReplayStep` may stay as specified; my type is a superset (optional `itemId`, `found`), so either reuse mine or add the two optional fields.
+- AI-3: avatar walking: `pathTo(room, avatarCell, standCells(room, spotId)[0])`; cross-room via `doorCell`.
