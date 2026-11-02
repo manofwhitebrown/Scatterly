@@ -19,6 +19,15 @@ describe('puzzle layout guards', () => {
   it('target scene rows end above the bottom bar', () => {
     expect(PY + 496 + 48).toBeLessThanOrEqual(BAR_TOP);
   });
+  it('5x5 lights grid fits between the title and the bottom bar', () => {
+    const top = PY + 56;
+    expect(top).toBeGreaterThanOrEqual(PY + 54); // below the title line
+    expect(top + 5 * 96 + 4 * 3).toBeLessThanOrEqual(BAR_TOP);
+  });
+  it('slide grid and side panel stay inside the panel', () => {
+    expect(PY + 120 + 3 * 96 + 2 * 6).toBeLessThanOrEqual(BAR_TOP);
+    expect(PX + 740 + 110).toBeLessThanOrEqual(PX + PW);
+  });
   it('keys are at least 96 px', () => {
     expect(KEY).toBeGreaterThanOrEqual(96);
   });

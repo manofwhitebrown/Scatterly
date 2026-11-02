@@ -67,7 +67,9 @@
 - `target` DONE (src/puzzles/TargetScene.ts): 96 px number tiles (consumed when used, result becomes a new tile), 4 operator keys, Undo and Reset (state is replayed from `history`, so undo cannot drift), selection shown by a bold outline ring plus a "7 x ? " line (not colour only), invalid ops (non-whole divide, below 1) show "X That does not work". Win via `PUZZLES.target.check(spec, history)`. `e2eSolve` taps tile, operator, tile for each reference step.
 - `sequence` DONE (src/puzzles/SequenceScene.ts): up to 7 term boxes (the gap is a thick outline with "?", shown without colour), 2x2 answer buttons (300x96) on difficulty 1-2, shared keypad on 3 with the typed number shown inside the gap; wrong choice is disabled and marked "X n is not it".
 - LAYOUT FIX (my bug, caught by review against the 720 px screen): the first `code` and `target` layouts ran into the 96 px bottom bar and the code Enter row was partly off-screen. Now: shared `Keypad.ts` (6 columns, Back/OK as the 6th column, ends at y=610), geometry constants in `layout.ts` (plain data), notes drawer narrowed to 340 px and the hint banner moved to the top of the panel. `tests/puzzle-layout.test.ts` guards rows against the bar and the drawer.
-- Next: lights, slide, pipes, mastermind, memory.
+- `lights` DONE (LightsScene.ts, 97 lines): 3x3 to 5x5, every cell 96 px (3 px gaps; a 5x5 grid ends at y=608, above the bar), lit = dark tile + round lamp (shape and colour), Reset, press counter; win via `PUZZLES.lights.check(spec, presses)`. The shell title moved up 8 px so a 5x5 grid fits under it.
+- `slide` DONE (SlideScene.ts, 98 lines): 3x3, 96 px numbered tiles, tap a neighbour of the gap, non-neighbour taps play the error sound, Reset, move counter; win via `PUZZLES.slide.check(spec, taps)`.
+- Next: pipes, mastermind, memory.
 - Not verified: how it looks/plays in a browser (no Playwright browser available locally; CI e2e will be the first run).
 
 ## Requests (new)

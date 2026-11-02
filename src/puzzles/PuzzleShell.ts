@@ -106,9 +106,9 @@ export abstract class PuzzleShell extends Phaser.Scene {
     g.fillRoundedRect(PX + 4, PY + 10, PW, PH, 28);
     panelBox(g, PX, PY, PW, PH, 28, PAL.panel, PAL.panelEdge, 4);
     const title = this.contextIsTitle() && this.req.context && this.req.context.trim() ? this.req.context.trim() : this.defaultTitle();
-    makeText(this, PX + PW / 2, PY + 38, title, 34, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 300 });
+    makeText(this, PX + PW / 2, PY + 30, title, 34, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 300 });
     this.drawDifficulty();
-    this.buttons.push(makeButton(this, PX + PW - 56, PY + 56, BTN_H, BTN_H, '', () => this.cancel(), { fill: PAL.steel, glyph: 'close' }));
+    this.buttons.push(makeButton(this, PX + PW - 56, PY + 54, BTN_H, BTN_H, '', () => this.cancel(), { fill: PAL.steel, glyph: 'close' }));
     this.build();
 
     const hint = makeButton(this, PX + 120, BAR_Y + BTN_H / 2, 200, BTN_H, 'Hint', () => this.hint(), { fill: PAL.blue, size: 30 });
@@ -136,7 +136,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
     const g = this.add.graphics();
     for (let i = 0; i < 3; i++) {
       const cx = PX + 52 + i * 40;
-      const cy = PY + 38;
+      const cy = PY + 30;
       if (i < this.req.difficulty) {
         g.fillStyle(PAL.terracotta, 1);
         g.fillCircle(cx, cy, 14);
