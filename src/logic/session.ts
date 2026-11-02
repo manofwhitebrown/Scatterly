@@ -21,7 +21,7 @@ const EMPTY_MSGS = [
   'Empty. Whatever you left, it was not here.',
   'You rummage thoroughly and find only regret.',
 ];
-const GATE_MSGS: Record<Gate['kind'], string> = {
+const GATE_MSGS: Partial<Record<Gate['kind'], string>> = {
   untangle: 'A knot of cords blocks the way. Untangle it first.',
   sort: 'It is jammed with odds and ends. Sort them out to get in.',
   word: 'It will not budge. There is a riddle to solve first.',
@@ -98,7 +98,7 @@ export class GameSession {
     if (!spot) return { kind: 'empty', items: [], clues: [], message: 'There is nothing to inspect there.' };
     const gate = this.scenario.gates[spotId];
     if (gate && !this.solvedGates.has(spotId)) {
-      return { kind: 'locked', items: [], clues: [], gate, message: GATE_MSGS[gate.kind] };
+      return { kind: 'locked', items: [], clues: [], gate, message: GATE_MSGS[gate.kind] ?? 'It is locked. Solve the puzzle to open it.' };
     }
     if (!this.opened.has(spotId)) {
       this.opened.add(spotId);
@@ -204,7 +204,7 @@ export class GameSession {
     return {
       scenarioId: this.scenario.id, mode: this.mode, targets: this.scenario.targets.slice(),
       found: this.found(), timeMs, searches: this.searches, hintsUsed: this.hintsUsed, timedOut,
-      stars, coinsEarned: coins, habitHits: [], newAchievements: [],
+      stars, coinsEarned: coins, habitHits: [], newAchievements: [], puzzleLog: [],
     };
   }
 

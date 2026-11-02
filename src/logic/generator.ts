@@ -99,7 +99,7 @@ function resolveSlots(t: Template, w: World, rng: Rng): Resolved | null {
   return { slots, habit };
 }
 
-const GATE_KINDS: Record<PuzzleKind, string[]> = {
+const GATE_KINDS: Partial<Record<PuzzleKind, string[]>> = {
   untangle: ['charger', 'drawer', 'bagSpot', 'jacket', 'basket'],
   sort: ['drawer', 'cabinet', 'basket', 'papers', 'wardrobe', 'bin'],
   word: ['drawer', 'cabinet', 'wardrobe', 'fridge', 'papers'],
@@ -123,7 +123,7 @@ function addGates(s: Scenario, t: Template, rng: Rng): void {
     if (Object.keys(s.gates).length >= wanted) break;
     const sp = anySpot(id);
     if (!sp || sp.room === s.startRoom || s.gates[id]) continue;
-    const ok = kinds.filter((k) => GATE_KINDS[k].includes(sp.kind));
+    const ok = kinds.filter((k) => (GATE_KINDS[k] ?? []).includes(sp.kind));
     if (ok.length === 0) continue;
     s.gates[id] = makeGate(rng.pick(ok), s.difficulty, rng);
     const costs = gateCosts(s);

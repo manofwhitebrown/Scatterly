@@ -3,7 +3,7 @@ import { join, relative } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 const DIST = 'dist';
-const JS_GZIP_BUDGET = 450 * 1024; // warn
+const JS_GZIP_BUDGET = 520 * 1024; // warn
 const JS_GZIP_LIMIT = 600 * 1024; // fail
 const DIST_BUDGET = 2 * 1024 * 1024; // warn
 const DIST_LIMIT = 2.5 * 1024 * 1024; // fail

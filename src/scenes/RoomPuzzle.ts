@@ -15,5 +15,5 @@ export function puzzleLaunchData(
   };
   if (gate.payload !== undefined) req.payload = gate.payload;
   if (gate.context !== undefined) req.context = gate.context;
-  return { req, onDone };
+  return { req, notes: [], onDone };
 }

@@ -19,7 +19,22 @@ export const SPOT_SIZE = {
 } as const;
 export type SpotKind = keyof typeof SPOT_SIZE;
 export type SpotId = string; // 'room.name' e.g. 'kitchen.fridge'
-export type PuzzleKind = 'untangle' | 'sort' | 'word';
+export const PUZZLE_KINDS = [
+  'untangle', 'sort', 'word', 'code', 'target', 'sequence', 'lights', 'slide', 'pipes',
+  'mastermind', 'memory', 'sudoku', 'kenken', 'balance', 'dial', 'tangram', 'cipher', 'logic', 'nonogram',
+] as const;
+export type PuzzleKind = (typeof PUZZLE_KINDS)[number];
+
+/** Isometric grid: screen px per cell step (tileW x tileH) and per height unit. */
+export const ISO = { tileW: 64, tileH: 32, unitH: 16 } as const;
+/** Footprint on the iso grid in cells; h and gz are in height units (wall mounts use gz). */
+export interface IsoPlacement { gx: number; gy: number; w: number; d: number; h: number; gz?: number }
+export interface Door { to: RoomId; wall: 'left' | 'right'; at: number }
+export interface RoomLayout {
+  id: RoomId; cols: number; rows: number; doors: Door[];
+  windows: Array<{ wall: 'left' | 'right'; at: number; w: number }>; theme: string;
+}
+export interface HouseSlot { room: RoomId; floor: 0 | 1; col: number; row: number }
 export type GameMode = 'rush' | 'relaxed' | 'daily';
 export type Difficulty = 1 | 2 | 3;
 export type SpotAction = 'open' | 'lift' | 'search' | 'peek'; // how the interaction animates
@@ -27,14 +42,20 @@ export type SpotAction = 'open' | 'lift' | 'search' | 'peek'; // how the interac
 export interface Spot {
   id: SpotId; room: RoomId; kind: SpotKind; label: string;
   x: number; y: number; w: number; h: number;
+  iso: IsoPlacement;         // isometric placement (x,y,w,h stay until the Phase 2 cleanup)
+  lockable: boolean;         // closed containers only: may be locked by a puzzle gate
   action: SpotAction;
   capacity: number;          // max items it can hold
   plausible: ItemId[];       // items that believably end up here
 }
-export interface Gate { kind: PuzzleKind; difficulty: Difficulty; payload?: string; context?: string }
+export interface Gate { kind: PuzzleKind; difficulty: Difficulty; payload?: string; context?: string; needs?: string[] }
 export type ClueIcon = 'receipt' | 'note' | 'photo' | 'ticket' | 'bagTag' | 'mug' | 'stain' | 'wrapper' | 'text' | 'laundry';
 export interface ClueLink { spotId?: SpotId; room?: RoomId; item?: ItemId; strength: 'weak' | 'strong' }
-export interface Clue { id: string; spotId: SpotId; title: string; text: string; icon: ClueIcon; links: ClueLink[] }
+export interface ClueFact { key: string; label: string; value: number }
+export interface Clue {
+  id: string; spotId: SpotId; title: string; text: string; icon: ClueIcon; links: ClueLink[];
+  facts?: ClueFact[];        // numbers that feed code locks
+}
 
 export type EveningVerb = 'arrive' | 'drop' | 'use' | 'charge' | 'cook' | 'shop' | 'change' | 'pocket' | 'tidy' | 'sleep';
 export interface EveningStep { n: number; clock: string; verb: EveningVerb; room: RoomId; spotId?: SpotId; itemId?: ItemId; note: string }
@@ -54,7 +75,7 @@ export interface InspectOutcome {
   kind: 'empty' | 'found' | 'locked';
   items: ItemId[]; clues: Clue[]; gate?: Gate; message: string;
 }
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 export type SpotMark = 'ruledOut' | 'hunch';
 export type FxName = 'tap' | 'open' | 'empty' | 'found' | 'take' | 'clue' | 'hint' | 'room'
   | 'urgent' | 'win' | 'lose' | 'coin' | 'star' | 'buy' | 'unlock' | 'puzzleOk';
@@ -67,9 +88,11 @@ export interface RunResult {
   timeMs: number; searches: number; hintsUsed: number; timedOut: boolean;
   stars: 0 | 1 | 2 | 3; coinsEarned: number;
   habitHits: ItemId[]; newAchievements: string[];
+  puzzleLog: Array<{ kind: PuzzleKind; solved: boolean; skipped: boolean; ms: number }>;
 }
+export interface PuzzleStat { solved: number; skipped: number; bestMs: number | null }
 export interface PlayerProfile {
-  version: 2; day: number; coins: number; streak: number; lastDailyDate: string | null;
+  version: 3; day: number; coins: number; streak: number; lastDailyDate: string | null;
   unlockedRooms: RoomId[];                     // default: entrance, living, kitchen, bedroom
   owned: string[];                             // DecorDef ids
   homeSpots: Partial<Record<ItemId, SpotId>>;  // dedicated places chosen by player
@@ -77,10 +100,12 @@ export interface PlayerProfile {
   tutorialDone: boolean;
   stats: ProfileStats; achievements: string[]; weekMorning: number; weekStars: number;
   settings: { sfx: boolean; music: boolean; vibration: boolean; lowFx: boolean; reducedMotion: boolean };
+  puzzles: Record<string, PuzzleStat>;         // mastery per PuzzleKind
 }
 export interface DecorDef {
   id: string; name: string; room: RoomId; price: number; unlockDay: number;
   kind: 'cosmetic' | 'storage';
+  iso: IsoPlacement;                          // placement on the iso grid
   x: number; y: number; w: number; h: number; // where it is drawn in the room (cosmetic: wall/corner; storage: becomes a Spot)
   spotKind?: SpotKind;                         // storage only: Spot added to house
   benefit?: string;                            // storage only: player-facing text, e.g. 'Keys left near the door are easier to find'
@@ -89,16 +114,20 @@ export interface DecorView { def: DecorDef; owned: boolean; canBuy: boolean; loc
 
 export interface PuzzleRequest { kind: PuzzleKind; seed: number; difficulty: Difficulty; payload?: string; context?: string }
 export interface PuzzleResult { solved: boolean; skipped: boolean; ms: number }
-export interface PuzzleLaunchData { req: PuzzleRequest; onDone: (r: PuzzleResult) => void }
+export interface PuzzleLaunchData { req: PuzzleRequest; notes: Clue[]; onDone: (r: PuzzleResult) => void }
 export interface RoomSceneData { mode: GameMode; seed?: number }
 export interface ResultSceneData { result: RunResult; scenario: Scenario }
 
 export const SCENE = {
   Boot: 'Boot', Menu: 'Menu', ModeSelect: 'ModeSelect', Room: 'Room', Result: 'Result',
-  Settings: 'Settings', Organise: 'Organise', Journal: 'Journal',
+  Settings: 'Settings', Organise: 'Organise', Journal: 'Journal', House: 'House',
 } as const;
 export const PUZZLE_SCENE: Record<PuzzleKind, string> = {
-  untangle: 'PuzzleUntangle', sort: 'PuzzleSort', word: 'PuzzleWord',
+  untangle: 'PuzzleUntangle', sort: 'PuzzleSort', word: 'PuzzleWord', code: 'PuzzleCode', target: 'PuzzleTarget',
+  sequence: 'PuzzleSequence', lights: 'PuzzleLights', slide: 'PuzzleSlide', pipes: 'PuzzlePipes',
+  mastermind: 'PuzzleMastermind', memory: 'PuzzleMemory', sudoku: 'PuzzleSudoku', kenken: 'PuzzleKenken',
+  balance: 'PuzzleBalance', dial: 'PuzzleDial', tangram: 'PuzzleTangram', cipher: 'PuzzleCipher',
+  logic: 'PuzzleLogic', nonogram: 'PuzzleNonogram',
 };
 export const tex = {
   room: (r: RoomId) => `room_${r}`,
@@ -106,6 +135,9 @@ export const tex = {
   item: (i: ItemId) => `item_${i}`,
   icon: (c: ClueIcon) => `icon_${c}`,
   decor: (id: string) => `decor_${id}`,
+  isoSpot: (k: SpotKind, open = false) => (open ? `iso_spot_${k}_open` : `iso_spot_${k}`),
+  isoShell: (r: RoomId) => `iso_shell_${r}`,
+  isoProp: (id: string) => `iso_prop_${id}`,
   mark: (m: SpotMark) => `mark_${m}`,
   fx: (n: 'dot' | 'star' | 'ring' | 'confetti' | 'mote') => `fx_${n}`,
 };

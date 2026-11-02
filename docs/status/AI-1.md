@@ -26,3 +26,34 @@
 - `generateAllTextures` may be called again on Boot "Retry": skip textures that already exist (`scene.textures.exists(key)`).
 - `sfx.startMusic()` is called at boot before any user gesture: it must be safe (no throw) and defer until `unlock()`.
 - Barrels must exist at `src/art/index.ts`, `src/audio/sfx.ts`, `src/puzzles/index.ts`, `src/organise/index.ts`.
+
+# Phase 3 (AI-1: Platform and Puzzle Scenes)
+
+## Phase 0 contract v3: done (one commit)
+- `src/shared/types.ts`: SAVE_VERSION 3, `ISO`, `IsoPlacement`, `Door`, `RoomLayout`, `HouseSlot`, `PUZZLE_KINDS` (19) + derived `PuzzleKind`, `PUZZLE_SCENE` for all kinds, `SCENE.House`, `Spot.iso` + `Spot.lockable`, `Gate.needs`, `Clue.facts` (`ClueFact`), `DecorDef.iso`, `RunResult.puzzleLog`, `PlayerProfile.version 3` + `puzzles` (`PuzzleStat`), `PuzzleLaunchData.notes`, `tex.isoSpot/isoShell/isoProp`.
+- `src/core/save.ts`: v2 -> v3 migration (`puzzles` validated per known kind). Tests in tests/save.test.ts (v1, v2, v3, corrupt, null, future).
+- `src/puzzles/manifest.ts` `IMPLEMENTED` = untangle, sort, word. `src/core/flags.ts` (`?view=iso`, default old). `tests/contract.test.ts`.
+- `scripts/secret-scan.mjs` + CI step + `npm run secret-scan`. Size budget raised to 520 KB (fail stays 600).
+
+### Minimum lines touched outside my folders (Phase 0 exception, to keep tsc green)
+- src/content/house.ts: `LOCKABLE_KINDS`, placeholder `isoFromBox()` (iso derived from old pixel box), Spot gets `iso` + `lockable`.
+- src/content/decor.ts: `iso` on DecorDef helpers and storage Spots, `lockable` on storage Spots.
+- src/logic/generator.ts: `GATE_KINDS` is `Partial<Record<...>>`. src/logic/session.ts: `GATE_MSGS` Partial with a default message, `puzzleLog: []` in the RunResult.
+- src/scenes/RoomPuzzle.ts: `notes: []` in launch data (AI-3/AI-1 fill real notes later).
+- tests/logic.test.ts, tests/logic.fuzz.test.ts: version 3, `puzzles: {}`, `puzzleLog: []`.
+
+## Verified (real output, local, Node 22)
+- `node scripts/secret-scan.mjs`: `secret-scan: clean`
+- `npx tsc --noEmit`: no errors
+- `npx vitest run`: 6 files, 55 tests passed
+- `npm run build`: Total JS gzip 391.6 KB (budget 520.0, limit 600.0), dist 1629.1 KB
+
+## Not verified
+- Playwright e2e (needs CI; not run locally). Phone fps. Node 20 specifically (local is Node 22).
+
+## Requests
+- AI-2: replace `isoFromBox` placeholders with real `LAYOUTS`/iso data; move generators into `src/logic/puzzles/`; `GATE_KINDS` is now Partial, extend it for new kinds.
+- AI-3: `PuzzleLaunchData.notes` is `[]` for now: pass discovered clues from the session.
+
+## Integration log
+(none yet)

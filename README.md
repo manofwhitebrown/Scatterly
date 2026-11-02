@@ -67,3 +67,8 @@ docs/status/          one status file per contributor
 - The `android/` folder is git-ignored: CI regenerates it with `npx cap add android` and patches it
   (landscape, fullscreen, app name). To build locally run `npx cap add android` once, then `npm run build && npm run cap:sync`.
 - Never commit tokens or credentials.
+
+## Flags and verification (Phase 3)
+- `?debug=1` debug overlay, `?e2e=1` test hooks (never changes gameplay), `?view=iso` selects the isometric Room/House (default stays the flat view until the Parity flip).
+- `npm run secret-scan` fails if a `github_pat_` / `ghp_` string is in the tree (also a CI step).
+- `npm run verify` = secret-scan + tsc + unit tests + build + e2e smoke. JS gzip budget 520 KB (hard fail 600).

@@ -20,6 +20,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Secret scan (fails on github_pat_ / ghp_)
+        run: node scripts/secret-scan.mjs
       - run: npm test
       - run: npm run build
       - name: Cache Playwright browsers

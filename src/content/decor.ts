@@ -1,6 +1,6 @@
 import { SPOT_SIZE } from '../shared/types';
 import type { DecorDef, ItemId, Spot, SpotAction, SpotId } from '../shared/types';
-import { HOUSE, SLOTS, items } from './house';
+import { HOUSE, LOCKABLE_KINDS, SLOTS, isoFromBox, items } from './house';
 
 export interface StorageInfo {
   label: string;
@@ -26,14 +26,14 @@ function storage(
 ): DecorDef {
   const pos = SLOTS[`${room}.${id}`] ?? { x: 40, y: 400 };
   const size = SPOT_SIZE[spotKind];
-  return { id, name, room, price, unlockDay, kind: 'storage', x: pos.x, y: pos.y, w: size.w, h: size.h, spotKind, benefit };
+  return { id, name, room, price, unlockDay, kind: 'storage', iso: isoFromBox(pos.x, pos.y, size.w, size.h), x: pos.x, y: pos.y, w: size.w, h: size.h, spotKind, benefit };
 }
 
 function cosmetic(
   id: string, name: string, room: DecorDef['room'], price: number, unlockDay: number,
   x: number, y: number, w: number, h: number,
 ): DecorDef {
-  return { id, name, room, price, unlockDay, kind: 'cosmetic', x, y, w, h };
+  return { id, name, room, price, unlockDay, kind: 'cosmetic', iso: isoFromBox(x, y, w, h), x, y, w, h };
 }
 
 export const DECOR: DecorDef[] = [
@@ -63,7 +63,7 @@ export function storageSpot(d: DecorDef): Spot | null {
   if (d.kind !== 'storage' || !d.spotKind || !info) return null;
   return {
     id: decorSpotId(d), room: d.room, kind: d.spotKind, label: info.label,
-    x: d.x, y: d.y, w: d.w, h: d.h, action: info.action, capacity: info.capacity,
+    x: d.x, y: d.y, w: d.w, h: d.h, iso: d.iso, lockable: LOCKABLE_KINDS.includes(d.spotKind), action: info.action, capacity: info.capacity,
     plausible: info.plausible.slice(),
   };
 }

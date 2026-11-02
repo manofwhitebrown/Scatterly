@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
-import { ITEM_IDS, ROOM_ORDER } from '../shared/types';
+import { ITEM_IDS, PUZZLE_KINDS, ROOM_ORDER } from '../shared/types';
 import { SAVE_VERSION } from '../shared/types';
-import type { ItemId, PlayerProfile, ProfileStats, RoomId, SpotId } from '../shared/types';
+import type { ItemId, PlayerProfile, ProfileStats, PuzzleStat, RoomId, SpotId } from '../shared/types';
 
 const STORAGE_KEY = 'scatterly.profile.v1'; // key kept so v1 saves are found and migrated in place
 const MAX_ACHIEVEMENTS = 200;
@@ -25,6 +25,7 @@ export function defaultProfile(): PlayerProfile {
     weekMorning: 0,
     weekStars: 0,
     settings: { sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: false },
+    puzzles: {},
   };
 }
 
@@ -67,9 +68,25 @@ function sanitizeStats(raw: unknown): ProfileStats {
   };
 }
 
+function sanitizePuzzles(raw: unknown): Record<string, PuzzleStat> {
+  const out: Record<string, PuzzleStat> = {};
+  if (!isRecord(raw)) return out;
+  for (const kind of PUZZLE_KINDS) {
+    const v = raw[kind];
+    if (!isRecord(v)) continue;
+    const b = v.bestMs;
+    out[kind] = {
+      solved: wholeNumber(v.solved, 0, 0),
+      skipped: wholeNumber(v.skipped, 0, 0),
+      bestMs: typeof b === 'number' && Number.isFinite(b) && b >= 0 ? Math.floor(b) : null,
+    };
+  }
+  return out;
+}
+
 /**
- * Migrates any stored value to the current version. v1 -> v2 keeps all progress and fills new
- * fields with defaults. Future versions (> SAVE_VERSION) are read field-by-field, never trusted
+ * Migrates any stored value to the current version. v1 -> v2 -> v3 keeps all progress and fills new
+ * fields with defaults (v3 adds puzzles: {}). Future versions (> SAVE_VERSION) are read field-by-field, never trusted
  * wholesale. Anything that is not an object yields a fresh profile. Never throws.
  */
 export function migrate(raw: unknown): PlayerProfile {
@@ -140,6 +157,7 @@ function sanitize(raw: unknown): PlayerProfile {
       lowFx: bool(s.lowFx, d.settings.lowFx),
       reducedMotion: bool(s.reducedMotion, d.settings.reducedMotion),
     },
+    puzzles: sanitizePuzzles(raw.puzzles),
   };
 }
 

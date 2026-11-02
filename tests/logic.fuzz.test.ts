@@ -6,12 +6,12 @@ import type { GameMode, ItemId, PlayerProfile } from '../src/shared/types';
 
 function profile(day: number, rooms: number): PlayerProfile {
   return {
-    version: 2, day, coins: 0, streak: 0, lastDailyDate: null,
+    version: 3, day, coins: 0, streak: 0, lastDailyDate: null,
     unlockedRooms: ROOM_ORDER.slice(0, rooms) as PlayerProfile['unlockedRooms'], owned: [], homeSpots: {},
     bestStars: {}, tutorialDone: false,
     stats: { mornings: 0, perfect: 0, itemsFound: 0, hintsUsed: 0, puzzlesSolved: 0, bestStreak: 0, fastestMs: null },
     achievements: [], weekMorning: 0, weekStars: 0,
-    settings: { sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: false },
+    settings: { sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: false }, puzzles: {},
   };
 }
 

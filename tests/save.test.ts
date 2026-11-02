@@ -117,4 +117,41 @@ describe('save migration', () => {
     (globalThis as unknown as { window: unknown }).window = {};
     expect(loadProfile()).toEqual(defaultProfile());
   });
+
+  it('v2 save migrates to v3 with empty puzzle mastery and keeps progress', () => {
+    const v2 = { ...v1, version: 2, stats: { mornings: 5, puzzlesSolved: 9 }, settings: { sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: true } };
+    store.setItem(KEY, JSON.stringify(v2));
+    const p = loadProfile();
+    expect(p.version).toBe(3);
+    expect(p.puzzles).toEqual({});
+    expect(p.stats.mornings).toBe(5);
+    expect(p.stats.puzzlesSolved).toBe(9);
+    expect(p.settings.reducedMotion).toBe(true);
+    expect(p.coins).toBe(340);
+  });
+
+  it('v3 puzzle mastery is validated per known kind', () => {
+    const raw = {
+      ...v1, version: 3,
+      puzzles: {
+        code: { solved: 4, skipped: 1, bestMs: 12000.7 },
+        lights: { solved: -3, skipped: 'x', bestMs: -1 },
+        bogus: { solved: 9, skipped: 9, bestMs: 1 },
+        sort: 'nope',
+      },
+    };
+    store.setItem(KEY, JSON.stringify(raw));
+    const p = loadProfile();
+    expect(p.puzzles.code).toEqual({ solved: 4, skipped: 1, bestMs: 12000 });
+    expect(p.puzzles.lights).toEqual({ solved: 0, skipped: 0, bestMs: null });
+    expect(p.puzzles.bogus).toBeUndefined();
+    expect(p.puzzles.sort).toBeUndefined();
+  });
+
+  it('non-object puzzles field and null save never crash', () => {
+    store.setItem(KEY, JSON.stringify({ ...v1, version: 3, puzzles: [1, 2] }));
+    expect(loadProfile().puzzles).toEqual({});
+    store.setItem(KEY, 'null');
+    expect(loadProfile()).toEqual(defaultProfile());
+  });
 });
