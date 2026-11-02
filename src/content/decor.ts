@@ -1,6 +1,7 @@
 import { SPOT_SIZE } from '../shared/types';
 import type { DecorDef, ItemId, Spot, SpotAction, SpotId } from '../shared/types';
-import { HOUSE, LOCKABLE_KINDS, SLOTS, isoFromBox, items } from './house';
+import { HOUSE, LOCKABLE_KINDS, SLOTS, items } from './house';
+import { decorIso } from './layout';
 
 export interface StorageInfo {
   label: string;
@@ -26,14 +27,14 @@ function storage(
 ): DecorDef {
   const pos = SLOTS[`${room}.${id}`] ?? { x: 40, y: 400 };
   const size = SPOT_SIZE[spotKind];
-  return { id, name, room, price, unlockDay, kind: 'storage', iso: isoFromBox(pos.x, pos.y, size.w, size.h), x: pos.x, y: pos.y, w: size.w, h: size.h, spotKind, benefit };
+  return { id, name, room, price, unlockDay, kind: 'storage', iso: decorIso({ id, room }, spotKind), x: pos.x, y: pos.y, w: size.w, h: size.h, spotKind, benefit };
 }
 
 function cosmetic(
   id: string, name: string, room: DecorDef['room'], price: number, unlockDay: number,
   x: number, y: number, w: number, h: number,
 ): DecorDef {
-  return { id, name, room, price, unlockDay, kind: 'cosmetic', iso: isoFromBox(x, y, w, h), x, y, w, h };
+  return { id, name, room, price, unlockDay, kind: 'cosmetic', iso: decorIso({ id, room }), x, y, w, h };
 }
 
 export const DECOR: DecorDef[] = [

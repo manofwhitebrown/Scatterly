@@ -40,24 +40,36 @@
 
 ## Phase 3 (AI-2: Logic, Content and Puzzle Generators)
 
-### Done
-- `src/logic/puzzles/`: framework (`types.ts`: `PuzzleDef`, `Fact`, `PuzzleCtx`) + the 8 Tier-1 generators: `code` (clue-fact maths), `target`, `sequence`, `lights`, `slide`, `pipes`, `mastermind`, `memory`. Each has generate / check / solve / hint / parSeconds. Registry in `index.ts` (`PUZZLES`, `PuzzleTypes`, `LogicPuzzleKind`, `feedback`).
-- `tests/puzzles/puzzles.test.ts`: per kind x 3 difficulties: generate -> solve -> check true, wrong answers false, deterministic, hints non-empty, generate p99 <= 10 ms, par grows with difficulty; kind-specific rules (code 3-4 digit positive, target not pre-present, sequence 4 distinct options, lights min presses >= 3, slide depth ranges 8-10 / 11-14 / 15-18, mastermind solver cracks within cap, memory no repeats).
+### Done (pushed)
+- `src/logic/puzzles/`: framework (`types.ts`) + 11 pure generators with generate / check / solve / hint / parSeconds: Tier 1 `code`, `target`, `sequence`, `lights`, `slide`, `pipes`, `mastermind`, `memory`, plus the three existing kinds ported to pure logic: `untangle`, `sort`, `word` (same rules as the scenes; scenes do not use them yet, AI-1 adopts them). Registry `PUZZLES` + `PuzzleTypes` in `index.ts`.
+- `src/content/puzzleRoster.ts`: `ENABLED = ['untangle','sort','word']` (kinds with generator AND scene). `tests/puzzles/roster.test.ts` enforces ENABLED is a subset of `IMPLEMENTED` and of the registry.
+- `src/content/layout.ts` (+ `layoutSpots.ts`, `layoutProps.ts`): `LAYOUTS` (5 rooms, 8x8 to 10x8, doors for entrance-living, living-kitchen, living-bedroom (stairs), bedroom-bathroom, windows), `HOUSE_MAP`, `KIND_FOOT`, `spotIso`, `DECOR_ISO`, `PROPS` (6 per room), hand-placed iso for all 55 spots + 7 storage slots + 8 cosmetic decor. `house.ts`/`decor.ts` now take `iso` from it (isoFromBox removed). No spot or decor id changed.
+- Tests: `tests/puzzles/puzzles.test.ts` (per kind x 3 difficulties), `tests/puzzles/roster.test.ts`, `tests/logic.layout.test.ts` (29 tests: ids/footprints, bounds, no overlaps incl. all storage owned, wall mounts touch a wall, doors/windows clear, free floor connected, free neighbour per spot, door symmetry, HOUSE_MAP).
 
 ### Verified (commands run)
-- `PUZZLE_SEEDS=2000 npx vitest run tests/puzzles` -> 40 passed (2000 seeds x 3 difficulties x 8 kinds), 21.7 s.
-- `npm test` -> 6 files, 86 tests passed (default 300 seeds, tests ~12 s). `npx tsc --noEmit` clean. `npm run build` OK, JS 391.1 KB gzip (unchanged: logic/puzzles is not imported by the app yet).
+- `PUZZLE_SEEDS=2000 npx vitest run tests/puzzles` -> 58 passed (2000 seeds x 3 difficulties x 11 kinds incl. generate -> solve -> check, wrong answers rejected, determinism, generate p99 <= 10 ms). A real bug was caught and fixed on the way (untangle jitter could remove the crossings after they were counted).
+- Layout mutation check: moving the TV onto the sideboard, and the bedroom wardrobe in front of the door, makes the tests fail as expected; restored.
+- `npm test` / `npm run build` green before push (see Integration log in AI-1.md).
 
 ### Not verified / not done yet
-- Waiting for AI-1's contract v3 (SAVE_VERSION is still 2, no PuzzleKind v3, no Spot.iso). So NOT done: `PuzzleTypes` keyed by the shared `PuzzleKind`, untangle/sort/word moved into the registry, `src/content/puzzleRoster.ts` (ENABLED), `src/content/layout.ts` (LAYOUTS, HOUSE_MAP, iso per spot), Scenario v3 gates, clue facts (Clue.facts), progression/achievements, balance sim, fuzz extension. Tier 2 kinds not started (after parity gate).
-- Median ideal-bot time per difficulty (G9) not measured yet; only `parSeconds` is set (code 18/35/65, target 18/40/75, sequence 12/25/45, lights 20/40/70, slide 25/45/80, pipes 25/45/80, mastermind 25/50/80, memory 12/25/45).
+- Layout vs art footprints (AI-4 review) and layout look on screen: not seen rendered. Positions are by hand, only checked by the geometric tests.
+- G10 note: Entrance has 11 house spots + 5 storage decor = 16 interactive pieces once everything is bought (brief says 8-14). Ids may not change, so I kept it; owner decides whether to cap storage purchases in the entrance.
+- Median ideal-bot time per difficulty (G9) not measured yet; `parSeconds` is set (code 18/35/65, target 18/40/75, sequence 12/25/45, lights 20/40/70, slide 25/45/80, pipes 25/45/80, mastermind 25/50/80, memory 12/25/45, untangle 15/35/70, sort 14/25/50, word 12/25/50).
+- Still to do, in order: Scenario v3 (gate density, `lockable` only, 40% padlocked, day-1 guided), clue `facts` + `needs` + template growth (18 -> ~28), validator/solver for code locks, `applyRun` puzzleLog + ACHIEVEMENTS, balance sim (tests/sim), fuzz extension to 5000 seeds, then Tier 2 kinds after the parity gate.
+
+### Layout conventions (for AI-3 / AI-4)
+- gx runs along the RIGHT wall (plane gy = 0), gy along the LEFT wall (plane gx = 0); cell (0,0) is the back corner; front/open edges are gx = cols and gy = rows. Door/window `at`: wall 'right' -> gx, wall 'left' -> gy. Door entry cell = (at,0) on the right wall, (0,at) on the left wall; always free floor.
+- Footprints come only from `KIND_FOOT[kind]` (w along gx, d along gy, h in height units, `gz` for wall mounts: jacket, keyHook, charger). No rotation: every kind is drawn with its long side along gx. `WALL_H` = 10, windows occupy heights 3..8 (`WINDOW_Z`).
+- A piece blocks walking if gz = 0 and h > 1 (rugs, mats, runners and shoe racks are walk-over). `PROPS[room]` entries have `kind: PropKind`; `lampHang` is the only prop with gz > 0 that is not on a wall.
+- Dollhouse: `HOUSE_MAP`: ground floor entrance(col0), living(col1), kitchen(col2); upper floor bedroom(col1, above living), bathroom(col2, above kitchen).
 
 ### Notes for AI-1/3/4 (puzzle API, additions only)
-- `import { PUZZLES } from 'src/logic/puzzles'`; `PUZZLES[kind].generate(seed, difficulty, ctx?)`. Specs are plain JSON and contain the solution fields, so scenes must not render them.
-- Answer shapes: code `string`; target `Array<{a,b,op}>` (a,b index the growing pool: originals first, each step's result appended; both operands are consumed; ops `+ - * /`, results must be positive integers; solved the moment any result equals `target`); sequence `number` (the chosen option); lights `number[]` (cells pressed, duplicates cancel); slide `number[]` (cells tapped, each must be next to the gap); pipes `number[]` (final rotation 0..3 per cell, clockwise quarter turns from `base`); mastermind `number[][]` (all guesses so far; last one is the secret; length <= `maxAttempts`; use exported `feedback(secret, guess)` for the exact/misplaced pegs); memory `number[]` (whole sequence).
-- `code` takes `ctx.facts` (`{key,label,value}[]`); `spec.facts` lists the facts the rule uses (their keys become `Gate.needs`); `spec.own` = true means it invented facts (show them on the lock).
+- `import { PUZZLES } from 'src/logic/puzzles'`; `PUZZLES[kind].generate(seed, difficulty, ctx?)`; `ctx` = `{ facts?, payload?, context? }` (payload/context = Gate fields, used by word and untangle). Specs are plain JSON and contain solution fields, so scenes must not render them.
+- Answer shapes: code `string`; target `Array<{a,b,op}>` (a,b index the growing pool: originals first, each step's result appended; both operands consumed; ops `+ - * /`; results positive integers; solved when any result equals `target`); sequence `number` (the chosen option); lights `number[]` (cells pressed, duplicates cancel); slide `number[]` (cells tapped, each next to the gap); pipes `number[]` (final rotation 0..3 per cell); mastermind `number[][]` (all guesses so far, last = secret, count <= `maxAttempts`; `feedback(secret, guess)` gives exact/misplaced); memory `number[]` (whole sequence); untangle `Array<[x,y]>` normalised 0..1 per node (solved = `crossings(spec.edges, pts) === 0`, helper exported); sort `number[]` (bin index per piece in spec order); word `string` (anagrams of list words also accepted unless `spec.custom`).
+- `code`: `spec.facts` lists the facts the rule uses (their keys become `Gate.needs`); `spec.own` true = it invented facts (show them on the lock).
 - `hint(spec, progress)`: pass how many hints were already shown for this puzzle.
-- Tests' `PUZZLE_SEEDS` env raises the seed count (default 300).
+- Tests: env `PUZZLE_SEEDS` raises the seed count (default 300).
 
 ### Requests
-- AI-1: land contract v3 (see brief section 5) so I can add the shared `PuzzleKind` typing, `Spot.iso/lockable`, `Clue.facts`, `Gate.needs`, `RunResult.puzzleLog`, `PlayerProfile.puzzles`.
+- AI-1: when you adopt the logic generators in the scenes, add the kinds to `IMPLEMENTED` and tell me; I then add them to `ENABLED`.
+- AI-4: please review `KIND_FOOT`/`PROPS` against your iso art footprints (a kind whose art needs a different footprint: tell me the numbers and I change the data, the tests will tell if it still fits).

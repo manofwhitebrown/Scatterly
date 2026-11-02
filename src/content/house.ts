@@ -1,5 +1,6 @@
 import { SPOT_SIZE } from '../shared/types';
-import type { IsoPlacement, ItemId, RoomId, Spot, SpotAction, SpotId, SpotKind } from '../shared/types';
+import type { ItemId, RoomId, Spot, SpotAction, SpotId, SpotKind } from '../shared/types';
+import { spotIso } from './layout';
 
 const CODE: Record<string, ItemId> = {
   k: 'keys', w: 'wallet', p: 'phone', i: 'officeId', s: 'shoes', g: 'glasses', e: 'earbuds', b: 'bag',
@@ -17,11 +18,6 @@ export function items(codes: string): ItemId[] {
 
 /** Closed containers that may be locked by a puzzle gate. */
 export const LOCKABLE_KINDS: readonly SpotKind[] = ['drawer', 'cabinet', 'fridge', 'wardrobe', 'basket', 'bin', 'bagSpot', 'shoeRack', 'tv'];
-
-/** Placeholder iso footprint derived from the legacy pixel box (AI-2 replaces it with layout data). */
-export function isoFromBox(x: number, y: number, w: number, h: number): IsoPlacement {
-  return { gx: Math.floor(x / 64), gy: Math.floor(y / 64), w: Math.max(1, Math.round(w / 64)), d: 1, h: Math.max(1, Math.ceil(h / 16)) };
-}
 
 // [name, kind, label, action, capacity, plausible codes, optional bottom edge override]
 type Def = readonly [string, SpotKind, string, SpotAction, number, string, number?];
@@ -44,7 +40,7 @@ function layout(rows: Row[]): Spot[] {
         out.push({
           id: `${row.room}.${name}`, room: row.room, kind, label,
           x, y, w: size.w, h: size.h, action, capacity, plausible: items(codes),
-          iso: isoFromBox(x, y, size.w, size.h), lockable: LOCKABLE_KINDS.includes(kind),
+          iso: spotIso(`${row.room}.${name}`, kind), lockable: LOCKABLE_KINDS.includes(kind),
         });
       }
       x += size.w + (row.gap ?? 12);

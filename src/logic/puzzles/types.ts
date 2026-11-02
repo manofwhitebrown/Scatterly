@@ -2,7 +2,8 @@ import type { Difficulty } from '../../shared/types';
 
 /** A numeric fact carried by a clue (e.g. receipt total). Structurally identical to Clue.facts entries. */
 export interface Fact { key: string; label: string; value: number }
-export interface PuzzleCtx { facts?: readonly Fact[] }
+/** Optional generation context: clue facts for code locks; payload/context come from Gate (custom word, riddle, theme). */
+export interface PuzzleCtx { facts?: readonly Fact[]; payload?: string; context?: string }
 
 export interface PuzzleDef<S, A> {
   tier: 1 | 2;

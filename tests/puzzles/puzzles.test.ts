@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PUZZLES, type LogicPuzzleKind, type PuzzleTypes } from '../../src/logic/puzzles';
+import { PUZZLES, crossings, type LogicPuzzleKind, type PuzzleTypes } from '../../src/logic/puzzles';
 import type { Difficulty } from '../../src/shared/types';
 import { Rng } from '../../src/logic/rng';
 
@@ -20,6 +20,9 @@ const WRONG: { [K in LogicPuzzleKind]: Wrong<K> } = {
   slide: (s) => [[], [99], [4, 4], s.solution.slice(0, -1)],
   pipes: (s) => [s.rots, [], s.solution.slice(1), s.solution.map(() => 7)],
   mastermind: (s) => [[], [s.secret.map((v) => (v + 1) % s.symbols)], Array.from({ length: s.maxAttempts + 1 }, () => s.secret), [[...s.secret, 0]]],
+  untangle: (s) => [[], s.start.map((p) => [p[0], p[1]] as [number, number]), s.solved.slice(1), s.solved.map(() => [2, 2] as [number, number])],
+  sort: (s) => [[], s.pieces.map((p) => (p.bin + 1) % s.bins.length), s.pieces.map(() => 99)],
+  word: (s) => ['', 'ZZZZ', s.word + 'X', s.word.slice(1), '12'],
   memory: (s) => [[], s.sequence.slice(0, -1), s.sequence.map((v) => (v + 1) % s.pads), [...s.sequence].reverse().map((v, i) => (i === 0 ? (v + 1) % s.pads : v))],
 };
 
@@ -121,6 +124,39 @@ describe('kind-specific rules', () => {
       const s = PUZZLES.memory.generate(seed, d);
       expect(s.sequence.length).toBeGreaterThanOrEqual(3);
       s.sequence.forEach((v, i) => { if (i > 0) expect(v).not.toBe(s.sequence[i - 1]); });
+    }
+  });
+  it('untangle: starts tangled (>= minCross crossings), reference has none', () => {
+    for (const d of DIFFS) for (let seed = 1; seed <= SEEDS; seed++) {
+      const s = PUZZLES.untangle.generate(seed, d);
+      expect(crossings(s.edges, s.start)).toBeGreaterThanOrEqual(s.minCross);
+      expect(crossings(s.edges, s.solved)).toBe(0);
+    }
+  });
+  it('untangle: theme follows the gate context', () => {
+    expect(PUZZLES.untangle.generate(1, 1, { context: 'charging cable' }).theme).toBe('cable');
+    expect(PUZZLES.untangle.generate(1, 1, { context: 'her necklace' }).theme).toBe('necklace');
+    expect(PUZZLES.untangle.generate(1, 1).theme).toBe('headphones');
+  });
+  it('sort: bins in range, every piece belongs to a bin, never pre-sorted by position', () => {
+    for (const d of DIFFS) for (let seed = 1; seed <= SEEDS; seed++) {
+      const s = PUZZLES.sort.generate(seed, d);
+      expect(s.pieces.length).toBeGreaterThanOrEqual(6);
+      for (const p of s.pieces) { expect(p.bin).toBeGreaterThanOrEqual(0); expect(p.bin).toBeLessThan(s.bins.length); }
+    }
+  });
+  it('word: custom payload is the only accepted answer; generated words accept anagrams of list words only', () => {
+    const s = PUZZLES.word.generate(5, 1, { payload: 'keys-box', context: 'Where the keys sleep' });
+    expect(s.word).toBe('KEYSBOX');
+    expect(s.custom).toBe(true);
+    expect(s.hint).toBe('Where the keys sleep');
+    expect(PUZZLES.word.check(s, 'KEYSBOX')).toBe(true);
+    expect(PUZZLES.word.check(s, 'BOXKEYS')).toBe(false);
+    for (const d of DIFFS) for (let seed = 1; seed <= SEEDS; seed++) {
+      const w = PUZZLES.word.generate(seed, d);
+      expect(w.custom).toBe(false);
+      if (w.mode !== 'cipher') expect(w.tiles.join('')).not.toBe(w.word);
+      expect(w.mode === 'cipher' ? w.coded.length : w.tiles.length).toBeGreaterThan(0);
     }
   });
 });
