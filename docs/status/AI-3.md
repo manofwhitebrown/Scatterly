@@ -52,7 +52,7 @@ tap/open/empty/found/take/clue/hint/room/urgent/win/lose: src/scenes/RoomFeel.ts
 
 ## Waiting on others
 - AI-2 `LAYOUTS` / `HOUSE_MAP` / real Spot `iso` (current `iso` is AI-1's placeholder derived from the old pixel boxes, so pieces can sit outside the 8x8 shell and overlap until real layout data lands).
-- Still to build: shimmer, hop-out items, camera zoom to lock, Dollhouse progress and zoom, HUD v3, notebook facts, Puzzle Book, Result story, tutorial.
+- Still to build: Menu backdrop (Dollhouse behind the Menu), notebook facts + keypad notes drawer, Puzzle Book (Journal), Result story + week plan, tutorial in the iso room, reduced-motion coverage audit, leak counts, Parity cleanup (delete RoomView/RoomNav tabs path).
 
 ## Verified (commands run, repo at AI-3 iso-art commit)
 - `npx tsc --noEmit`: clean.
