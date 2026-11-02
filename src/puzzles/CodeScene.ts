@@ -5,11 +5,11 @@ import { PUZZLES } from '../logic/puzzles';
 import type { CodeSpec } from '../logic/puzzles/codeLock';
 import type { Fact } from '../logic/puzzles/types';
 import { sfx } from '../audio/sfx';
-import { PAL, makeButton, makeText, panelBox } from '../art/palette';
+import { PAL, makeText, panelBox } from '../art/palette';
 import type { G } from '../art/palette';
 import { PX, PY, PuzzleShell } from './PuzzleShell';
+import { KEYPAD_W, buildKeypad } from './Keypad';
 
-const KEY = 96;
 const GAP = 8;
 const CELL_W = 84;
 const CELL_H = 96;
@@ -51,29 +51,22 @@ export class CodeScene extends PuzzleShell {
     this.cells = [];
     const spec = PUZZLES.code.generate(this.req.seed, this.req.difficulty, { facts: this.gatherFacts() });
     this.spec = spec;
-    const cx = PX + 330; // keypad column, clear of the notes drawer
-    makeText(this, cx, PY + 112, spec.rule, 30, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: 600 });
+    const left = PX + 16; // keypad column, clear of the notes drawer
+    const cx = left + KEYPAD_W / 2;
+    makeText(this, cx, PY + 112, spec.rule, 30, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: KEYPAD_W });
     if (spec.own) {
       const given = spec.facts.map((f) => `${f.label} ${f.value}`).join('  |  ');
-      makeText(this, cx, PY + 164, given, 28, PAL.ink, { ox: 0.5, oy: 0.5, align: 'center', wrap: 600 });
+      makeText(this, cx, PY + 170, given, 28, PAL.ink, { ox: 0.5, oy: 0.5, align: 'center', wrap: KEYPAD_W });
     }
     this.frame = this.add.graphics();
     const x0 = cx - (spec.digits * (CELL_W + GAP) - GAP) / 2;
     for (let i = 0; i < spec.digits; i++) {
       const x = x0 + i * (CELL_W + GAP);
-      panelBox(this.frame, x, PY + 200, CELL_W, CELL_H, 14, PAL.white, PAL.panelEdge, 4);
-      this.cells.push(makeText(this, x + CELL_W / 2, PY + 200 + CELL_H / 2, '', 52, PAL.ink, { bold: true, ox: 0.5, oy: 0.5 }));
+      panelBox(this.frame, x, PY + 205, CELL_W, CELL_H, 14, PAL.white, PAL.panelEdge, 4);
+      this.cells.push(makeText(this, x + CELL_W / 2, PY + 205 + CELL_H / 2, '', 52, PAL.ink, { bold: true, ox: 0.5, oy: 0.5 }));
     }
-    this.status = makeText(this, cx, PY + 318, '', 28, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center' });
-    const kx = cx - (5 * (KEY + GAP) - GAP) / 2 + KEY / 2;
-    for (let d = 0; d < 10; d++) {
-      const row = d < 5 ? 0 : 1;
-      const col = d % 5;
-      makeButton(this, kx + col * (KEY + GAP), PY + 360 + row * (KEY + GAP) + KEY / 2, KEY, KEY, String(d), () => this.press(String(d)), { fill: PAL.terracotta, size: 44 });
-    }
-    const y = PY + 360 + 2 * (KEY + GAP) + KEY / 2;
-    makeButton(this, cx - 135, y, 260, KEY, 'Back', () => this.back(), { fill: PAL.steel, size: 32 });
-    makeButton(this, cx + 135, y, 260, KEY, 'Enter', () => this.enter(), { fill: PAL.sage, size: 32 });
+    this.status = makeText(this, cx, PY + 328, '', 28, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center' });
+    buildKeypad(this, left, PY + 400, { digit: (d) => this.press(d), back: () => this.back(), enter: () => this.enter() });
   }
 
   protected hintLine(): string {

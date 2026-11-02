@@ -43,21 +43,21 @@ export class TargetScene extends PuzzleShell {
     this.tiles = [];
     this.opBtns = [];
     const cx = PX + PW / 2;
-    makeText(this, cx, PY + 124, `Make ${spec.target}`, 52, PAL.ink, { bold: true, ox: 0.5, oy: 0.5 });
-    this.line = makeText(this, cx, PY + 188, '', 32, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center' });
-    this.status = makeText(this, cx, PY + 232, '', 28, PAL.ink, { ox: 0.5, oy: 0.5, align: 'center' });
+    makeText(this, cx, PY + 108, `Make ${spec.target}`, 48, PAL.ink, { bold: true, ox: 0.5, oy: 0.5 });
+    this.line = makeText(this, cx, PY + 160, '', 32, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center' });
+    this.status = makeText(this, cx, PY + 202, '', 28, PAL.ink, { ox: 0.5, oy: 0.5, align: 'center' });
     this.ring = this.add.graphics().setDepth(5);
     const n = spec.numbers.length;
     const x0 = cx - (n * (SIZE + GAP) - GAP) / 2 + SIZE / 2;
     for (let i = 0; i < n; i++) {
-      this.tiles.push(makeButton(this, x0 + i * (SIZE + GAP), PY + 310, SIZE, SIZE, '', () => this.tapSlot(i), { fill: PAL.blue, size: 44 }));
+      this.tiles.push(makeButton(this, x0 + i * (SIZE + GAP), PY + 270, SIZE, SIZE, '', () => this.tapSlot(i), { fill: PAL.blue, size: 44 }));
     }
     const ox = cx - (4 * (SIZE + GAP) - GAP) / 2 + SIZE / 2;
     OPS.forEach((op, i) => {
-      this.opBtns.push(makeButton(this, ox + i * (SIZE + GAP), PY + 424, SIZE, SIZE, GLYPH[op], () => this.pickOp(op), { fill: PAL.terracotta, size: 52 }));
+      this.opBtns.push(makeButton(this, ox + i * (SIZE + GAP), PY + 386, SIZE, SIZE, GLYPH[op], () => this.pickOp(op), { fill: PAL.terracotta, size: 52 }));
     });
-    makeButton(this, cx - 135, PY + 538, 260, SIZE, 'Undo', () => this.undo(), { fill: PAL.steel, size: 32 });
-    makeButton(this, cx + 135, PY + 538, 260, SIZE, 'Reset', () => this.reset(), { fill: PAL.sageDark, size: 32 });
+    makeButton(this, cx - 135, PY + 496, 260, SIZE, 'Undo', () => this.undo(), { fill: PAL.steel, size: 32 });
+    makeButton(this, cx + 135, PY + 496, 260, SIZE, 'Reset', () => this.reset(), { fill: PAL.sageDark, size: 32 });
     this.recompute();
   }
 

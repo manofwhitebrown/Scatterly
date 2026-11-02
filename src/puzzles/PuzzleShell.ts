@@ -5,15 +5,13 @@ import { isLowFx } from '../core/perf';
 import { flags } from '../core/flags';
 import { playFx } from '../fx';
 import { PuzzleNotes } from './PuzzleNotes';
+import { BAR_TOP, BTN_H, NOTES_LEFT, NOTES_W, PH, PW, PX, PY } from './layout';
 import { sfx } from '../audio/sfx';
 import type { SfxName } from '../audio/sfx';
 import { PAL, makeButton, makeText, panelBox } from '../art/palette';
 import type { Btn } from '../art/palette';
 
-export const PX = 140;
-export const PY = 60;
-export const PW = 1000;
-export const PH = 600;
+export { PX, PY, PW, PH } from './layout';
 
 export function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
@@ -37,8 +35,7 @@ export function shuffle<T>(arr: T[], rand: () => number): T[] {
 }
 
 const HINT_SHOW_MS = 6000;
-const BTN_H = 96;
-const BAR_Y = GAME_H - BTN_H - 4; // Hint / Notes / Skip: 96 px tall, flush with the screen bottom
+const BAR_Y = BAR_TOP;
 
 /** Hook surface the e2e bot uses (only installed with ?e2e=1). */
 export interface PuzzleE2E { autoSolve(): void; hint(): void; skip(confirm: boolean): void }
@@ -118,7 +115,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
     const notes = makeButton(this, PX + PW / 2, BAR_Y + BTN_H / 2, 200, BTN_H, 'Notes', () => this.drawer?.toggle(), { fill: PAL.sage, size: 30 });
     const skip = makeButton(this, PX + PW - 120, BAR_Y + BTN_H / 2, 200, BTN_H, 'Skip', () => this.askSkip(), { fill: PAL.sageDark, size: 30 });
     this.buttons.push(hint, notes, skip);
-    this.drawer = new PuzzleNotes(this, PX + PW - 420, PY + 110, PH - 130, this.notes);
+    this.drawer = new PuzzleNotes(this, NOTES_LEFT, PY + 110, PH - 150, this.notes);
     this.drawer.set(this.req.kind === 'code');
     this.buildHintBox();
     this.buildConfirm();
@@ -151,8 +148,8 @@ export abstract class PuzzleShell extends Phaser.Scene {
   }
 
   private buildHintBox(): void {
-    const w = PW - 80;
-    const c = this.add.container(PX + 40, PY + PH - 100).setDepth(50).setVisible(false);
+    const w = PW - 160;
+    const c = this.add.container(PX + 20, PY + 6).setDepth(50).setVisible(false);
     const bg = this.add.graphics();
     panelBox(bg, 0, 0, w, 76, 16, PAL.butter, PAL.terracotta, 3);
     this.hintText = makeText(this, w / 2, 38, '', 28, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: w - 40 });

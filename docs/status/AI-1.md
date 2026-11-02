@@ -65,7 +65,9 @@
 ## Tier 1 scenes
 - `code` DONE (src/puzzles/CodeScene.ts, 134 lines): 5x2 digit keys + Back/Enter, all 96 px tall, sits left of the notes drawer; facts come from `notes[].facts` via `PUZZLES.code.generate(seed, d, { facts })`; wrong code shows "X Not the code (n)" and a shake (skipped under reducedMotion); `hintLine()` uses `PUZZLES.code.hint`; `e2eSolve()` types the reference answer through `press`/`enter`. Added to `IMPLEMENTED`.
 - `target` DONE (src/puzzles/TargetScene.ts): 96 px number tiles (consumed when used, result becomes a new tile), 4 operator keys, Undo and Reset (state is replayed from `history`, so undo cannot drift), selection shown by a bold outline ring plus a "7 x ? " line (not colour only), invalid ops (non-whole divide, below 1) show "X That does not work". Win via `PUZZLES.target.check(spec, history)`. `e2eSolve` taps tile, operator, tile for each reference step.
-- Next: sequence, lights, slide, pipes, mastermind, memory.
+- `sequence` DONE (src/puzzles/SequenceScene.ts): up to 7 term boxes (the gap is a thick outline with "?", shown without colour), 2x2 answer buttons (300x96) on difficulty 1-2, shared keypad on 3 with the typed number shown inside the gap; wrong choice is disabled and marked "X n is not it".
+- LAYOUT FIX (my bug, caught by review against the 720 px screen): the first `code` and `target` layouts ran into the 96 px bottom bar and the code Enter row was partly off-screen. Now: shared `Keypad.ts` (6 columns, Back/OK as the 6th column, ends at y=610), geometry constants in `layout.ts` (plain data), notes drawer narrowed to 340 px and the hint banner moved to the top of the panel. `tests/puzzle-layout.test.ts` guards rows against the bar and the drawer.
+- Next: lights, slide, pipes, mastermind, memory.
 - Not verified: how it looks/plays in a browser (no Playwright browser available locally; CI e2e will be the first run).
 
 ## Requests (new)

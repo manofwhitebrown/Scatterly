@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
 import type { Clue } from '../shared/types';
 import { PAL, makeText } from '../art/palette';
+import { NOTES_W } from './layout';
 
 const MAX_SHOWN = 5;
-const DW = 400;
+const DW = NOTES_W;
 
 /** Notes drawer: discovered clues with their numeric facts highlighted. Built once, only toggled afterwards. */
 export class PuzzleNotes {
