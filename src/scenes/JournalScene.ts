@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
-import { SCENE } from '../shared/types';
+import { PUZZLE_KINDS, SCENE } from '../shared/types';
+import type { PuzzleStat } from '../shared/types';
+import { bookEntries } from './puzzleBook';
 import { Button } from '../ui/Button';
 import { ScrollArea } from '../ui/ScrollArea';
 import { COLOR, CSS, SIZE, drawPlate, enterFade, fmtClock, getProfile, go, makeText } from '../ui/theme';
@@ -40,7 +42,6 @@ export class JournalScene extends Phaser.Scene {
       layer.add(makeText(this, bx + BOX_W / 2, y + 30, `Day ${i + 1}`, { fontSize: `${SIZE.body}px`, color: today ? CSS.amber : CSS.cream }).setOrigin(0.5));
       layer.add(makeText(this, bx + BOX_W / 2, y + 68, done ? '✓' : today ? 'Today' : '·', { fontSize: `${SIZE.body}px`, color: done ? CSS.green : CSS.muted }).setOrigin(0.5));
     }
-    layer.addAt(board, 0);
     y += 140;
 
     const s = p.stats;
@@ -57,6 +58,8 @@ export class JournalScene extends Phaser.Scene {
       y += 44;
     }
     y += 20;
+    y = this.buildBook(layer, board, p.puzzles, y);
+    layer.addAt(board, 0);
     layer.add(makeText(this, 80, y, 'Achievements', { fontSize: `${SIZE.heading}px`, fontStyle: 'bold', color: CSS.amber }).setOrigin(0, 0));
     y += 60;
     if (p.achievements.length === 0) {
@@ -85,5 +88,24 @@ export class JournalScene extends Phaser.Scene {
       this.scroll = null;
       this.tweens.killAll();
     });
+  }
+
+  /** Puzzle Book: one card per puzzle kind (locked/unlocked, solved, best time, skip rate). Returns the next y. */
+  private buildBook(layer: Phaser.GameObjects.Container, board: Phaser.GameObjects.Graphics, stats: Record<string, PuzzleStat>, top: number): number {
+    layer.add(makeText(this, 80, top, 'Puzzle Book', { fontSize: `${SIZE.heading}px`, fontStyle: 'bold', color: CSS.amber }).setOrigin(0, 0));
+    const y = top + 60;
+    bookEntries(stats).forEach((e, i) => {
+      const x = 80 + (i % 2) * 560;
+      const cy = y + Math.floor(i / 2) * 112;
+      drawPlate(board, x, cy, 540, 100, 14, e.unlocked ? COLOR.plateLight : COLOR.plate, e.unlocked ? COLOR.amber : COLOR.plateEdge);
+      layer.add(makeText(this, x + 20, cy + 14, e.unlocked ? e.name : `${e.name} (locked)`, { fontSize: `${SIZE.body}px`, fontStyle: 'bold', color: e.unlocked ? CSS.cream : CSS.muted }).setOrigin(0, 0));
+      const detail = !e.unlocked
+        ? 'Not unlocked yet'
+        : e.solved + e.skipped === 0
+          ? 'Not played yet'
+          : `Solved ${e.solved}  ·  Best ${e.bestMs === null ? '-' : fmtClock(Math.round(e.bestMs / 1000))}  ·  Skipped ${e.skipPct ?? 0}%`;
+      layer.add(makeText(this, x + 20, cy + 54, detail, { fontSize: '26px', color: CSS.muted }).setOrigin(0, 0));
+    });
+    return y + Math.ceil(PUZZLE_KINDS.length / 2) * 112 + 24;
   }
 }
