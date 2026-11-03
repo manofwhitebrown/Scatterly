@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
-import { interactives, openGame, startMorning, tapMatch, tapWhenReady, waitScene } from '../e2e/helpers';
+import { interactives, openGame, startMorning, tapMatch, waitScene } from '../e2e/helpers';
 import { IMPLEMENTED } from '../../src/puzzles/manifest';
 import { PUZZLE_SCENE } from '../../src/shared/types';
 import type { PuzzleKind } from '../../src/shared/types';
@@ -10,6 +10,13 @@ import type { PuzzleKind } from '../../src/shared/types';
 const OUT = 'docs/shots';
 const SHOT_PUZZLES: PuzzleKind[] = ['untangle', 'lights', 'mastermind'];
 const SIZES = [{ w: 1280, h: 720, suffix: '' }, { w: 800, h: 360, suffix: '-800' }] as const;
+
+/** Fails the run when the named scene is not active (and, for Home, when the old Menu is) so a shot can never show the wrong view. */
+async function expectScene(page: Page, key: string): Promise<void> {
+  const active = await page.evaluate(() => window.__scatterly?.activeScenes() ?? []);
+  if (!active.includes(key)) throw new Error(`shot "${key}": active scenes are [${active.join(', ')}]`);
+  if (key === 'Home' && active.includes('Menu')) throw new Error('shot "Home": old Menu is also active');
+}
 
 async function snap(page: Page, name: string): Promise<void> {
   for (const s of SIZES) {
@@ -33,35 +40,31 @@ async function dismissAny(page: Page): Promise<void> {
 
 test.beforeAll(() => mkdirSync(OUT, { recursive: true }));
 
-test('menu', async ({ page }) => {
+test('menu (old default view)', async ({ page }) => {
   await openGame(page);
   await page.waitForTimeout(1500);
+  await expectScene(page, 'Menu');
   await snap(page, 'menu');
 });
 
-test('home overview and focus rooms (?view=home)', async ({ page }) => {
-  await page.goto('/?e2e=1&view=home'); // Boot hands over to Home directly
+test('home overview and focus rooms (?view=home boots Home directly)', async ({ page }) => {
+  await page.goto('/?e2e=1&view=home');
   await waitScene(page, 'Home', 60_000);
-  await dismissAny(page);
-  await page.waitForTimeout(2500);
+  await page.waitForTimeout(2000);
+  await expectScene(page, 'Home');
   await snap(page, 'home-overview');
-  if (await tapMatch(page, 'Play')) { // the small Play sheet over the house
-    await page.waitForTimeout(800);
-    await snap(page, 'home-play-sheet');
-    await page.goto('/?e2e=1&view=home');
-    await waitScene(page, 'Home', 60_000);
-  await dismissAny(page);
-    await page.waitForTimeout(1500);
-  }
   const rooms = ['entrance', 'living', 'kitchen', 'bedroom', 'bathroom', 'study'];
   for (const room of rooms) {
-    const ok = await page.evaluate((r) => {
-      const sc = window.__scatterly?.game.scene.getScene('Home') as unknown as { __e2e?: { focus(room: string): void } } | null;
-      if (!sc?.__e2e) return false;
-      try { sc.__e2e.focus(r); return true; } catch { return false; }
+    const got = await page.evaluate((r) => {
+      const sc = window.__scatterly?.game.scene.getScene('Home') as unknown as { __e2e?: { focus(room: string): void; focused(): string | null } } | null;
+      if (!sc?.__e2e) return 'no-hooks';
+      sc.__e2e.focus(r);
+      return 'ok';
     }, room);
-    if (!ok) continue;
-    await page.waitForTimeout(900);
+    if (got !== 'ok') throw new Error(`focus-${room}: Home __e2e hooks missing`);
+    await page.waitForTimeout(1000);
+    const focused = await page.evaluate(() => (window.__scatterly?.game.scene.getScene('Home') as unknown as { __e2e: { focused(): string | null } }).__e2e.focused());
+    if (focused !== room) throw new Error(`focus-${room}: Home reports focused=${String(focused)}`);
     await snap(page, `focus-${room}`);
   }
 });
@@ -72,6 +75,7 @@ for (const kind of SHOT_PUZZLES.filter((k) => IMPLEMENTED.includes(k))) {
     await page.evaluate((k) => window.__scatterly!.openPuzzle(k, 2, 401), kind);
     await waitScene(page, PUZZLE_SCENE[kind]);
     await page.waitForTimeout(1200);
+    await expectScene(page, PUZZLE_SCENE[kind]);
     await snap(page, `puzzle-${kind}`);
   });
 }
@@ -92,5 +96,6 @@ test('result', async ({ page }) => {
   });
   await waitScene(page, 'Result', 30_000);
   await page.waitForTimeout(3000);
+  await expectScene(page, 'Result');
   await snap(page, 'result');
 });
