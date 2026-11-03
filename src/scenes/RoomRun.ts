@@ -39,6 +39,7 @@ export interface RunView {
 export interface RunHost {
   goRoom(room: RoomId): void;
   useHouse?: boolean; // views with the Dollhouse (HUD v3: house button instead of room tabs)
+  onHouse?(): void; // overrides the Dollhouse overlay (the Home world zooms out instead)
   tutorial?(): boolean; // starts the guided tutorial (relaxed mornings); true when it started
 }
 
@@ -122,7 +123,7 @@ export class RoomRun {
         onClues: () => this.openBoard(),
         onHint: () => this.useHint(),
         onRoom: (room) => this.host.goRoom(room),
-        onHouse: this.host.useHouse ? () => this.openHouse() : undefined,
+        onHouse: this.host.useHouse ? () => (this.host.onHouse ? this.host.onHouse() : this.openHouse()) : undefined,
       },
     });
     sfx.setRoomAmbience(this.start);

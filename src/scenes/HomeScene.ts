@@ -7,6 +7,7 @@ import { COLOR, DEPTH, ROOM_LABEL, SAFE, drawPlate, isCalm, makeText } from '../
 import { HomeMenu } from './HomeMenu';
 import { HomeSpots } from './HomeSpots';
 import { RoomRun } from './RoomRun';
+import type { RunView } from './RoomRun';
 import { drawRoomShell } from './homeDraw';
 import {
   HOUSE_WORLD, LINKS, roomAt, roomBounds, focusCamera, lerpCamera, overviewCamera, screenToArt,
@@ -85,7 +86,11 @@ export class HomeScene extends Phaser.Scene {
     this.run = run;
     const spots = new HomeSpots(this, this.world, allSpots(run.profile).filter((sp) => run.rooms.includes(sp.room)), run.session, () => this.cam);
     this.spots = spots;
-    run.mount(spots, { goRoom: (r) => this.focusOn(r), useHouse: true });
+    const view: RunView = {
+      playAction: (sp) => spots.playAction(sp), refresh: (id) => spots.refresh(id), pulse: (id) => spots.pulse(id),
+      center: (id) => spots.center(id), zoomTo: (sp, done) => this.zoomToSpot(sp, done), resetZoom: () => this.resetZoom(),
+    };
+    run.mount(view, { goRoom: (r) => this.focusOn(r), useHouse: true, onHouse: () => { if (!run.modalOpen()) this.focusOn(null); } });
     this.focusRoom = run.start;
     this.apply(focusCamera(run.start, GAME_W, GAME_H));
     this.refreshDim();
@@ -112,6 +117,7 @@ export class HomeScene extends Phaser.Scene {
   private apply(c: CameraState): void {
     this.cam = c;
     this.world.setScale(c.zoom).setPosition(GAME_W / 2 - c.cx * c.zoom, GAME_H / 2 - c.cy * c.zoom);
+    this.spots?.syncBadges();
   }
 
   private onDown(p: Phaser.Input.Pointer): void {
@@ -148,14 +154,32 @@ export class HomeScene extends Phaser.Scene {
     this.menu?.setShown(!room);
     this.spots?.showRoom(room);
     if (room) this.run?.setCurrent(room);
-    if (isCalm(this)) { this.apply(to); return; }
+    this.tweenTo(to);
+  }
+
+  private tweenTo(to: CameraState, ms = TWEEN_MS, done?: () => void): void {
+    this.tween?.stop();
+    this.tween = null;
+    if (isCalm(this)) { this.apply(to); done?.(); return; }
     const from = this.cam;
     const state = { t: 0 };
     this.tween = this.tweens.add({
-      targets: state, t: 1, duration: TWEEN_MS, ease: 'Cubic.easeOut',
+      targets: state, t: 1, duration: ms, ease: 'Cubic.easeOut',
       onUpdate: () => this.apply(lerpCamera(from, to, state.t)),
-      onComplete: () => { this.apply(to); this.tween = null; },
+      onComplete: () => { this.apply(to); this.tween = null; done?.(); },
     });
+  }
+
+  /** Before a lock's puzzle opens: push the camera onto the piece, then call done. */
+  private zoomToSpot(spot: Spot, done: () => void): void {
+    const c = this.spots?.artCentre(spot.id);
+    if (!c || !this.focusRoom) { done(); return; }
+    const base = focusCamera(this.focusRoom, GAME_W, GAME_H);
+    this.tweenTo({ zoom: base.zoom * 1.6, cx: c.x, cy: c.y }, 240, done);
+  }
+
+  private resetZoom(): void {
+    if (this.focusRoom) this.tweenTo(focusCamera(this.focusRoom, GAME_W, GAME_H), 240);
   }
 
   private refreshDim(): void {

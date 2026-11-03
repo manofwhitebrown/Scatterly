@@ -4,7 +4,7 @@ import type { RoomId, Spot, SpotId } from '../shared/types';
 import type { RunView } from './RoomRun';
 import { FLOOR1_RAISE, HOUSE_WORLD, project } from './homeWorld';
 import type { CameraState, Pt } from './homeWorld';
-import { isCalm } from '../ui/theme';
+import { CSS, isCalm, makeText } from '../ui/theme';
 import { GAME_H, GAME_W } from '../shared/types';
 
 const UNIT = 6; // art px per layout height unit
@@ -16,14 +16,19 @@ const shade = (c: number, k: number): number => {
 };
 const BASE: Partial<Record<string, number>> = { fridge: 0xe8e4da, sofa: 0x7d9b7a, bed: 0xc9a0a8, tv: 0x2f2f38, plant: 0x5e9a5a, rug: 0xb7674b, sink: 0xbfd0d4 };
 
-interface Node { spot: Spot; g: Phaser.GameObjects.Graphics; centre: Pt }
+interface Node { spot: Spot; g: Phaser.GameObjects.Graphics; centre: Pt; badge?: Phaser.GameObjects.Text }
+const GLYPH = { ruledOut: '✕', hunch: '?' } as const;
 
 /** Placeholder tappable pieces for the Home world (iso boxes) and the RunView the run controller drives. Hit-testing is by nearest centre. */
 export class HomeSpots implements RunView {
   private readonly nodes = new Map<SpotId, Node>();
   private shown: RoomId | null = null;
+  private readonly off: () => void;
+  private readonly world: Phaser.GameObjects.Container;
 
   constructor(private readonly scene: Phaser.Scene, world: Phaser.GameObjects.Container, spots: Spot[], private readonly session: GameSession, private readonly camera: () => CameraState) {
+    this.world = world;
+    this.off = session.on('mark', () => this.syncBadges());
     for (const spot of spots) {
       const slot = HOUSE_WORLD.find((s) => s.room === spot.room);
       if (!slot) continue;
@@ -55,10 +60,24 @@ export class HomeSpots implements RunView {
     if (open) face(0x20150e, [P(0.2 * w, d, 0.3 * h), P(0.8 * w, d, 0.3 * h), P(0.8 * w, d, 0.7 * h), P(0.2 * w, d, 0.7 * h)]);
   }
 
+  /** Deduction badges (✕ ruled out, ? hunch): one text per marked piece, kept ~40 game px whatever the zoom. */
+  syncBadges(): void {
+    const marks = this.session.marks();
+    const z = this.camera().zoom;
+    for (const [id, n] of this.nodes) {
+      const mark = marks.get(id);
+      if (!mark) { n.badge?.setVisible(false); continue; }
+      if (!n.badge) { n.badge = makeText(this.scene, 0, 0, GLYPH[mark], { fontSize: '40px', fontStyle: 'bold' }).setOrigin(0.5, 1); this.world.add(n.badge); }
+      n.badge.setText(GLYPH[mark]).setColor(mark === 'hunch' ? CSS.amber : CSS.red).setScale(1 / z)
+        .setPosition(n.centre.x, n.centre.y - (n.spot.iso.h * UNIT) / 2 - 4 / z).setVisible(n.spot.room === this.shown);
+    }
+  }
+
   /** Only the focused room's pieces are visible and tappable. */
   showRoom(room: RoomId | null): void {
     this.shown = room;
     for (const n of this.nodes.values()) n.g.setVisible(n.spot.room === room);
+    this.syncBadges();
   }
 
   private screen(centre: Pt): Pt {
@@ -96,13 +115,16 @@ export class HomeSpots implements RunView {
     this.scene.tweens.add({ targets: n.g, alpha: 0.5, duration: 120, yoyo: true, repeat: 1, onComplete: () => n.g.setAlpha(1) });
   }
 
+  artCentre(id: SpotId): Pt | null { return this.nodes.get(id)?.centre ?? null; }
+
   center(id: SpotId): { x: number; y: number } | null {
     const n = this.nodes.get(id);
     return n ? this.screen(n.centre) : null;
   }
 
   destroy(): void {
-    for (const n of this.nodes.values()) n.g.destroy();
+    this.off();
+    for (const n of this.nodes.values()) { n.g.destroy(); n.badge?.destroy(); }
     this.nodes.clear();
   }
 }

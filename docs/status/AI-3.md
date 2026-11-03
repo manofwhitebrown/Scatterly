@@ -7,6 +7,7 @@
 
 - HomeMenu (menu-as-house): Play / Journal / Settings over the Overview; Play opens a small sheet with Relaxed/Rush/Daily chips, Short/Standard/Long chips (saved to settings) and Start. Under `?view=home` the Menu redirects to Home; Start still runs the old Room scene (runScene = Room) until RoomRun moves into Home.
 - Play now starts the morning INSIDE Home: HomeScene runs RoomRun (HUD, clock, inspect, gates, puzzles) with HomeSpots as its view (placeholder iso boxes, open state, nearest-centre taps at 112 px, long-press marks, only the focused room's pieces tappable). ROOM_SIZE adapter now matches the legacy room layouts so all spots fit (tested).
+- Home run polish: HUD house button zooms back to the Overview (RunHost.onHouse), deduction badges (x / ?) in Home, camera pushes onto a lock before its puzzle opens and resets after.
 
 ## Verified
 - `npx tsc --noEmit`: no errors. `npx vitest run tests/home`: 10 home tests; 340 total. `npm run build`: ok (dist 2245 KB, over the 2048 KB soft budget, under the 2560 KB limit). `npm run secret-scan`: clean.
