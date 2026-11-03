@@ -4,6 +4,8 @@
 Checked at f1e8cc6: `path.ts`, `replay.ts`, `src/art/manifest.ts` (stub) landed. STILL missing: Contract v4 (`SCENE.Home/Chill/Builder`, `ART`, save v4, ISO still 64x32), `src/core/assets.ts`, `src/logic/builder.ts`, `useTreat`. HomeScene, Builder, Chill, new Settings fields and the manifest-driven UI kit stay blocked on them (I do not edit `src/shared/types.ts`).
 
 ### Done this push
+- Case flow, first part (owner item 9): `caseProgress.ts` (pure, spoiler-free counts: rooms searched, found/targets, locks left) + `CaseUi.ts`: a strip under the HUD ("Rooms 1/4  Found 1/3  Locks 5") and a NON-modal checkpoint bar after each find ("Nice find! 2 more to go." with Keep going / Take a break, auto-hides after 7 s; Take a break opens Pause). Not shown as a modal on purpose: it never blocks input or the clock, and the e2e bot is unaffected. Rush gets the strip only. One line added to `RoomRun.mount` (file now 399 lines, cap 400). Tests: tests/ui-caseprogress.test.ts (pure text + real GameSession).
+- Still to do for item 9: Menu Resume button (needs autosave wiring from AI-1/AI-2; `snapshot.ts` exists), sessionLength in the mode picker, compound-gate finale presentation.
 - HomeScene slice 1 (`?view=home`, `SCENE.Home`): `HomeScene extends IsoRoomScene` under its own key, so Overview (house button, Dollhouse overlay) <-> Focus (room switch) and RoomRun rules work under Home; `__e2e = { hotspots, doors, focus(room), overview }`; `runScene()` routes ModeSelect/House to Home when the flag is set; `core/perf.ts` hook falls back to Home (AI-1's file, one line). NOT yet the single connected world: baked RoomLayer, global-grid camera pan/zoom and dimmed unfocused rooms are still to do and wait on `core/assets.ts` + AI-4 frames.
 - Contract v4 landed (SAVE_VERSION 4, SCENE.Home/Chill/Builder). Still missing: `core/assets.ts`, `logic/builder.ts`, `useTreat`, achievement progress.
 - Settings v2 (`settingsModel.ts` pure + `SettingsScene.ts`): two columns, every control >= 96 px: sfx, music, vibration, low fx, reduced motion, walk animation, match my clock, music/effect/ambience level (0/25/50/75/100%), quality (auto/low/high), case length (short/standard/long), two-step reset. Values persist in the save. Audio levels are applied for real: `engine.ts` got `setVolumes` and music/ambience buses join per-group gains (AI-4's folder, small edit because AI-4 is busy; `makeBus(c, gain, group?)`); Menu's first tap applies them. `quality`, `matchClock`, `walkAnim`, `sessionLength` are stored but nothing reads them yet (they belong to Home, the day/night overlay and the generator).
@@ -17,9 +19,10 @@ Checked at f1e8cc6: `path.ts`, `replay.ts`, `src/art/manifest.ts` (stub) landed.
 - Iso room, Dollhouse overlay, Menu backdrop, Result story, Puzzle Book (19 kinds), first-morning tutorial (relaxed), hit areas >= 96 px via `ui/hit.pickSpot`.
 
 ## Verified (commands run)
-- `npm test` 293/293, `npx tsc --noEmit` clean, `npm run build` green, JS 434.1 KB gzip (budget 520), `node scripts/secret-scan.mjs` run before push.
+- `npm test` 307/307, `npx tsc --noEmit` clean, `npm run build` green, JS 435.3 KB gzip (budget 520), `node scripts/secret-scan.mjs` run before push.
 
 ## Not verified
+- Case strip and checkpoint bar placement (strip at y=70 under the HUD bar, bar at bottom centre) have not been seen on screen; they may overlap iso art.
 - `?view=home` has not been run in a browser (no Playwright browsers here); the Home slice only reuses the iso room, so it should look like `?view=iso`.
 - Anything visual or tactile (feel, fps, haptics, Journal layout of the longer achievement list): never seen on a device; owner checks with `?debug=1`.
 - Settings two-column layout and the volume feel (squared curve) have not been seen or heard.

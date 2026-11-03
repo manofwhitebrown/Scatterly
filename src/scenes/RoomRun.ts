@@ -12,6 +12,7 @@ import { InspectPanel } from '../ui/InspectPanel';
 import { Toast } from '../ui/Toast';
 import { Dim, SIZE, getProfile, go, isCalm, makeText, vibrate } from '../ui/theme';
 import { timeUpCard } from './RoomCardConfigs';
+import { CaseUi } from './CaseUi';
 import { ModalCard } from './RoomCards';
 import { burst } from './RoomFx';
 import { RoomFlyouts } from './RoomFlyouts';
@@ -135,7 +136,7 @@ export class RoomRun {
     });
     this.card = new ModalCard(s, this.dim);
     this.fly = new RoomFlyouts(s);
-    this.unsubs.push(this.session.on('clue', () => this.onClue()), this.session.on('complete', () => this.onComplete()));
+    this.unsubs.push(this.session.on('clue', () => this.onClue()), this.session.on('complete', () => this.onComplete()), new CaseUi(s, this.session, this.scenario, this.rooms, this.spotRoom, this.mode, () => this.flow.openPause()).off);
     this.clock = new RoomClock(
       s,
       this.mode === 'rush' ? this.scenario.timeLimitSec : null,
