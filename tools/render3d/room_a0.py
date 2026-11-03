@@ -33,6 +33,11 @@ K.PROPS = [
  ("pottedPlant",6.5,5.5,0,0,{},None),
  ("coatRackStanding",0.3,5.9,0,0,{},None),
  ("plantSmall3",0.25,0.5,0,"TOP:bookcaseClosedWide",{},None),
+ ("lampWall",0,1.9,1,0.55,{},"L"),
+ ("pillowLong",5.95,3.0,3,0.28,{"carpet":"TERRA"},None),
+ ("plantSmall1",5.3,4.9,0,"TOP:loungeSofaOttoman",{},None),
+ ("benchCushionLow",1.9,5.5,0,0,{"carpet":"TERRA","carpetDarker":"TERRA"},None),
+ ("speaker",0.3,3.9,1,0,{},"L"),
  ("rugDoormat",2.0,5.6,0,0,{"carpet":"TEAL","carpetDarker":"TEAL"},None),
 ]
 
@@ -46,15 +51,19 @@ def spr(rows):
             c=PAL.get(ch)
             if c: im.putpixel((x,y),hx(c)+(255,))
     return im
-CAT=spr([
-"..kk...kk......",
-".kwwk.kwwk.....",
-"kwwwwkwwwwk....",
-"kwkwwwwwkwwkkk.",
-"kwwwwwwwwwwwOk.",
-"kOOwwwwwwwOOOk.",
-".kOOOwwwOOOkk..",
-"..kkkkkkkkk...."])
+def make_cat():
+    w,h=22,12; im=Image.new('RGBA',(w,h),(0,0,0,0)); d=ImageDraw.Draw(im)
+    o,w_,s_=hx('#f2a07f'),hx('#fff6e2'),hx('#d97a5c')
+    d.ellipse([2,4,16,11],fill=w_); d.ellipse([13,3,20,10],fill=w_)
+    d.polygon([(13,4),(14,0),(16,3)],fill=w_); d.polygon([(17,3),(19,0),(20,4)],fill=w_)
+    for x in (5,8,11): d.line([x,5,x+1,7],fill=o)
+    d.arc([0,5,8,11],150,330,fill=s_); d.ellipse([14,5,16,6],fill=hx('#3a2530'));d.ellipse([18,5,19,6],fill=hx('#3a2530'))
+    # outline
+    a=np.array(im); al=a[...,3]>0; out=Image.new('RGBA',(w+2,h+2),(0,0,0,0)); out.alpha_composite(im,(1,1))
+    A=np.array(out); m=A[...,3]>0; edge=np.zeros_like(m)
+    for dy,dx in ((1,0),(-1,0),(0,1),(0,-1)): edge|=np.roll(m,(dy,dx),(0,1))
+    A[edge&~m]=list(hx('#3a2530'))+[255]; return Image.fromarray(A,'RGBA')
+CAT=make_cat()
 MUG=spr([".kkk.","kwwkk","kwwwk","kwwk.",".kk.."]).copy()
 def book_row(img,x,y,cols,h=5):
     x,y=int(round(x)),int(round(y))

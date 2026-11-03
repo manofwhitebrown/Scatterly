@@ -262,10 +262,13 @@ def draw_shell(img):
     plank = np.floor(gy * 3).astype(int)
     seg = np.floor(gx + (plank * 0.37) % 1.0).astype(int)
     hsh = ((plank * 73856093) ^ (seg * 19349663)) & 0xFF
-    tone = np.where(hsh % 5 == 0, 0, 1)
-    base = RAMP_ARR[RAMP_IDS["WOOD"]][tone]
+    r1=RAMP_ARR[RAMP_IDS["WOOD"]][1].astype(np.float32); r0=RAMP_ARR[RAMP_IDS["WOOD"]][0].astype(np.float32); r2=RAMP_ARR[RAMP_IDS["WOOD"]][2].astype(np.float32)
+    v=(hsh % 4)[..., None]
+    base=np.where(v==0,r1,np.where(v==1,r1*1.05,np.where(v==2,r1*0.94,r0*0.97)))
+    grain=((((xs//2)*7+(ys//2)*13+plank*5)&15)==0)[..., None]
+    base=np.where(grain,base*0.93,base)
     seam = (np.abs(gy * 3 - np.round(gy * 3)) < 0.05) | (np.abs((gx + (plank * 0.37) % 1.0) - np.round(gx + (plank * 0.37) % 1.0)) < 0.03)
-    col = np.where(seam[..., None], RAMP_ARR[RAMP_IDS["WOOD"]][2][None, None, :].astype(np.uint8), base)
+    col = np.where(seam[..., None], (r1+r2)/2*0.95, base).clip(0,255).astype(np.uint8)
     fl[..., :3] = col; fl[inside, 3] = 255
     img.alpha_composite(Image.fromarray(fl, "RGBA"))
     d = ImageDraw.Draw(img)

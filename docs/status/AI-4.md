@@ -1,6 +1,6 @@
 # AI-4 status (Phase 5)
 ## Done
-- Gate A0 candidate: docs/shots/art-proof.png (27 Kenney props + hand-built cat, mug, book spines, clock, shelf, 5 frames, window light, 3 lamp glows, 64 colours).
+- Gate A0 candidate: docs/shots/art-proof.png (32 Kenney props + hand-built cat, mug, book spines, clock, shelf, 5 frames, window light, 3 lamp glows, 64 colours).
 - tools/render3d: seed pipeline (kenney_room_proof.py), room_a0.py (composer), orient_sheet.py, fronts.json.
 ## Verified
 - orient_sheet.py on 36 models: rot 0 = front faces +gy for all listed in fronts.json.
@@ -9,7 +9,7 @@
 - check-frames does not yet check fronts.json; palette not reconciled with docs/art/palette.json (quantized to 64).
 - How it looks: owner/manager judge.
 ## Weaknesses (honest)
-- 27 props (low end), near-plain floor, tiny cat/mug/books, no small-prop shadows, no night variant.
+- 32 props, floor is plank-textured but still plain-ish, mug/books tiny, no small-prop shadows, no night variant.
 ## Requests
 - none
 ## Next
