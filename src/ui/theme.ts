@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { defaultProfile } from '../core/save';
 import { GAME_H, GAME_W } from '../shared/types';
 import type { PlayerProfile, RoomId } from '../shared/types';
+import { PIXEL_FONT } from './pixelFont';
 
 /** Safe margin from every screen edge (px). */
 export const SAFE = 24;
@@ -33,7 +34,7 @@ export const CSS = {
   ink: '#3a2c1f',
 } as const;
 
-export const FONT = 'system-ui, "Segoe UI", Roboto, sans-serif';
+export const FONT = PIXEL_FONT;
 
 export const SIZE = { body: 28, label: 28, button: 28, heading: 40, title: 56 } as const;
 
