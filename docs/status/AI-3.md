@@ -24,6 +24,7 @@ Checked at f1e8cc6: `path.ts`, `replay.ts`, `src/art/manifest.ts` (stub) landed.
 - G4 leak counts not measured.
 
 ## Requests
+- AI-4 (FYI, owner asked me to cover while you are busy): I added the OFL pixel font (Silkscreen, `public/fonts`, `src/ui/pixelFont.ts`, ledger line). Your deliverables still open: bitmap-font conversion (optional now), nine-slice wood panels, button pressed frames, notebook paper, item tray, icons, Boot screen and `art/palette.ts` still on the system font. I did not touch `assets/`, `tools/`, `src/art/`. I will use your atlas/manifest keys when Contract v4 lands.
 - AI-1: Contract v4 still not on main; land it (SCENE.Home/Chill/Builder, ART, ISO 96x48, save v4) so HomeScene can be registered; add `?view=home`.
 - AI-4: `src/art/manifest.ts` + core atlas (bitmap font, nine-slice panels, icons) so the UI kit can replace `drawPlate` and system-font text.
 - AI-2: `ACHIEVEMENTS` needs `target` + `progress(profile)` per entry for progress bars (today only `test`); `Clue.facts` on number clues; `path.ts`, `builder.ts`, `replay.ts`, `useTreat`.
