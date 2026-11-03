@@ -24,6 +24,7 @@ const WRONG: { [K in LogicPuzzleKind]: Wrong<K> } = {
   sort: (s) => [[], s.pieces.map((p) => (p.bin + 1) % s.bins.length), s.pieces.map(() => 99)],
   word: (s) => ['', 'ZZZZ', s.word + 'X', s.word.slice(1), '12'],
   sudoku: (s) => [[], s.solution.slice(1), s.solution.map(() => 1), s.solution.map((v) => (v % s.n) + 1)],
+  kenken: (s) => [[], s.solution.slice(1), s.solution.map(() => 1), s.solution.map((v) => (v % s.n) + 1)],
   memory: (s) => [[], s.sequence.slice(0, -1), s.sequence.map((v) => (v + 1) % s.pads), [...s.sequence].reverse().map((v, i) => (i === 0 ? (v + 1) % s.pads : v))],
 };
 
