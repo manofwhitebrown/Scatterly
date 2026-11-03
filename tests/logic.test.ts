@@ -133,7 +133,7 @@ describe('fairness over many seeds', () => {
 describe('house and decor spatial rules', () => {
   it('HOUSE obeys the contract', () => {
     expect(HOUSE.length).toBeGreaterThanOrEqual(48);
-    expect(HOUSE.length).toBeLessThanOrEqual(58);
+    expect(HOUSE.length).toBeLessThanOrEqual(65);
     expect(new Set(HOUSE.map((s) => s.id)).size).toBe(HOUSE.length);
     for (const r of LEGACY_ROOMS) expect(HOUSE.filter((s) => s.room === r).length).toBeGreaterThanOrEqual(8);
     for (const s of HOUSE) {

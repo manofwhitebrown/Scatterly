@@ -32,10 +32,11 @@ const wallRange = (i: IsoPlacement, wall: 'left' | 'right'): [number, number] | 
 const hit = (r: [number, number] | null, at: number, w = 1): boolean => r !== null && r[0] < at + w && at < r[1];
 
 describe('layout data', () => {
-  it('has positions for exactly the 55 house spots plus 7 storage slots, with kind footprints', () => {
-    expect(HOUSE.length).toBe(55);
+  it('has positions for exactly the 55 legacy house spots, 10 study spots and 7 storage slots, with kind footprints', () => {
+    expect(HOUSE.length).toBe(65);
+    expect(HOUSE.filter((x) => LEGACY_ROOMS.includes(x.room as never)).length).toBe(55);
     const ids = new Set([...HOUSE, ...STORAGE_SPOTS].map((s) => s.id));
-    expect(ids.size).toBe(62);
+    expect(ids.size).toBe(72);
     expect(Object.keys(SPOT_POS).sort()).toEqual([...ids].sort());
     for (const s of [...HOUSE, ...STORAGE_SPOTS]) {
       const f = KIND_FOOT[s.kind];

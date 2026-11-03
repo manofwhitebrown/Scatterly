@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { HOUSE } from '../src/content/house';
-import { HOUSE_MAP_V2, ROOM_SIZE, STAIRS, WORLD_DOORS, WORLD_ROOMS, walkGrid, worldDoorCell } from '../src/content/world';
+import { HOUSE_MAP_V2, ROOM_SIZE, STAIRS, WORLD_DOORS, WORLD_ROOMS, worldDoorCell } from '../src/content/world';
+import { walkGrid } from '../src/content/worldGrid';
 import type { Cell2, WorldRoom } from '../src/content/world';
 
 const slot = (r: WorldRoom) => HOUSE_MAP_V2.find((s) => s.room === r) as (typeof HOUSE_MAP_V2)[number];
@@ -43,10 +44,9 @@ describe('world layout v2', () => {
     expect(slot(STAIRS.upper).wy).toBe(slot(STAIRS.lower).wy);
     expect(slot(STAIRS.lower).floor).toBe(0);
     expect(slot(STAIRS.upper).floor).toBe(1);
+    expect((walkGrid(STAIRS.lower)[STAIRS.board.y] as boolean[])[STAIRS.board.x], 'board').toBe(true);
+    expect((walkGrid(STAIRS.upper)[STAIRS.landing.y] as boolean[])[STAIRS.landing.x], 'landing').toBe(true);
     for (const r of [STAIRS.lower, STAIRS.upper]) {
-      for (const c of [STAIRS.board, STAIRS.landing]) {
-        expect((walkGrid(r)[c.y] as boolean[])[c.x], `${r} ${c.x},${c.y}`).toBe(true);
-      }
       const f = STAIRS.footprint;
       expect(f.x + f.w).toBeLessThanOrEqual(ROOM_SIZE[r].w);
     }
@@ -55,10 +55,11 @@ describe('world layout v2', () => {
   it('every walkable cell of every room is connected and the whole house is one graph', () => {
     const seen = new Map<WorldRoom, Set<string>>();
     for (const r of WORLD_ROOMS) {
-      const g = walkGrid(r), cells = new Set<string>(), q: Cell2[] = [{ x: 0, y: 0 }];
-      let total = 0;
-      g.forEach((row) => row.forEach((ok) => { if (ok) total++; }));
-      cells.add('0,0');
+      const g = walkGrid(r), cells = new Set<string>();
+      let total = 0, first: Cell2 | undefined;
+      g.forEach((row, y) => row.forEach((ok, x) => { if (ok) { total++; first = first ?? { x, y }; } }));
+      const q: Cell2[] = [first as Cell2];
+      cells.add(`${(first as Cell2).x},${(first as Cell2).y}`);
       while (q.length) {
         const c = q.pop() as Cell2;
         for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {

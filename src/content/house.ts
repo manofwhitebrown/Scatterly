@@ -142,6 +142,21 @@ export const HOUSE: Spot[] = layout([
     ['drawer', 'drawer', 'Vanity drawer', 'open', 2, 'geki'],
     ['papers', 'papers', 'Magazine stack', 'lift', 2, 'pge'],
   ] },
+  // ---- Study (10, world layout v2) ----
+  { room: 'study', x: 40, bottom: 500, defs: [
+    ['bookshelfL', 'shelf', 'Left bookshelf', 'peek', 2, 'kpge'],
+    ['cabinet', 'cabinet', 'Filing cabinet', 'open', 2, 'kwiebg'],
+    ['drawerL', 'drawer', 'Desk drawer (left)', 'open', 2, 'kwige'],
+    ['desk', 'table', 'Desk', 'peek', 3, 'kwpgie'],
+    ['drawerR', 'drawer', 'Desk drawer (right)', 'open', 2, 'pgewk'],
+  ] },
+  { room: 'study', x: 40, bottom: 690, defs: [
+    ['bookshelfR', 'shelf', 'Right bookshelf', 'peek', 2, 'kpge'],
+    ['papers', 'papers', 'Stack of papers', 'lift', 2, 'kwige'],
+    ['basket', 'basket', 'Reading basket', 'search', 2, 'pegk'],
+    ['sofa', 'sofa', 'Reading sofa', 'lift', 3, 'kwpgeb'],
+    ['bin', 'bin', 'Paper bin', 'search', 1, 'ki'],
+  ] },
 ]);
 
 const BY_ID: Map<SpotId, Spot> = new Map(HOUSE.map((s) => [s.id, s]));

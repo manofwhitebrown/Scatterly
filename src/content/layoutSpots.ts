@@ -23,4 +23,7 @@ export const SPOT_POS: Record<string, readonly [number, number]> = {
   'bathroom.shelf': [0, 0], 'bathroom.sink': [2, 0], 'bathroom.cabinet': [4, 0], 'bathroom.drawer': [5, 0],
   'bathroom.plant': [0, 5], 'bathroom.basket': [0, 7], 'bathroom.bin': [1, 7], 'bathroom.bagSpot': [7, 3],
   'bathroom.papers': [7, 5],
+  // Study 10x9 (world layout v2)
+  'study.bookshelfL': [0, 0], 'study.cabinet': [2, 0], 'study.drawerL': [3, 0], 'study.desk': [4, 0], 'study.drawerR': [6, 0],
+  'study.bookshelfR': [8, 0], 'study.papers': [6, 3], 'study.basket': [0, 6], 'study.sofa': [3, 7], 'study.bin': [9, 7],
 };

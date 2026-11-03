@@ -29,7 +29,7 @@ export interface Cell2 { x: number; y: number }
 /** A doorway through the shared partition: `a` is the left room, `b` the right room, `at` the row (gy) of the opening. */
 export interface WorldDoor { a: WorldRoom; b: WorldRoom; at: number }
 export const WORLD_DOORS: WorldDoor[] = [
-  { a: 'entrance', b: 'living', at: 4 }, { a: 'living', b: 'kitchen', at: 4 },
+  { a: 'entrance', b: 'living', at: 2 }, { a: 'living', b: 'kitchen', at: 4 },
   { a: 'bathroom', b: 'bedroom', at: 4 }, { a: 'bedroom', b: 'study', at: 4 },
 ];
 
@@ -47,17 +47,6 @@ export function worldDoorCell(room: WorldRoom, other: WorldRoom): Cell2 | undefi
     if (d.b === room && d.a === other) return { x: 0, y: d.at };
   }
   return undefined;
-}
-
-/** Walkable grid of a room, `grid[y][x]`. Blocks the staircase footprint; props join as AI-2 fills them in. */
-export function walkGrid(room: WorldRoom): boolean[][] {
-  const { w, d } = ROOM_SIZE[room];
-  const grid = Array.from({ length: d }, () => Array.from({ length: w }, () => true));
-  if (room === STAIRS.lower || room === STAIRS.upper) {
-    const f = STAIRS.footprint;
-    for (let y = f.y; y < f.y + f.d; y++) for (let x = f.x; x < f.x + f.w; x++) (grid[y] as boolean[])[x] = false;
-  }
-  return grid;
 }
 
 export const floorOf = (room: RoomId): 0 | 1 | undefined => HOUSE_MAP_V2.find((s) => s.room === room)?.floor;
