@@ -27,6 +27,7 @@ const WRONG: { [K in LogicPuzzleKind]: Wrong<K> } = {
   kenken: (s) => [[], s.solution.slice(1), s.solution.map(() => 1), s.solution.map((v) => (v % s.n) + 1)],
   balance: (s) => [[], s.expected.map((v) => v + 1), s.expected.slice(1), [...s.expected, 1], s.expected.map(() => 0)],
   dial: (s) => [[], s.solution.slice(1), s.solution.map((v) => (v + 1) % s.m), [...s.solution, 0], s.solution.map(() => -1)],
+  tangram: (s) => [[], s.solution.slice(1), s.solution.map((v, i) => (i % 3 === 0 ? v + 9 : v)), s.pieces.flatMap(() => [0, 0, 0]), s.solution.map((v, i) => (i % 3 === 2 ? 9 : v))],
   memory: (s) => [[], s.sequence.slice(0, -1), s.sequence.map((v) => (v + 1) % s.pads), [...s.sequence].reverse().map((v, i) => (i === 0 ? (v + 1) % s.pads : v))],
 };
 
