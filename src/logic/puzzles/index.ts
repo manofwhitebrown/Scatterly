@@ -9,6 +9,7 @@ import { type MemorySpec, memoryPuzzle } from './memory';
 import { type UntangleSpec, type Pt, untanglePuzzle } from './untangle';
 import { type SortSpec, sortPuzzle } from './sort';
 import { type WordSpec, wordPuzzle } from './word';
+import { type SudokuSpec, sudokuPuzzle } from './sudoku';
 import type { PuzzleDef } from './types';
 
 /** kind -> { spec, answer } for the generators implemented in the logic layer. */
@@ -24,16 +25,18 @@ export interface PuzzleTypes {
   untangle: { spec: UntangleSpec; answer: Pt[] };
   sort: { spec: SortSpec; answer: number[] };
   word: { spec: WordSpec; answer: string };
+  sudoku: { spec: SudokuSpec; answer: number[] };
 }
 export type LogicPuzzleKind = keyof PuzzleTypes;
 
 export const PUZZLES: { [K in LogicPuzzleKind]: PuzzleDef<PuzzleTypes[K]['spec'], PuzzleTypes[K]['answer']> } = {
   code: codePuzzle, target: targetPuzzle, sequence: sequencePuzzle, lights: lightsPuzzle,
   slide: slidePuzzle, pipes: pipesPuzzle, mastermind: mastermindPuzzle, memory: memoryPuzzle,
-  untangle: untanglePuzzle, sort: sortPuzzle, word: wordPuzzle,
+  untangle: untanglePuzzle, sort: sortPuzzle, word: wordPuzzle, sudoku: sudokuPuzzle,
 };
 export { feedback } from './mastermind';
 export { crossings } from './untangle';
 export { codeFeasible } from './codeLock';
+export { sudokuLevel, countSolutions, LEVEL_PAR_SECONDS } from './sudoku';
 export type { Pt } from './untangle';
 export type { Fact, PuzzleCtx, PuzzleDef } from './types';

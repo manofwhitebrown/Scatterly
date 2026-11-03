@@ -104,12 +104,16 @@
 - `src/logic/path.ts`: `pathTo(room, from, to, opts?)` A* (4-neighbour, deterministic, [] if unreachable, blocked target -> ends beside it), `pathLengthCells` (-1 unreachable), `doorCell`, `standCells(room, spotId)`, `blockedCells`, `isWalkable`. `opts.owned` (storage ids) and `opts.extra` (builder footprints). Uses the CURRENT 5-room layouts; picks up layout v2 automatically. Tests: tests/logic.path.test.ts (6).
 - `src/logic/replay.ts`: `replayScript(scenario, run?)` -> `ReplayStep[] {t, room, spotId?, verb, icon, itemId?, found?}`, `replayDuration`. Icon key = `icon/<item>` else `icon/<verb>` (AI-4: please add `icon/<verb>` for the 10 verbs). Test: replay ends where each item ended up, 600 scenarios. Tests: tests/logic.replay.test.ts (4).
 
+- `src/logic/puzzles/sudoku.ts` (Tier 2, first of deliverable 7): 4x4 (levels 1-2) and 6x6 2x3-box (levels 3-5), unique solution checked at generation, `sudokuLevel(seed, level 1-5)`, `countSolutions`, 3-step hint ladder (nudge, rule, reveal cell), aha documented in file header, `LEVEL_PAR_SECONDS`. Registered in PUZZLES but NOT in ENABLED (no scene yet). Tests: tests/puzzles/sudoku.test.ts; `PUZZLE_SEEDS=2000` run: 5 levels x 2000 seeds all unique, generate p99 <= 10 ms.
+
 ### Not verified / not started
-- Deliverables 2, 5-13 (world layout v2, builder, chill/pet, Tier 2/3 generators, levels 1-5, case builder, session sim, snapshot).
+- BLOCKED on Contract v4 (AI-1; `types.ts` still has 5 rooms, SAVE_VERSION 3): deliverable 2 (layout v2: 8 rooms, `ROOM_UNLOCK_DAY`, world `HOUSE_MAP`), builder save shape (5), pet/chill profile fields (6), `Gate.chain`/`level` in Spec (10), snapshot type reference (12), Tier 3 kinds (mirror/jigsaw/flow/gears are not in PUZZLE_KINDS yet).
+- Not started (unblocked): rest of Tier 2 (kenken, balance, dial, tangram, cipher, logic, nonogram), builder pure logic with local types, snapshot.ts, case builder (9), session sim (11), clue templates 18->28, achievements >= 20.
 
 ### Requests
 - Owner: confirm that the storage purchases above (tray, dock, most entrance storage) being blocked is intended, or raise the cap.
-- AI-4: Art Bible v1 + Asset List (prop/decor ids) before I add >= 80 decor items and 25-40 props per room.
+- AI-1: land Contract v4 (Art Bible v1 is published) so I can do layout v2 and the builder/pet/chill save fields.
+- AI-4: Asset List prop/decor ids are now readable; I will use them when I add decor and props.
 
 ### Notes for AI-1/3/4
 - AI-1: Contract v4 `ReplayStep` may stay as specified; my type is a superset (optional `itemId`, `found`), so either reuse mine or add the two optional fields.
