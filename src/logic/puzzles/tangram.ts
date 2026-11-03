@@ -44,14 +44,17 @@ const toCells = (flat: readonly number[]): Cell[] => {
 };
 
 /** Random region growth from k seeds; every region is connected by construction. */
-function cut(w: number, h: number, k: number, rng: Rng): number[][] | null {
+function cut(w: number, h: number, k: number, maxSize: number, rng: Rng): number[][] | null {
   const owner = new Array<number>(w * h).fill(-1);
   const regions: number[][] = [];
   for (const s of rng.shuffle(Array.from({ length: w * h }, (_, i) => i)).slice(0, k)) { owner[s] = regions.length; regions.push([s]); }
   let left = w * h - k;
   while (left > 0) {
     const opts: Array<[number, number]> = [];
+    const growable = regions.map((cells) => cells.length);
+    const floor = Math.min(...growable);
     regions.forEach((cells, r) => {
+      if (cells.length > Math.min(maxSize - 1, floor + 1)) return; // balanced growth keeps pieces near equal size
       for (const c of cells) {
         const x = c % w, y = Math.floor(c / w);
         for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
@@ -60,7 +63,20 @@ function cut(w: number, h: number, k: number, rng: Rng): number[][] | null {
         }
       }
     });
-    if (opts.length === 0) return null;
+    if (opts.length === 0) {
+      // the smallest regions are boxed in: let any region below the size cap grow instead
+      regions.forEach((cells, r) => {
+        if (cells.length >= maxSize) return;
+        for (const c of cells) {
+          const x = c % w, y = Math.floor(c / w);
+          for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+            const nx = x + dx, ny = y + dy;
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h && owner[ny * w + nx] === -1) opts.push([r, ny * w + nx]);
+          }
+        }
+      });
+      if (opts.length === 0) return null;
+    }
     const [r, cell] = rng.pick(opts);
     owner[cell] = r;
     at(regions, r).push(cell);
@@ -74,7 +90,7 @@ function generateLevel(seed: number, level: number): TangramSpec {
   const { w, h, k, turned, maxSize } = LEVELS[lv] as (typeof LEVELS)[number];
   const rng = new Rng(deriveSeed(seed, 9191 + lv));
   for (let attempt = 0; attempt < 400; attempt++) {
-    const regions = cut(w, h, k, rng);
+    const regions = cut(w, h, k, maxSize, rng);
     if (!regions || regions.some((r) => r.length < 2 || r.length > maxSize)) continue;
     const pieces: number[][] = [];
     const solution: number[] = [];
