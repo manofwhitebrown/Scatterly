@@ -1,3 +1,5 @@
+> **New AI? Start at `docs/manager/START-HERE.md`.**
+
 # Scatterly ("Where'd I Put It?")
 
 A cosy deduction puzzle for web and Android. You wake up late and your keys, wallet and phone are missing.
