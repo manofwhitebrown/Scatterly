@@ -2,6 +2,14 @@
 
 Source: the manager rebuilt the latest main and looked at the real `?view=home` screenshots. Items 1-4 are defects in your scenes, item 5 is a new small feature.
 
+## 0. Theme swap: no more brown (quick token change, do it in the same push as item 1)
+Owner: "the brown looks disgusting; whatever else looks good is fine, even the buttons." Brown is out as a UI/background colour. Keep the orange Play button (it looks good) and the cream text. Put ALL UI colours in one `src/ui/theme.ts` token set (no hex literals in scenes) and use these interim values until AI-4 publishes the final ones in `docs/art/palette.json` (`theme` block; then read from it, or mirror it with a test that asserts they match):
+- panel `#2d4a53`, panelHi `#3f6a72`, panelLo `#1f3338`, outline `#16252a`
+- primary button (Play, Start) sun orange `#f4a93d` (keep), pressed `#d98a20`
+- secondary buttons teal `#3f7f86`, hi `#5aa3a5`, lo `#2a5a62`; danger/pause terracotta `#c8604a`
+- text cream `#fff3dc`, dim text `#cfd9d3`, camera/fallback backdrop soft sky `#cfe8ee` (the sky in item 5 replaces it)
+Replace every brown fill in buttons, HUD panels, the item tray, notebook chrome, toasts, sheets and dialogs. Do not touch furniture or floor colours (AI-4 owns those).
+
 ## 1. Focus view is unreadable (highest priority)
 In Focus the neighbouring rooms are drawn as translucent ghosts OVER the focused room, so you cannot read it, and the room is not centred or fully on screen (cut off on the left).
 - Fit and centre the focused room completely on screen with a margin (HUD safe area respected).
