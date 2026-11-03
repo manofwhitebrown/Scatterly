@@ -48,3 +48,11 @@ describe('ui kit', () => {
     expect(j.frames['ui/btn_wood_up'].frame.w).toBe(j.frames['ui/btn_wood_pressed'].frame.w);
   });
 });
+
+describe('item icons', () => {
+  it('every ItemId has an icon frame in the core atlas', async () => {
+    const { ITEM_IDS } = await import('../src/shared/types');
+    const j = load('core');
+    for (const id of ITEM_IDS) expect(j.frames[`icon/${id}`], id).toBeDefined();
+  });
+});
