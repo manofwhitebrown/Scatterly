@@ -1,4 +1,5 @@
 # AI-3 status (Phase 5, Scenes and UI)
+> **Manager inbox: read docs/manager/TO-AI-3.md first.**
 
 ## Done
 - src/scenes/homeWorld.ts: iso projection (32x16 art px), HOUSE_WORLD adapter (ground: entrance|living|kitchen; upper: bathroom|bedroom|study), LINKS, camera fit/lerp, silhouette hit-test, taps-from-overview.

@@ -1,4 +1,5 @@
 # AI-4 status (Phase 5)
+> **Manager inbox: read docs/manager/TO-AI-4.md first.**
 ## Done
 - tools/check-frames/check_fronts.py: every model in render3d/models.json needs a verified front in fronts.json (10/10 pass). orient_pending.py renders both sides for new models.
 - fronts.json now covers all 32 A0 models; none pending.
