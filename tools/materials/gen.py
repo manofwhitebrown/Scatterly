@@ -46,33 +46,67 @@ def wainscot(ramp):
 def trim_rail(ramp):
     return lambda u, v: R(ramp, 3) if v == 0 else (R(ramp, 2) if v == 1 else R(ramp, 1) if v == 2 else R(ramp, 0))
 
-def shell(room, cols, rows, wallh_units, pal_cfg, windows=(), doors=()):
-    """Returns RGBA image + pivot (top vertex of the floor diamond). Left wall = gx=0 plane, right wall = gy=0 plane."""
+TONE = {}
+for _rn, _rr in PAL['ramps'].items():
+    for _i, _c in enumerate(_rr): TONE[hx(_c)] = (_rn, _i)
+def tone_shift(c, d):
+    rn, i = TONE[tuple(c)]; return R(rn, max(0, min(4, i + d)))
+SKY = {'day': ('sky', 3, 4), 'dusk': ('terracotta', 3, 4), 'night': ('navy', 1, 4)}
+def window_px(u, v, u0, w_cells, tod):
+    """Window art in wall px (u along the wall, v up from the floor line). Returns colour or None outside."""
+    x0, x1, y0, y1 = u0, u0 + w_cells * 16, 16, 34
+    if not (x0 <= u < x1 and y0 <= v < y1): return None
+    if u < x0 + 2 or u >= x1 - 2 or v < y0 + 2 or v >= y1 - 2: return R('woodDark', 3 if v >= y1 - 2 else 2)   # frame
+    if v < y0 + 4: return R('woodDark', 3)                                                                  # sill
+    if (u - x0) % 16 == 8 or v == (y0 + y1) // 2: return R('woodDark', 2)                                  # muntins
+    rn, base, hi = SKY[tod]
+    if tod != 'night' and ((u - x0) + (v - y0)) % 14 in (0, 1) and (u - x0) % 16 < 8: return R(rn, hi)      # glint
+    if tod == 'night' and ((u * 7 + v * 13) % 29 == 4): return R('butter', 4)                               # stars
+    return R(rn, base)
+def door_px(u, v, u0, tod):
+    x0, x1, y1 = u0 + 1, u0 + 15, 30
+    if not (x0 <= u < x1 and 0 <= v < y1): return None
+    if u < x0 + 1 or u >= x1 - 1 or v >= y1 - 1: return R('woodDark', 3)
+    if u in (x1 - 4,) and 12 <= v <= 13: return R('butter', 3)                      # knob
+    if 3 <= v < 12 and x0 + 3 <= u < x1 - 3 or 16 <= v < 26 and x0 + 3 <= u < x1 - 3: return R('woodDark', 1)  # panels
+    return R('woodDark', 2)
+
+def shell(room, cols, rows, wallh_units, pal_cfg, windows=(), doors=(), tod='day'):
+    """RGBA image + pivot (top vertex of the floor diamond). Left wall = gx=0 plane (u along gy), right wall = gy=0 plane (u along gx).
+    windows: [(wall, at, w)], doors: [(wall, at)]. Window light falls on the floor as a dithered patch (not at night)."""
     wh = wallh_units * 4; rails = 3
     W = (cols + rows) * 16 + 2; H = wh + (cols + rows) * 8 + 2
-    px0 = rows * 16 + 1; py0 = wh + 1  # screen position of floor top vertex
+    px0 = rows * 16 + 1; py0 = wh + 1
     img = np.zeros((H, W, 4), np.uint8)
-    fl = pal_cfg['floor_fn']; wp = pal_cfg['wall_fn']; ws = pal_cfg['wains_fn']; tr = pal_cfg['trim_fn']
+    fl, wp, ws, tr = pal_cfg['floor_fn'], pal_cfg['wall_fn'], pal_cfg['wains_fn'], pal_cfg['trim_fn']
+    def wall_col(wall, u, v):
+        for (ww, at, wc) in windows:
+            if ww == wall:
+                c = window_px(u, v, at * 16, wc, tod)
+                if c is not None: return c
+        for (dw, at) in doors:
+            if dw == wall:
+                c = door_px(u, v, at * 16, tod)
+                if c is not None: return c
+        return ws(u, v) if v < 14 else (tr(u, wh - 1 - v) if wh - 1 - v < rails + 1 else wp(u, v))
+    def lit(gx, gy):  # floor patch under each window, shifted +2 cells away from the wall
+        if tod == 'night': return 0
+        for (ww, at, wc) in windows:
+            if ww == 'right' and at + 1 <= gx < at + wc + 1 and 1 <= gy < 3.2: return 2 if gy < 2.6 else 1
+            if ww == 'left' and at + 1 <= gy < at + wc + 1 and 1 <= gx < 3.2: return 2 if gx < 2.6 else 1
+        return 0
     for sy in range(H):
         for sx in range(W):
             x, y = sx - px0, sy - py0
-            # floor: x=(gx-gy)*16, y=(gx+gy)*8  (diamond centre sampling)
             gx = (y / 8 + x / 16) / 2; gy = (y / 8 - x / 16) / 2
             if 0 <= gx < cols and 0 <= gy < rows:
-                img[sy, sx] = fl(int(gx * 16), int(gy * 16)); continue
-            # right wall (gy in [-0.0..0], gx in [0,cols)): x=gx*16, y=gx*8 - h*4
-            gxr = x / 16; hr = (gxr * 8 - y) / 4
-            if 0 <= gxr < cols and 0 <= hr < wallh_units and -1 <= (y - gxr * 8) <= 0 or (0 <= gxr < cols and 0 <= hr < wallh_units and False):
-                pass
-            hv = gxr * 8 - y  # art px above floor line of that wall
-            if 0 <= gxr < cols and 0 <= hv < wh:
-                u = int(gxr * 16); v = int(hv)
-                img[sy, sx] = ws(u, v) if v < 14 else (tr(u, wh - 1 - v) if wh - 1 - v < rails + 1 else wp(u, v)); continue
+                c = fl(int(gx * 16), int(gy * 16)); k = lit(gx, gy)
+                if k == 2 or (k == 1 and BAYER[sy % 2, sx % 2] < 2): c = tone_shift(c, 1)
+                img[sy, sx] = c; continue
+            gxr = x / 16; hv = gxr * 8 - y
+            if 0 <= gxr < cols and 0 <= hv < wh: img[sy, sx] = wall_col('right', int(gxr * 16), int(hv)); continue
             gyl = -x / 16; hv = gyl * 8 - y
-            if 0 <= gyl < rows and 0 <= hv < wh:
-                u = int(gyl * 16); v = int(hv)
-                c = ws(u, v) if v < 14 else (tr(u, wh - 1 - v) if wh - 1 - v < rails + 1 else wp(u, v))
-                img[sy, sx] = tuple(int(q) for q in (c[0] * 0 + c[0], c[1], c[2], 255)); continue
+            if 0 <= gyl < rows and 0 <= hv < wh: img[sy, sx] = wall_col('left', int(gyl * 16), int(hv))
     return img, (px0, py0)
 
 def room_cfg(room):
@@ -83,8 +117,14 @@ def room_cfg(room):
     else: fl = floor_plank(r['floor'] if r['floor'].startswith('wood') else 'woodWarm'); wp = wall_striped('plaster', r['accent'])
     return {'floor_fn': fl, 'wall_fn': wp, 'wains_fn': wainscot('woodWarm'), 'trim_fn': trim_rail('woodDark')}
 
+LAYOUT = {  # mirrors src/content/layout.ts (windows [(wall, at, w)], doors [(wall, at)])
+    'living':  (10, 8, [('left', 1, 2), ('right', 5, 2)], [('left', 3), ('left', 6), ('right', 7)]),
+    'kitchen': (9, 8, [('left', 1, 2), ('right', 5, 2)], [('left', 3)]),
+    'bedroom': (9, 8, [('left', 4, 2), ('right', 7, 1)], [('left', 2), ('right', 8)])}
 if __name__ == '__main__':
     out = sys.argv[1]; os.makedirs(out, exist_ok=True)
-    for room, c, r in (('living', 10, 8), ('kitchen', 9, 8), ('bedroom', 9, 8)):
-        im, pv = shell(room, c, r, 10, room_cfg(room))
-        Image.fromarray(im).save(os.path.join(out, f'shell__{room}__full.png')); print(room, im.shape[1], im.shape[0], pv)
+    for room, (c, r, wins, drs) in LAYOUT.items():
+        for tod, suffix in (('day', 'full'), ('dusk', 'full_dusk'), ('night', 'full_night')):
+            im, pv = shell(room, c, r, 10, room_cfg(room), wins, drs, tod)
+            Image.fromarray(im).save(os.path.join(out, f'shell__{room}__{suffix}.png'))
+        print(room, im.shape[1], im.shape[0], pv)

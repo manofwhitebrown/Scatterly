@@ -148,5 +148,41 @@
 129,
 41
 ]
+},
+"shell/living/full_dusk": {
+"pivot": [
+129,
+41
+]
+},
+"shell/living/full_night": {
+"pivot": [
+129,
+41
+]
+},
+"shell/kitchen/full_dusk": {
+"pivot": [
+129,
+41
+]
+},
+"shell/kitchen/full_night": {
+"pivot": [
+129,
+41
+]
+},
+"shell/bedroom/full_dusk": {
+"pivot": [
+129,
+41
+]
+},
+"shell/bedroom/full_night": {
+"pivot": [
+129,
+41
+]
 }
 }
