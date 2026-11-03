@@ -11,6 +11,7 @@ import { type SortSpec, sortPuzzle } from './sort';
 import { type WordSpec, wordPuzzle } from './word';
 import { type SudokuSpec, sudokuPuzzle } from './sudoku';
 import { type KenKenSpec, kenkenPuzzle } from './kenken';
+import { type BalanceSpec, balancePuzzle } from './balance';
 import type { PuzzleDef } from './types';
 
 /** kind -> { spec, answer } for the generators implemented in the logic layer. */
@@ -28,17 +29,19 @@ export interface PuzzleTypes {
   word: { spec: WordSpec; answer: string };
   sudoku: { spec: SudokuSpec; answer: number[] };
   kenken: { spec: KenKenSpec; answer: number[] };
+  balance: { spec: BalanceSpec; answer: number[] };
 }
 export type LogicPuzzleKind = keyof PuzzleTypes;
 
 export const PUZZLES: { [K in LogicPuzzleKind]: PuzzleDef<PuzzleTypes[K]['spec'], PuzzleTypes[K]['answer']> } = {
   code: codePuzzle, target: targetPuzzle, sequence: sequencePuzzle, lights: lightsPuzzle,
   slide: slidePuzzle, pipes: pipesPuzzle, mastermind: mastermindPuzzle, memory: memoryPuzzle,
-  untangle: untanglePuzzle, sort: sortPuzzle, word: wordPuzzle, sudoku: sudokuPuzzle, kenken: kenkenPuzzle,
+  untangle: untanglePuzzle, sort: sortPuzzle, word: wordPuzzle, sudoku: sudokuPuzzle, kenken: kenkenPuzzle, balance: balancePuzzle,
 };
 export { feedback } from './mastermind';
 export { crossings } from './untangle';
 export { codeFeasible } from './codeLock';
+export { balanceLevel, balanceDetermined, SHAPES } from './balance';
 export { kenkenLevel, kenkenSolutions } from './kenken';
 export { sudokuLevel, countSolutions, LEVEL_PAR_SECONDS } from './sudoku';
 export type { Pt } from './untangle';

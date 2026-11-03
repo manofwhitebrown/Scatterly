@@ -106,10 +106,11 @@
 
 - `src/logic/puzzles/sudoku.ts` (Tier 2, first of deliverable 7): 4x4 (levels 1-2) and 6x6 2x3-box (levels 3-5), unique solution checked at generation, `sudokuLevel(seed, level 1-5)`, `countSolutions`, 3-step hint ladder (nudge, rule, reveal cell), aha documented in file header, `LEVEL_PAR_SECONDS`. Registered in PUZZLES but NOT in ENABLED (no scene yet). Tests: tests/puzzles/sudoku.test.ts; `PUZZLE_SEEDS=2000` run: 5 levels x 2000 seeds all unique, generate p99 <= 10 ms.
 - `src/logic/puzzles/kenken.ts` (Tier 2): 3x3 to 5x5, cages with + - × ÷ =, unique solution enforced (cages split until one solution), `kenkenLevel(seed, 1-5)`, `kenkenSolutions`, 3-step hint ladder, aha in header. Registered, NOT in ENABLED (no scene). `PUZZLE_SEEDS=2000`: all levels unique, p99 <= 10 ms; level 5 averages 3.4 free givens in 25 cells.
+- `src/logic/puzzles/balance.ts` (Tier 2): weighing scales, 3-5 shapes, 1-3 questions (answer = list of counts, so no blind guessing), `balanceLevel(seed, 1-5)`, `balanceDetermined`, exported `SHAPES`. Fair by construction: equation rank = shapes-1 (exact integer elimination) plus an independent brute-force test (levels 1-3) that all consistent weight sets give the same answers. `spec.weights` is the hidden truth: the scene must NOT display it. Registered, NOT in ENABLED. 2000 seeds x all levels pass, p99 <= 10 ms.
 
 ### Not verified / not started
 - BLOCKED on Contract v4 (AI-1; `types.ts` still has 5 rooms, SAVE_VERSION 3): deliverable 2 (layout v2: 8 rooms, `ROOM_UNLOCK_DAY`, world `HOUSE_MAP`), builder save shape (5), pet/chill profile fields (6), `Gate.chain`/`level` in Spec (10), snapshot type reference (12), Tier 3 kinds (mirror/jigsaw/flow/gears are not in PUZZLE_KINDS yet).
-- Not started (unblocked): rest of Tier 2 (balance, dial, tangram, cipher, logic, nonogram), builder pure logic with local types, snapshot.ts, case builder (9), session sim (11), clue templates 18->28, achievements >= 20.
+- Not started (unblocked): rest of Tier 2 (dial, tangram, cipher, logic, nonogram), builder pure logic with local types, snapshot.ts, case builder (9), session sim (11), clue templates 18->28, achievements >= 20.
 
 ### Requests
 - Owner: confirm that the storage purchases above (tray, dock, most entrance storage) being blocked is intended, or raise the cap.
