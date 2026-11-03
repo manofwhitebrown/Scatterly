@@ -1,10 +1,11 @@
 import type Phaser from 'phaser';
 import { errorCount } from './errors';
 import { liveParticles } from '../fx';
+import { textureBytes } from './assetLoad';
 import type { FrameStats, FrameSummary } from './frameStats';
 
 export interface Metrics extends FrameSummary {
-  objects: number; textures: number; tweens: number; particles: number; heapMB: number | null; errors: number;
+  objects: number; textures: number; atlasMB: number; tweens: number; particles: number; heapMB: number | null; errors: number;
 }
 
 interface PerfMemory { memory?: { usedJSHeapSize: number } }
@@ -21,7 +22,7 @@ export function readMetrics(game: Phaser.Game, stats: FrameStats): Metrics {
   const f = stats.summary();
   return {
     fps: f.fps, p5Fps: f.p5Fps, p95Ms: f.p95Ms, maxMs: f.maxMs, slowFrames: f.slowFrames, frames: f.frames,
-    objects, textures: game.textures.getTextureKeys().length, tweens, particles: liveParticles(),
+    objects, textures: game.textures.getTextureKeys().length, atlasMB: textureBytes() / 1048576, tweens, particles: liveParticles(),
     heapMB: mem ? mem.usedJSHeapSize / 1048576 : null, errors: errorCount(),
   };
 }
@@ -30,7 +31,7 @@ export function formatMetrics(m: Metrics): string {
   const heap = m.heapMB === null ? 'n/a' : `${m.heapMB.toFixed(1)}MB`;
   return (
     `${Math.round(m.fps)} fps  p5 ${Math.round(m.p5Fps)}  p95 ${m.p95Ms.toFixed(1)}ms  slow ${m.slowFrames}\n` +
-    `obj ${m.objects}  tex ${m.textures}  tween ${m.tweens}  fx ${m.particles}\n` +
+    `obj ${m.objects}  tex ${m.textures} (atlas ${m.atlasMB.toFixed(1)}MB)  tween ${m.tweens}  fx ${m.particles}\n` +
     `heap ${heap}  err ${m.errors}`
   );
 }

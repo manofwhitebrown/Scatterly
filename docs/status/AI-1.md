@@ -18,5 +18,10 @@
 ## Requests
 - AI-3: Home boot path needs a run session; until then Home starts via Play -> ModeSelect -> Start.
 
+## Added (loader + packer)
+- `src/core/assets.ts` (ensureGroup/prefetchGroups/hasFrame), `assetLoad.ts` (pure core: retry x3 with backoff, never throws, fallback), atlas MB in `?debug=1` overlay, Boot prefetches `core` in background.
+- `scripts/pack-atlas.mjs` (Node, pngjs, deterministic: core frames/tags identical to tools/pack/pack.py output, repeat runs md5-equal, 2048 cap).
+- Verified: `npm test` 43 files / 345 tests passed; `npm run build` ok (JS gzip 442.0 KB of 520 budget). dist is over the soft 2048 KB budget (WARN, pre-existing).
+
 ## Next
 Rerun shots, push; loader (src/core/assets.ts), pack-atlas, Home boot path.

@@ -1,3 +1,4 @@
+import { prefetchGroups } from './assets';
 import Phaser from 'phaser';
 import { GAME_H, GAME_W, SCENE } from '../shared/types';
 import { generateAllTextures } from '../art';
@@ -76,6 +77,7 @@ export class BootScene extends Phaser.Scene {
       }
       this.running = false;
       markBooted();
+      prefetchGroups(this, ['core']); // background: the menu never waits for atlases
       this.scene.start(SCENE.Menu);
     } catch (err) {
       this.running = false;
