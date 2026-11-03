@@ -20,6 +20,17 @@ async function snap(page: Page, name: string): Promise<void> {
   await page.setViewportSize({ width: 1280, height: 720 });
 }
 
+/** Clicks through intro and coach cards (Start / Next / Got it) in whatever scene shows them. */
+async function dismissAny(page: Page): Promise<void> {
+  for (let i = 0; i < 12; i++) {
+    await page.waitForTimeout(500);
+    const labels = (await interactives(page)).map((x) => x.label);
+    const btn = ['Start', 'Next', 'Got it'].find((l) => labels.includes(l));
+    if (!btn) return;
+    await tapMatch(page, btn);
+  }
+}
+
 test.beforeAll(() => mkdirSync(OUT, { recursive: true }));
 
 test('menu', async ({ page }) => {
@@ -31,6 +42,7 @@ test('menu', async ({ page }) => {
 test('home overview and focus rooms (?view=home)', async ({ page }) => {
   await page.goto('/?e2e=1&view=home'); // Boot hands over to Home directly
   await waitScene(page, 'Home', 60_000);
+  await dismissAny(page);
   await page.waitForTimeout(2500);
   await snap(page, 'home-overview');
   if (await tapMatch(page, 'Play')) { // the small Play sheet over the house
@@ -38,6 +50,7 @@ test('home overview and focus rooms (?view=home)', async ({ page }) => {
     await snap(page, 'home-play-sheet');
     await page.goto('/?e2e=1&view=home');
     await waitScene(page, 'Home', 60_000);
+  await dismissAny(page);
     await page.waitForTimeout(1500);
   }
   const rooms = ['entrance', 'living', 'kitchen', 'bedroom', 'bathroom', 'study'];
@@ -64,6 +77,7 @@ for (const kind of SHOT_PUZZLES.filter((k) => IMPLEMENTED.includes(k))) {
 }
 
 test('result', async ({ page }) => {
+  test.setTimeout(600_000);
   test.setTimeout(600_000);
   await openGame(page);
   await startMorning(page, 'relaxed');
