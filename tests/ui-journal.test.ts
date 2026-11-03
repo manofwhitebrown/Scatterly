@@ -12,7 +12,7 @@ describe('Puzzle Book', () => {
   });
 
   it('locks kinds that are neither enabled nor played, unlocks played ones', () => {
-    const e = bookEntries({ sudoku: { solved: 1, skipped: 0, bestMs: 61000 } }, ['sort']);
+    const e = bookEntries({ sudoku: { solved: 1, skipped: 0, bestMs: 61000, seen: true } }, ['sort']);
     const by = (k: string) => e.find((x) => x.kind === k);
     expect(by('sort')?.unlocked).toBe(true);
     expect(by('sudoku')?.unlocked).toBe(true);
@@ -21,7 +21,7 @@ describe('Puzzle Book', () => {
   });
 
   it('computes solved count, best time and skip rate', () => {
-    const e = bookEntries({ word: { solved: 3, skipped: 1, bestMs: 42000 } }, ['word']).find((x) => x.kind === 'word');
+    const e = bookEntries({ word: { solved: 3, skipped: 1, bestMs: 42000, seen: true } }, ['word']).find((x) => x.kind === 'word');
     expect(e).toMatchObject({ solved: 3, skipped: 1, bestMs: 42000, skipPct: 25 });
   });
 });

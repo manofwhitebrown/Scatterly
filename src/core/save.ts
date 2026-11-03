@@ -2,6 +2,10 @@ import type Phaser from 'phaser';
 import { ITEM_IDS, PUZZLE_KINDS, ROOM_ORDER } from '../shared/types';
 import { SAVE_VERSION } from '../shared/types';
 import type { ItemId, PlayerProfile, ProfileStats, PuzzleStat, RoomId, SpotId } from '../shared/types';
+import {
+  DEFAULT_PET, DEFAULT_SETTINGS, sanitizeBuilder, sanitizeChill, sanitizeCollection, sanitizePet, sanitizeResume,
+  sanitizeSettings, sanitizeThemes,
+} from './saveFields';
 
 const STORAGE_KEY = 'scatterly.profile.v1'; // key kept so v1 saves are found and migrated in place
 const MAX_ACHIEVEMENTS = 200;
@@ -24,8 +28,14 @@ export function defaultProfile(): PlayerProfile {
     achievements: [],
     weekMorning: 0,
     weekStars: 0,
-    settings: { sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: false },
+    settings: { ...DEFAULT_SETTINGS },
     puzzles: {},
+    builder: {},
+    themes: {},
+    pet: { ...DEFAULT_PET },
+    chill: { minutes: 0, sessions: 0 },
+    collection: [],
+    resume: null,
   };
 }
 
@@ -79,14 +89,15 @@ function sanitizePuzzles(raw: unknown): Record<string, PuzzleStat> {
       solved: wholeNumber(v.solved, 0, 0),
       skipped: wholeNumber(v.skipped, 0, 0),
       bestMs: typeof b === 'number' && Number.isFinite(b) && b >= 0 ? Math.floor(b) : null,
+      seen: bool(v.seen, false),
     };
   }
   return out;
 }
 
 /**
- * Migrates any stored value to the current version. v1 -> v2 -> v3 keeps all progress and fills new
- * fields with defaults (v3 adds puzzles: {}). Future versions (> SAVE_VERSION) are read field-by-field, never trusted
+ * Migrates any stored value to the current version. v1 -> v2 -> v3 -> v4 keeps all progress and fills new
+ * fields with defaults (v3 adds puzzles; v4 adds builder, themes, pet, chill, collection, resume, audio/quality settings). Future versions (> SAVE_VERSION) are read field-by-field, never trusted
  * wholesale. Anything that is not an object yields a fresh profile. Never throws.
  */
 export function migrate(raw: unknown): PlayerProfile {
@@ -132,7 +143,6 @@ function sanitize(raw: unknown): PlayerProfile {
     }
   }
 
-  const s = isRecord(raw.settings) ? raw.settings : {};
   const last = raw.lastDailyDate;
 
   return {
@@ -150,14 +160,14 @@ function sanitize(raw: unknown): PlayerProfile {
     achievements,
     weekMorning: Math.min(6, wholeNumber(raw.weekMorning, 0, 0)),
     weekStars: wholeNumber(raw.weekStars, 0, 0),
-    settings: {
-      sfx: bool(s.sfx, d.settings.sfx),
-      music: bool(s.music, d.settings.music),
-      vibration: bool(s.vibration, d.settings.vibration),
-      lowFx: bool(s.lowFx, d.settings.lowFx),
-      reducedMotion: bool(s.reducedMotion, d.settings.reducedMotion),
-    },
+    settings: sanitizeSettings(raw.settings),
     puzzles: sanitizePuzzles(raw.puzzles),
+    builder: sanitizeBuilder(raw.builder),
+    themes: sanitizeThemes(raw.themes),
+    pet: sanitizePet(raw.pet),
+    chill: sanitizeChill(raw.chill),
+    collection: sanitizeCollection(raw.collection),
+    resume: sanitizeResume(raw.resume),
   };
 }
 

@@ -1,4 +1,4 @@
-import type { RoomId } from '../shared/types';
+import type { LegacyRoomId, RoomId } from '../shared/types';
 import { PAL, line, panelBox, poly, rrect, shade, vgrad, vgradA } from './palette';
 import type { G } from './palette';
 
@@ -10,7 +10,7 @@ interface RoomLook {
   win: { x: number; y: number; w: number; h: number; curtain: number | null; frosted: boolean };
 }
 
-const LOOK: Record<RoomId, RoomLook> = {
+const LOOK_PHASE3: Record<LegacyRoomId, RoomLook> = {
   entrance: {
     wall: 0xf0d0ae, wallLow: 0xe2b98f, trim: 0xfff1dc, floor: 0xb48257, floorAlt: 0xa97650, tiles: false, pattern: 'stripes',
     sky: [0xcfe6f2, 0xf6e7c8], win: { x: 520, y: 42, w: 200, h: 120, curtain: 0xd8795a, frosted: false },
@@ -31,6 +31,12 @@ const LOOK: Record<RoomId, RoomLook> = {
     wall: 0xbfe3e0, wallLow: 0xa6d2cf, trim: 0xffffff, floor: 0xeef3f2, floorAlt: 0xcfe6e4, tiles: true, pattern: 'grid',
     sky: [0xe6f3f6, 0xf6fbfc], win: { x: 540, y: 52, w: 150, h: 104, curtain: null, frosted: true },
   },
+};
+
+/** Phase 4 stub looks for the new rooms. */
+const LOOK: Record<RoomId, RoomLook> = {
+  ...LOOK_PHASE3,
+  laundry: LOOK_PHASE3.bathroom, study: LOOK_PHASE3.living, balcony: LOOK_PHASE3.entrance, garden: LOOK_PHASE3.living,
 };
 
 const ROW_Y = [440, 468, 500, 536, 578, 626, 680, 720];

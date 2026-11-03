@@ -15,7 +15,8 @@ export interface ItemDef {
 
 export const ROOM_NAME: Record<RoomId, string> = {
   entrance: 'the entrance hall', living: 'the living room', kitchen: 'the kitchen',
-  bedroom: 'the bedroom', bathroom: 'the bathroom',
+  bedroom: 'the bedroom', bathroom: 'the bathroom', laundry: 'the laundry', study: 'the study',
+  balcony: 'the balcony', garden: 'the garden',
 };
 
 export const ITEM_DEFS: Record<ItemId, ItemDef> = {

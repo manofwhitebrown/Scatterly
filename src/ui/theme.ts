@@ -45,6 +45,10 @@ export const ROOM_LABEL: Record<RoomId, string> = {
   kitchen: 'Kitchen',
   bedroom: 'Bedroom',
   bathroom: 'Bathroom',
+  laundry: 'Laundry',
+  study: 'Study',
+  balcony: 'Balcony',
+  garden: 'Garden',
 };
 
 /** Creates a Text once (resolution 2 for crisp phone rendering). Change it later with setText only when the value changes. */

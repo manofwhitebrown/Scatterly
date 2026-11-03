@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import { WALL_H, WINDOW_Z } from '../content/layout';
-import { ISO, ROOM_ORDER, tex } from '../shared/types';
+import { ISO_LEGACY, LEGACY_ROOMS, tex } from '../shared/types';
 import type { RoomId } from '../shared/types';
 import { faceShade } from './iso';
 import { flat, mkCtx, P, quad } from './isoCtx';
@@ -10,8 +10,8 @@ import type { ShellSpec, Theme } from './isoTheme';
 import { bake, shade } from './palette';
 import type { G } from './palette';
 
-const HW = ISO.tileW / 2;
-const HH = ISO.tileH / 2;
+const HW = ISO_LEGACY.tileW / 2;
+const HH = ISO_LEGACY.tileH / 2;
 export const SHELL_MAX = { w: 960, h: 640 } as const;
 export const DEFAULT_ROOM = { cols: 8, rows: 8 } as const;
 export { WALL_H };
@@ -21,7 +21,7 @@ const PADS = 4;
 export const MINI_K = 0.35;
 
 export function shellSize(cols: number = DEFAULT_ROOM.cols, rows: number = DEFAULT_ROOM.rows, k = 1): { w: number; h: number; ox: number; oy: number } {
-  const wallPx = WALL_H * ISO.unitH * k;
+  const wallPx = WALL_H * ISO_LEGACY.unitH * k;
   return { w: Math.ceil((cols + rows) * HW * k) + 2 * PADS, h: Math.ceil((cols + rows) * HH * k + wallPx) + 2 * PADS, ox: rows * HW * k + PADS, oy: wallPx + PADS };
 }
 
@@ -128,7 +128,7 @@ export function ensureRoomShell(scene: Phaser.Scene, room: RoomId, spec: ShellSp
 }
 
 /** Queues shells and bakes them one per frame so no frame does more than one room's work. */
-export function prefetchRoomShells(scene: Phaser.Scene, rooms: readonly RoomId[] = ROOM_ORDER, mini = false): void {
+export function prefetchRoomShells(scene: Phaser.Scene, rooms: readonly RoomId[] = LEGACY_ROOMS, mini = false): void {
   for (const r of rooms) if (!scene.textures.exists(shellKey(r, mini)) && !queue.some((q) => q.room === r && q.mini === mini)) queue.push({ room: r, mini });
   if (pumping) return;
   pumping = true;

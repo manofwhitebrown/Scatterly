@@ -1,17 +1,19 @@
+import { defaultProfile } from '../src/core/save';
 import { describe, expect, it } from 'vitest';
 import { GameSession, generateScenario } from '../src/logic';
 import { Rng } from '../src/logic/rng';
-import { ITEM_IDS, ROOM_ORDER } from '../src/shared/types';
+import { ITEM_IDS, LEGACY_ROOMS } from '../src/shared/types';
 import type { GameMode, ItemId, PlayerProfile } from '../src/shared/types';
 
 function profile(day: number, rooms: number): PlayerProfile {
   return {
-    version: 3, day, coins: 0, streak: 0, lastDailyDate: null,
-    unlockedRooms: ROOM_ORDER.slice(0, rooms) as PlayerProfile['unlockedRooms'], owned: [], homeSpots: {},
+    ...defaultProfile(),
+    version: 4, day, coins: 0, streak: 0, lastDailyDate: null,
+    unlockedRooms: LEGACY_ROOMS.slice(0, rooms) as PlayerProfile['unlockedRooms'], owned: [], homeSpots: {},
     bestStars: {}, tutorialDone: false,
     stats: { mornings: 0, perfect: 0, itemsFound: 0, hintsUsed: 0, puzzlesSolved: 0, bestStreak: 0, fastestMs: null },
     achievements: [], weekMorning: 0, weekStars: 0,
-    settings: { sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: false }, puzzles: {},
+    settings: defaultProfile().settings, puzzles: {},
   };
 }
 
@@ -22,7 +24,7 @@ function runFuzz(seed: number, mode: GameMode, p: PlayerProfile): void {
   const sc = generateScenario(seed, mode, p);
   const g = new GameSession(sc, p, mode);
   const rng = new Rng(seed * 7919 + 13);
-  const ids = ROOM_ORDER.flatMap((r) => g.spotsIn(r).map((s) => s.id));
+  const ids = LEGACY_ROOMS.flatMap((r) => g.spotsIn(r).map((s) => s.id));
   let completes = 0;
   g.on('complete', () => { completes++; });
   let lastSearches = 0;

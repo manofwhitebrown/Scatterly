@@ -1,5 +1,5 @@
 import { anySpot } from '../content/decor';
-import { ROOM_ORDER } from '../shared/types';
+import { LEGACY_ROOMS } from '../shared/types';
 import { PUZZLES } from './puzzles';
 import type { ItemId, RoomId, Scenario, Spot, SpotAction, SpotId } from '../shared/types';
 import { scenarioSpots } from './validator';
@@ -69,7 +69,7 @@ export function solveScenario(s: Scenario): SolveResult {
     }
     const start = pick(pool.filter((x) => x.room === s.startRoom));
     if (start) return start;
-    for (const r of ROOM_ORDER) {
+    for (const r of LEGACY_ROOMS) {
       const sp = pick(pool.filter((x) => x.room === r));
       if (sp) return sp;
     }

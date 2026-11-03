@@ -5,7 +5,7 @@ vi.mock('phaser', () => ({ default: {}, Scenes: { Events: {} } }));
 import { depthKey, faceShade, ISO_DIMS, isoToScreen, screenToIso, boxTexture } from '../src/art/iso';
 import { DEFAULT_ROOM, shellSize, SHELL_MAX } from '../src/art/isoShell';
 import { isoTasks } from '../src/art/isoKit';
-import { ROOM_ORDER, SPOT_SIZE, tex } from '../src/shared/types';
+import { LEGACY_ROOMS, SPOT_SIZE, tex } from '../src/shared/types';
 import { DECOR } from '../src/logic';
 
 describe('iso math', () => {
@@ -61,14 +61,14 @@ describe('iso kit coverage', () => {
     const s = shellSize(DEFAULT_ROOM.cols, DEFAULT_ROOM.rows);
     expect(s.w).toBeLessThanOrEqual(SHELL_MAX.w);
     expect(s.h).toBeLessThanOrEqual(SHELL_MAX.h);
-    expect(ROOM_ORDER.map((r) => tex.isoShell(r))).toHaveLength(5);
+    expect(LEGACY_ROOMS.map((r) => tex.isoShell(r))).toHaveLength(5);
   });
 });
 
 describe('iso kit v1', () => {
   it('has a theme and a shell spec that fits for every room', async () => {
     const { THEMES, specFor } = await import('../src/art/isoTheme');
-    for (const r of ROOM_ORDER) {
+    for (const r of LEGACY_ROOMS) {
       expect(THEMES[r]).toBeDefined();
       const sp = specFor(r);
       const s = shellSize(sp.cols, sp.rows);
@@ -78,7 +78,7 @@ describe('iso kit v1', () => {
       for (const w of sp.windows) expect(w.at + w.w).toBeLessThanOrEqual(w.wall === 'left' ? sp.rows : sp.cols);
       for (const d of sp.doors) expect(d.at + 1).toBeLessThanOrEqual(d.wall === 'left' ? sp.rows : sp.cols);
     }
-    expect(new Set(ROOM_ORDER.map((r) => THEMES[r].wall)).size).toBe(5);
+    expect(new Set(LEGACY_ROOMS.map((r) => THEMES[r].wall)).size).toBe(5);
   });
   it('plans badges with distinct keys including both mark textures', async () => {
     const { badgeTasks, ISO_BADGE } = await import('../src/art/isoBadges');
@@ -117,7 +117,7 @@ describe('dollhouse art + props', () => {
   it('miniature shells are smaller than full shells and bounded', async () => {
     const { MINI_K } = await import('../src/art/isoShell');
     const { specFor } = await import('../src/art/isoTheme');
-    for (const r of ROOM_ORDER) {
+    for (const r of LEGACY_ROOMS) {
       const sp = specFor(r);
       const full = shellSize(sp.cols, sp.rows);
       const mini = shellSize(sp.cols, sp.rows, MINI_K);
@@ -131,7 +131,7 @@ describe('dollhouse art + props', () => {
     const { PROPS, DECOR_ISO } = await import('../src/content/layout');
     const tasks = new Map(propTasks().map((t) => [t.key, t]));
     expect(tasks.size).toBe(new Set(propTasks().map((t) => t.key)).size);
-    for (const room of ROOM_ORDER) {
+    for (const room of LEGACY_ROOMS) {
       for (const p of PROPS[room]) {
         const t = tasks.get(propKey(p));
         expect(t, p.id).toBeDefined();

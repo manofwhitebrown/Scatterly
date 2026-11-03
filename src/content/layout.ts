@@ -1,4 +1,4 @@
-import type { DecorDef, HouseSlot, IsoPlacement, RoomId, RoomLayout, SpotKind } from '../shared/types';
+import type { DecorDef, DollhouseSlot, IsoPlacement, LegacyRoomId, RoomId, RoomLayout, SpotKind } from '../shared/types';
 import { SPOT_POS } from './layoutSpots';
 import { PROPS as PROP_DATA } from './layoutProps';
 
@@ -37,7 +37,7 @@ export function spotIso(id: string, kind: SpotKind): IsoPlacement {
 const L = (to: RoomId, at: number) => ({ to, wall: 'left' as const, at });
 const R = (to: RoomId, at: number) => ({ to, wall: 'right' as const, at });
 
-export const LAYOUTS: Record<RoomId, RoomLayout> = {
+const LAYOUTS_PHASE3: Record<LegacyRoomId, RoomLayout> = {
   entrance: {
     id: 'entrance', cols: 8, rows: 8, theme: 'warm-entry',
     doors: [R('living', 6)],
@@ -65,8 +65,15 @@ export const LAYOUTS: Record<RoomId, RoomLayout> = {
   },
 };
 
+/** Phase 4 stub: the four new rooms have no geometry yet (AI-2 publishes world layout v2). Empty doors = unreachable. */
+const stubLayout = (id: RoomId): RoomLayout => ({ id, cols: 8, rows: 8, theme: 'stub', doors: [], windows: [] });
+export const LAYOUTS: Record<RoomId, RoomLayout> = {
+  ...LAYOUTS_PHASE3,
+  laundry: stubLayout('laundry'), study: stubLayout('study'), balcony: stubLayout('balcony'), garden: stubLayout('garden'),
+};
+
 /** Dollhouse plan. Floor 0 = ground, 1 = upper; the bedroom sits above the living room (stairs), the bathroom above the kitchen. */
-export const HOUSE_MAP: HouseSlot[] = [
+export const HOUSE_MAP: DollhouseSlot[] = [
   { room: 'entrance', floor: 0, col: 0, row: 0 },
   { room: 'living', floor: 0, col: 1, row: 0 },
   { room: 'kitchen', floor: 0, col: 2, row: 0 },

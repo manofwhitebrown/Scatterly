@@ -1,21 +1,6 @@
-import type { EveningVerb, ItemId, RoomId, RunResult, Scenario, SpotId } from '../shared/types';
+import type { EveningVerb, ItemId, ReplayStep, RoomId, RunResult, Scenario, SpotId } from '../shared/types';
 
-/**
- * One beat of "last night". Same shape as Contract v4's ReplayStep plus two optional fields (itemId, found) that
- * let the Result screen draw the item and tick off what the player recovered.
- */
-export interface ReplayStep {
-  /** Seconds since the replay started (walking time included). */
-  t: number;
-  room: RoomId;
-  spotId?: SpotId;
-  verb: EveningVerb;
-  /** Art manifest key for the speech bubble: `icon/<item>` when an item is involved, else `icon/<verb>`. */
-  icon: string;
-  itemId?: ItemId;
-  /** True when this step puts down an item the player found this morning. */
-  found?: boolean;
-}
+export type { ReplayStep };
 
 const BEAT = 1.2;
 const WALK = 0.6;

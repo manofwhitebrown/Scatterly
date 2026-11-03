@@ -1,16 +1,35 @@
 import { describe, expect, it } from 'vitest';
-import { ISO, PUZZLE_KINDS, PUZZLE_SCENE, SAVE_VERSION, SCENE, tex } from '../src/shared/types';
+import {
+  ART, ISO, ISO_LEGACY, LEGACY_ROOMS, PUZZLE_KINDS, PUZZLE_SCENE, ROOM_ORDER, ROOM_UNLOCK_DAY, SAVE_VERSION, SCENE, tex,
+} from '../src/shared/types';
 import { IMPLEMENTED } from '../src/puzzles/manifest';
 import { parseFlags } from '../src/core/flags';
 import { HOUSE } from '../src/content/house';
 import { DECOR } from '../src/content/decor';
 
-describe('contract v3', () => {
+describe('contract v4', () => {
   it('has the agreed constants', () => {
-    expect(SAVE_VERSION).toBe(3);
-    expect(ISO).toEqual({ tileW: 64, tileH: 32, unitH: 16 });
-    expect(SCENE.House).toBe('House');
-    expect(PUZZLE_KINDS).toHaveLength(19);
+    expect(SAVE_VERSION).toBe(4);
+    expect(ART).toEqual({ px: 3, tileArtW: 32, tileArtH: 16 });
+    expect(ISO).toEqual({ tileW: 96, tileH: 48, unitH: 12 });
+    expect(ISO_LEGACY).toEqual({ tileW: 64, tileH: 32, unitH: 16 });
+    expect(SCENE).toMatchObject({ House: 'House', Home: 'Home', Chill: 'Chill', Builder: 'Builder' });
+    expect(PUZZLE_KINDS).toHaveLength(23);
+  });
+  it('ISO is derived from ART (Art Bible v1)', () => {
+    expect(ISO.tileW).toBe(ART.tileArtW * ART.px);
+    expect(ISO.tileH).toBe(ART.tileArtH * ART.px);
+    expect(ISO.unitH).toBe(4 * ART.px); // one height unit = 4 art px
+  });
+  it('rooms: nine ids, every room has an unlock day, legacy rooms are a subset', () => {
+    expect(ROOM_ORDER).toHaveLength(9);
+    expect(new Set(ROOM_ORDER).size).toBe(9);
+    for (const r of ROOM_ORDER) expect(ROOM_UNLOCK_DAY[r]).toBeGreaterThanOrEqual(1);
+    for (const r of LEGACY_ROOMS) expect(ROOM_ORDER).toContain(r);
+    expect(ROOM_UNLOCK_DAY.bathroom).toBe(6); // matches progression.ts
+  });
+  it('the four new puzzle kinds have scenes', () => {
+    for (const k of ['mirror', 'jigsaw', 'flow', 'gears'] as const) expect(PUZZLE_SCENE[k]).toMatch(/^Puzzle/);
   });
   it('every puzzle kind has a unique scene key', () => {
     const keys = PUZZLE_KINDS.map((k) => PUZZLE_SCENE[k]);

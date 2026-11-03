@@ -1,12 +1,12 @@
-import { ISO } from '../shared/types';
+import { ISO_LEGACY } from '../shared/types';
 import { faceShade } from './iso';
 import type { IsoDims } from './iso';
 import { poly, softShadow } from './palette';
 import type { G } from './palette';
 
-const HW = ISO.tileW / 2;
-const HH = ISO.tileH / 2;
-const U = ISO.unitH;
+const HW = ISO_LEGACY.tileW / 2;
+const HH = ISO_LEGACY.tileH / 2;
+const U = ISO_LEGACY.unitH;
 
 /** Drawing context for one furniture piece. a runs along gx, b along gy, z is height in units. */
 export interface Ctx { g: G; w: number; d: number; h: number; ox: number; oy: number; base: number; open: boolean; k?: number }

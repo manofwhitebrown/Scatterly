@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { sfx } from '../audio/sfx';
 import { isLowFx } from '../core/perf';
 import { GameSession, allSpots, generateScenario } from '../logic';
-import { ITEM_LABEL, ROOM_ORDER, SCENE } from '../shared/types';
+import { ITEM_LABEL, LEGACY_ROOMS, SCENE } from '../shared/types';
 import type { GameMode, Gate, InspectOutcome, ItemId, PlayerProfile, RoomId, RoomSceneData, Scenario, Spot, SpotId } from '../shared/types';
 import { Button } from '../ui/Button';
 import { ClueBoard } from '../ui/ClueBoard';
@@ -94,7 +94,7 @@ export class RoomRun {
       new Button(s, 640, 400, 320, 'Back to menu', () => go(s, SCENE.Menu), { variant: 'primary' });
       return false;
     }
-    this.rooms = ROOM_ORDER.filter((r) => this.profile.unlockedRooms.includes(r));
+    this.rooms = LEGACY_ROOMS.filter((r) => this.profile.unlockedRooms.includes(r));
     if (this.rooms.length === 0) this.rooms = ['entrance'];
     for (const sp of allSpots(this.profile)) this.spotRoom.set(sp.id, sp.room);
     const first = this.rooms[0] ?? 'entrance';

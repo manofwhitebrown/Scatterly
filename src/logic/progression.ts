@@ -87,7 +87,7 @@ export function applyRun(profile: PlayerProfile, r: RunResult, today: string = l
   for (const [k, v] of Object.entries(profile.puzzles)) puzzles[k] = { ...v };
   let solvedNow = 0;
   for (const e of r.puzzleLog) {
-    const st = puzzles[e.kind] ?? { solved: 0, skipped: 0, bestMs: null };
+    const st = puzzles[e.kind] ?? { solved: 0, skipped: 0, bestMs: null, seen: false };
     if (e.skipped) st.skipped++;
     else if (e.solved) {
       st.solved++;

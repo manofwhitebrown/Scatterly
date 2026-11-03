@@ -3,7 +3,7 @@ import { DECOR, STORAGE_SPOTS } from '../src/content/decor';
 import { HOUSE } from '../src/content/house';
 import { DECOR_ISO, HOUSE_MAP, KIND_FOOT, LAYOUTS, PROPS, WINDOW_Z } from '../src/content/layout';
 import { SPOT_POS } from '../src/content/layoutSpots';
-import { ROOM_ORDER } from '../src/shared/types';
+import { LEGACY_ROOMS } from '../src/shared/types';
 import type { IsoPlacement, RoomId } from '../src/shared/types';
 
 interface Piece { id: string; iso: IsoPlacement; kind: string; src: 'spot' | 'prop' | 'decor' }
@@ -46,7 +46,7 @@ describe('layout data', () => {
   });
 
   it('spot counts per room: 8-14 house spots (<= 16 with every storage decor owned)', () => {
-    for (const r of ROOM_ORDER) {
+    for (const r of LEGACY_ROOMS) {
       const n = HOUSE.filter((s) => s.room === r).length;
       expect(n).toBeGreaterThanOrEqual(8);
       expect(n).toBeLessThanOrEqual(14);
@@ -56,7 +56,7 @@ describe('layout data', () => {
     }
   });
 
-  for (const room of ROOM_ORDER) {
+  for (const room of LEGACY_ROOMS) {
     const lay = LAYOUTS[room];
     describe(room, () => {
       const pieces = roomPieces(room, true);
@@ -144,15 +144,15 @@ describe('layout data', () => {
   }
 
   it('doors are symmetric and match the house plan', () => {
-    for (const r of ROOM_ORDER) for (const d of LAYOUTS[r].doors) {
+    for (const r of LEGACY_ROOMS) for (const d of LAYOUTS[r].doors) {
       expect(LAYOUTS[d.to].doors.some((b) => b.to === r), `${r} -> ${d.to} has no way back`).toBe(true);
     }
-    const edges = new Set(ROOM_ORDER.flatMap((r) => LAYOUTS[r].doors.map((d) => [r, d.to].sort().join('-'))));
+    const edges = new Set(LEGACY_ROOMS.flatMap((r) => LAYOUTS[r].doors.map((d) => [r, d.to].sort().join('-'))));
     expect([...edges].sort()).toEqual(['bathroom-bedroom', 'bedroom-living', 'entrance-living', 'kitchen-living']);
   });
 
   it('HOUSE_MAP lists each room once, ground floor entrance/living/kitchen, upper bedroom/bathroom, no shared slots', () => {
-    expect(HOUSE_MAP.map((s) => s.room).sort()).toEqual([...ROOM_ORDER].sort());
+    expect(HOUSE_MAP.map((s) => s.room).sort()).toEqual([...LEGACY_ROOMS].sort());
     const floorOf = (r: RoomId): number => (HOUSE_MAP.find((s) => s.room === r) as { floor: number }).floor;
     for (const r of ['entrance', 'living', 'kitchen'] as const) expect(floorOf(r)).toBe(0);
     for (const r of ['bedroom', 'bathroom'] as const) expect(floorOf(r)).toBe(1);

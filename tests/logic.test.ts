@@ -1,3 +1,4 @@
+import { defaultProfile } from '../src/core/save';
 import { describe, expect, it } from 'vitest';
 import { DECOR, GameSession, HOUSE, allSpots, applyRun, buyDecor, generateScenario, homeSpotCandidates, listDecor, setHomeSpot } from '../src/logic';
 import { fallbackScenario } from '../src/logic/generator';
@@ -7,16 +8,17 @@ import { validateScenario } from '../src/logic/validator';
 import { STORAGE_SPOTS } from '../src/content/decor';
 import { IMPLY } from '../src/content/phrases';
 import { TEMPLATES } from '../src/content/templates';
-import { SPOT_SIZE, ROOM_ORDER } from '../src/shared/types';
+import { SPOT_SIZE, LEGACY_ROOMS } from '../src/shared/types';
 import type { GameMode, PlayerProfile, RunResult, Spot } from '../src/shared/types';
 
 function fresh(): PlayerProfile {
   return {
-    version: 3, day: 1, coins: 0, streak: 0, lastDailyDate: null,
+    ...defaultProfile(),
+    version: 4, day: 1, coins: 0, streak: 0, lastDailyDate: null,
     unlockedRooms: ['entrance', 'living', 'kitchen', 'bedroom'], owned: [], homeSpots: {},
     bestStars: {}, tutorialDone: false,
     stats: { mornings: 0, perfect: 0, itemsFound: 0, hintsUsed: 0, puzzlesSolved: 0, bestStreak: 0, fastestMs: null },
-    achievements: [], weekMorning: 0, weekStars: 0, settings: { sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: false }, puzzles: {},
+    achievements: [], weekMorning: 0, weekStars: 0, settings: defaultProfile().settings, puzzles: {},
   };
 }
 const day10: PlayerProfile = {
@@ -24,7 +26,7 @@ const day10: PlayerProfile = {
   homeSpots: { keys: 'entrance.keyHook', wallet: 'entrance.walletBowl', shoes: 'entrance.shoeBench' },
 };
 const rich: PlayerProfile = {
-  ...fresh(), day: 20, coins: 999, unlockedRooms: [...ROOM_ORDER], owned: DECOR.map((d) => d.id),
+  ...fresh(), day: 20, coins: 999, unlockedRooms: [...LEGACY_ROOMS], owned: DECOR.map((d) => d.id),
   homeSpots: { keys: 'entrance.keyHook', wallet: 'entrance.walletBowl', phone: 'bedroom.dock', bag: 'entrance.bagHook', shoes: 'entrance.shoeBench' },
 };
 const MODES: GameMode[] = ['rush', 'relaxed', 'daily'];
@@ -133,7 +135,7 @@ describe('house and decor spatial rules', () => {
     expect(HOUSE.length).toBeGreaterThanOrEqual(48);
     expect(HOUSE.length).toBeLessThanOrEqual(58);
     expect(new Set(HOUSE.map((s) => s.id)).size).toBe(HOUSE.length);
-    for (const r of ROOM_ORDER) expect(HOUSE.filter((s) => s.room === r).length).toBeGreaterThanOrEqual(8);
+    for (const r of LEGACY_ROOMS) expect(HOUSE.filter((s) => s.room === r).length).toBeGreaterThanOrEqual(8);
     for (const s of HOUSE) {
       expect(s.id).toBe(`${s.room}.${s.id.split('.')[1]}`);
       expect(s.w).toBe(SPOT_SIZE[s.kind].w);

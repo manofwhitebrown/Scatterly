@@ -18,9 +18,9 @@ describe('applyRun: stats, puzzle mastery, week board, achievements', () => {
       { kind: 'lights', solved: false, skipped: true, ms: 3000 },
       { kind: 'sort', solved: true, skipped: true, ms: 100 },
     ] }), '2026-11-02');
-    expect(a.puzzles.code).toEqual({ solved: 2, skipped: 0, bestMs: 7000 });
-    expect(a.puzzles.lights).toEqual({ solved: 0, skipped: 1, bestMs: null });
-    expect(a.puzzles.sort).toEqual({ solved: 0, skipped: 1, bestMs: null });
+    expect(a.puzzles.code).toEqual({ solved: 2, skipped: 0, bestMs: 7000, seen: false });
+    expect(a.puzzles.lights).toEqual({ solved: 0, skipped: 1, bestMs: null, seen: false });
+    expect(a.puzzles.sort).toEqual({ solved: 0, skipped: 1, bestMs: null, seen: false });
     expect(a.stats.puzzlesSolved).toBe(2);
     expect(applyRun(a, run({ puzzleLog: [{ kind: 'code', solved: true, skipped: false, ms: 12000 }] })).puzzles.code?.bestMs).toBe(7000);
   });

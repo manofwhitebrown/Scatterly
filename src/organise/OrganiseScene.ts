@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_H, GAME_W, ITEM_LABEL, ROOM_ORDER, SCENE, tex } from '../shared/types';
+import { GAME_H, GAME_W, ITEM_LABEL, LEGACY_ROOMS, SCENE, tex } from '../shared/types';
 import type { DecorView, ItemId, PlayerProfile, RoomId, Spot } from '../shared/types';
 import { DECOR, allSpots, buyDecor, homeSpotCandidates, listDecor, setHomeSpot } from '../logic';
 import { commitProfile, defaultProfile } from '../core/save';
@@ -18,6 +18,7 @@ const POOL_IMAGES = 36;
 const ESSENTIALS: ItemId[] = ['keys', 'wallet', 'phone', 'officeId', 'bag'];
 const ROOM_NAME: Record<RoomId, string> = {
   entrance: 'Entrance', living: 'Living room', kitchen: 'Kitchen', bedroom: 'Bedroom', bathroom: 'Bathroom',
+  laundry: 'Laundry', study: 'Study', balcony: 'Balcony', garden: 'Garden',
 };
 
 type Tab = 'shop' | 'home';
@@ -129,7 +130,7 @@ export class OrganiseScene extends Phaser.Scene {
 
   private buildTabs(): void {
     this.tabG = this.u(this.add.graphics());
-    for (const id of ROOM_ORDER) {
+    for (const id of LEGACY_ROOMS) {
       const t = this.u(makeText(this, 0, 24, ROOM_NAME[id], 20, PAL.ink, { bold: true, padX: 14, padY: 16 }));
       t.setInteractive();
       t.on('pointerup', () => this.pickRoom(id));
@@ -241,7 +242,7 @@ export class OrganiseScene extends Phaser.Scene {
     const g = this.tabG;
     g.clear();
     let x = PRE_X;
-    ROOM_ORDER.forEach((id, i) => {
+    LEGACY_ROOMS.forEach((id, i) => {
       const t = this.roomTabs[i];
       const open = this.profile.unlockedRooms.includes(id);
       t.setVisible(open);

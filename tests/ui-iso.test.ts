@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('phaser', () => ({ default: {}, Scenes: { Events: {} } }));
 
 import { HOUSE } from '../src/content/house';
-import { ISO } from '../src/shared/types';
+import { ISO_LEGACY } from '../src/shared/types';
 import type { Spot } from '../src/shared/types';
 import { pickSpot } from '../src/ui/hit';
 import { ISO_DIMS } from '../src/art/iso';
@@ -14,20 +14,20 @@ const O = { x: 100, y: 50 };
 describe('iso grid', () => {
   it('projects 2:1 (cell step = half tile wide, half tile tall)', () => {
     expect(project(O, 0, 0)).toEqual({ x: 100, y: 50 });
-    expect(project(O, 1, 0)).toEqual({ x: 100 + ISO.tileW / 2, y: 50 + ISO.tileH / 2 });
-    expect(project(O, 0, 1)).toEqual({ x: 100 - ISO.tileW / 2, y: 50 + ISO.tileH / 2 });
-    expect(project(O, 0, 0, 2)).toEqual({ x: 100, y: 50 - 2 * ISO.unitH });
+    expect(project(O, 1, 0)).toEqual({ x: 100 + ISO_LEGACY.tileW / 2, y: 50 + ISO_LEGACY.tileH / 2 });
+    expect(project(O, 0, 1)).toEqual({ x: 100 - ISO_LEGACY.tileW / 2, y: 50 + ISO_LEGACY.tileH / 2 });
+    expect(project(O, 0, 0, 2)).toEqual({ x: 100, y: 50 - 2 * ISO_LEGACY.unitH });
   });
 
   it('boxes a 1x1x1 footprint', () => {
     const b = isoBox(O, { gx: 0, gy: 0, w: 1, d: 1, h: 1 });
-    expect(b).toEqual({ x: 100 - ISO.tileW / 2, y: 50 - ISO.unitH, w: ISO.tileW, h: ISO.tileH + ISO.unitH });
+    expect(b).toEqual({ x: 100 - ISO_LEGACY.tileW / 2, y: 50 - ISO_LEGACY.unitH, w: ISO_LEGACY.tileW, h: ISO_LEGACY.tileH + ISO_LEGACY.unitH });
   });
 
   it('lifts wall mounts by gz', () => {
     const lo = isoBox(O, { gx: 2, gy: 2, w: 1, d: 1, h: 1 });
     const hi = isoBox(O, { gx: 2, gy: 2, w: 1, d: 1, h: 1, gz: 3 });
-    expect(hi.y).toBe(lo.y - 3 * ISO.unitH);
+    expect(hi.y).toBe(lo.y - 3 * ISO_LEGACY.unitH);
     expect(hi.x).toBe(lo.x);
   });
 

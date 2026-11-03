@@ -1,22 +1,22 @@
 import { KIND_FOOT } from '../content/layout';
-import { ISO } from '../shared/types';
+import { ISO_LEGACY } from '../shared/types';
 import type { IsoPlacement, SpotKind } from '../shared/types';
 import { shade } from './palette';
 
-const HW = ISO.tileW / 2;
-const HH = ISO.tileH / 2;
+const HW = ISO_LEGACY.tileW / 2;
+const HH = ISO_LEGACY.tileH / 2;
 /** Transparent margin around every furniture texture so open parts (drawers, doors, lids) never clip. */
 export const PAD = 18;
 
 /** Screen position (relative to the room origin) of the TOP vertex of the cell (gx, gy) at height gz (height units). */
 export function isoToScreen(gx: number, gy: number, gz = 0): { x: number; y: number } {
-  return { x: (gx - gy) * HW, y: (gx + gy) * HH - gz * ISO.unitH };
+  return { x: (gx - gy) * HW, y: (gx + gy) * HH - gz * ISO_LEGACY.unitH };
 }
 
 /** Inverse of isoToScreen for a point at height gz. Returns fractional grid coordinates. */
 export function screenToIso(x: number, y: number, gz = 0): { gx: number; gy: number } {
   const a = x / HW;
-  const b = (y + gz * ISO.unitH) / HH;
+  const b = (y + gz * ISO_LEGACY.unitH) / HH;
   return { gx: (a + b) / 2, gy: (b - a) / 2 };
 }
 
@@ -39,7 +39,7 @@ export const ISO_DIMS: Record<SpotKind, IsoDims> = KIND_FOOT;
 
 /** Texture size and anchor for a box: origin is the TOP vertex of the footprint at floor level. */
 export function boxTexture(dims: IsoDims): { w: number; h: number; ox: number; oy: number } {
-  const hh = Math.max(0, dims.h) * ISO.unitH;
+  const hh = Math.max(0, dims.h) * ISO_LEGACY.unitH;
   return {
     w: Math.ceil((dims.w + dims.d) * HW) + 2 * PAD,
     h: Math.ceil((dims.w + dims.d) * HH + hh) + 2 * PAD,

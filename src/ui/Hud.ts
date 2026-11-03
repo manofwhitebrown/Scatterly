@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { isLowFx } from '../core/perf';
-import { GAME_W, ROOM_ORDER, tex } from '../shared/types';
+import { GAME_W, LEGACY_ROOMS, tex } from '../shared/types';
 import type { ItemId, RoomId } from '../shared/types';
 import { Button } from './Button';
 import { COLOR, CSS, DEPTH, ROOM_LABEL, drawPlate, fmtClock, isCalm, makeText } from './theme';
@@ -69,7 +69,7 @@ export class Hud {
       this.houseBtn = new Button(scene, 190, 32, 180, 'House', onHouse, { fontSize: 28, height: 56 });
       this.root.add(this.houseBtn);
     } else {
-      for (const room of ROOM_ORDER) {
+      for (const room of LEGACY_ROOMS) {
         const tab = new Button(scene, 0, 32, TAB_W, ROOM_LABEL[room], () => cfg.handlers.onRoom(room), {
           fontSize: 24,
           height: 56,
@@ -108,7 +108,7 @@ export class Hud {
   /** Shows only the given rooms' tabs, packed from the left. */
   setRooms(rooms: RoomId[]): void {
     let i = 0;
-    for (const room of ROOM_ORDER) {
+    for (const room of LEGACY_ROOMS) {
       const tab = this.tabs.get(room);
       if (!tab) continue;
       const on = rooms.includes(room);
