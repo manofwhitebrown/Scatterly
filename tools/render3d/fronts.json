@@ -1,0 +1,4 @@
+{"_note":"Verified with orient_sheet.py (r0 vs r2). Rendered with rot=0 the front faces +gy (down-left). Seed script adds the 180deg offset for Kenney -z models.",
+"verified_front_at_rot0":["loungeSofa","loungeChair","bookcaseOpen","bookcaseClosedWide","cabinetTelevision","televisionModern","kitchenStove","kitchenFridge","kitchenSink","kitchenCabinet","bedDouble","toilet","bathtub","desk","chair","computerScreen","washer","bathroomSink","cabinetTelevisionDoors","tableCoffee","sideTable"],
+"symmetric_or_front_agnostic":["speakerSmall","pottedPlant","lampRoundTable","lampRoundFloor","books","pillowBlue","bear"],
+"pending":["bookcaseOpenLow","loungeSofaOttoman","coatRackStanding","lampWall","plantSmall1","plantSmall2","plantSmall3","laptop","radio"]}
