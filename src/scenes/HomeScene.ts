@@ -3,6 +3,7 @@ import { flags } from '../core/flags';
 import { GAME_H, GAME_W, SCENE } from '../shared/types';
 import type { RoomId } from '../shared/types';
 import { COLOR, DEPTH, ROOM_LABEL, SAFE, drawPlate, isCalm, makeText } from '../ui/theme';
+import { HomeMenu } from './HomeMenu';
 import { drawRoomShell } from './homeDraw';
 import {
   HOUSE_WORLD, LINKS, roomAt, roomBounds, focusCamera, lerpCamera, overviewCamera, screenToArt,
@@ -28,6 +29,7 @@ export class HomeScene extends Phaser.Scene {
   private tween: Phaser.Tweens.Tween | null = null;
   private back: Phaser.GameObjects.Container | null = null;
   private doors: Phaser.GameObjects.Container[] = [];
+  private menu: HomeMenu | null = null;
 
   constructor() {
     super(SCENE.Home);
@@ -39,6 +41,7 @@ export class HomeScene extends Phaser.Scene {
     this.focusRoom = null;
     this.tween = null;
     this.back = null;
+    this.menu = null;
     this.__e2e = undefined;
   }
 
@@ -54,6 +57,7 @@ export class HomeScene extends Phaser.Scene {
     }
     this.apply(overviewCamera(GAME_W, GAME_H));
     this.refreshDim();
+    this.menu = new HomeMenu(this);
     this.input.on('pointerup', this.onTap, this);
     if (flags().e2e) this.__e2e = this.makeHooks();
   }
@@ -91,6 +95,7 @@ export class HomeScene extends Phaser.Scene {
     this.tween = null;
     this.refreshDim();
     this.buildChrome();
+    this.menu?.setShown(!room);
     if (isCalm(this)) { this.apply(to); return; }
     const from = this.cam;
     const state = { t: 0 };
@@ -133,6 +138,8 @@ export class HomeScene extends Phaser.Scene {
     this.tween?.stop();
     this.input.off('pointerup', this.onTap, this);
     this.tween = null;
+    this.menu?.destroy();
+    this.menu = null;
     this.back = null;
     this.doors = [];
     this.shells.clear();

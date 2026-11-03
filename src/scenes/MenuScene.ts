@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { sfx } from '../audio/sfx';
+import { flags } from '../core/flags';
 import { isLowFx } from '../core/perf';
 import { SCENE, tex } from '../shared/types';
 import { Button } from '../ui/Button';
@@ -14,6 +15,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create(): void {
+    if (flags().home && go(this, SCENE.Home)) return; // `?view=home`: the house is the first screen
     enterFade(this);
     const profile = getProfile(this);
     buildHouseTiles(this, profile.unlockedRooms, 0.5); // the dollhouse, dimmed, behind the menu

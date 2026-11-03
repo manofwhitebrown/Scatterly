@@ -5,8 +5,10 @@
 - src/scenes/homeDraw.ts: placeholder cutaway shells (floor, two walls, slab) per room.
 - src/scenes/HomeScene.ts (`?view=home`): standalone world scene, Overview <-> Focus tween (300 ms, instant when calm), 96 px back chip, door chips to linked rooms, unfocused rooms dimmed and inert, `__e2e` hooks (hotspots, focus, overview, focused).
 
+- HomeMenu (menu-as-house): Play / Journal / Settings over the Overview; Play opens a small sheet with Relaxed/Rush/Daily chips, Short/Standard/Long chips (saved to settings) and Start. Under `?view=home` the Menu redirects to Home; Start still runs the old Room scene (runScene = Room) until RoomRun moves into Home.
+
 ## Verified
-- `npx tsc --noEmit`: no errors. `npx vitest run tests/home`: 7 passed. `npm run build`: ok (dist 2245 KB, over the 2048 KB soft budget, under the 2560 KB limit). `npm run secret-scan`: clean.
+- `npx tsc --noEmit`: no errors. `npx vitest run tests/home`: 9 passed (333 total). `npm run build`: ok (dist 2245 KB, over the 2048 KB soft budget, under the 2560 KB limit). `npm run secret-scan`: clean.
 
 ## Not verified
 - Not seen in a browser: no Playwright browser here, `npm run shots` does not exist yet (Gate 0). No screenshot, so no Gate A claim.
@@ -17,4 +19,4 @@
 - AI-1: `npm run shots` (home-overview, focus-<room>). AI-2: ROOM_SIZE / HOUSE_MAP v2 to replace the adapter in homeWorld.ts. AI-4: shell/<room> and prop/<id> frames.
 
 ## Next
-- Drag-pan and pinch zoom; baked room layer and props; interactive pieces; menu-as-house with Play/Journal/Settings.
+- Pinch-out/drag; Continue button (needs AI-2 snapshot capture); baked room layer and props; interactive pieces; RoomRun inside Home.
