@@ -1,43 +1,20 @@
-# AI-3 Scenes and UI: status
+# AI-3 status (Phase 5, Scenes and UI)
 
-## Phase 4 (High-End Cozy), as of this push
-Checked at f1e8cc6: `path.ts`, `replay.ts`, `src/art/manifest.ts` (stub) landed. STILL missing: Contract v4 (`SCENE.Home/Chill/Builder`, `ART`, save v4, ISO still 64x32), `src/core/assets.ts`, `src/logic/builder.ts`, `useTreat`. HomeScene, Builder, Chill, new Settings fields and the manifest-driven UI kit stay blocked on them (I do not edit `src/shared/types.ts`).
+## Done
+- src/scenes/homeWorld.ts: iso projection (32x16 art px), HOUSE_WORLD adapter (ground: entrance|living|kitchen; upper: bathroom|bedroom|study), LINKS, camera fit/lerp, silhouette hit-test, taps-from-overview.
+- src/scenes/homeDraw.ts: placeholder cutaway shells (floor, two walls, slab) per room.
+- src/scenes/HomeScene.ts (`?view=home`): standalone world scene, Overview <-> Focus tween (300 ms, instant when calm), 96 px back chip, door chips to linked rooms, unfocused rooms dimmed and inert, `__e2e` hooks (hotspots, focus, overview, focused).
 
-### Done this push
-- Chill v1 (`SCENE.Chill`, Menu button): ambience picker (rain/birds/fire/night, saved in `settings.ambience`), paced breathing circle (4 s in / 4 s out, static + "Breathe slowly" when reduced motion/low fx; no health claims), focus timer 25/5 with a bell at each switch, sleep timer (off/15/30/60 min, then music and ambience stop), whole minutes + sessions saved to `profile.chill` on exit. No score, no fail state. Pure logic in `chillModel.ts` (tests/ui-chill.test.ts). The four ambience beds are synthesised noise stand-ins I added to `src/audio/ambience.ts` (AI-4's folder; AI-4 busy): they are NOT recorded rain/birds/fire and will sound like filtered noise.
-- Chill still to do: radio (needs AI-4 tracks beyond the one lofi loop), cat during focus, free-play puzzle shelf (needs a launch path for puzzles outside a run: Request to AI-1), photo mode (web PNG save; Android needs a plugin via AI-1), armchair hotspot entry from Home.
-- Case flow, first part (owner item 9): `caseProgress.ts` (pure, spoiler-free counts: rooms searched, found/targets, locks left) + `CaseUi.ts`: a strip under the HUD ("Rooms 1/4  Found 1/3  Locks 5") and a NON-modal checkpoint bar after each find ("Nice find! 2 more to go." with Keep going / Take a break, auto-hides after 7 s; Take a break opens Pause). Not shown as a modal on purpose: it never blocks input or the clock, and the e2e bot is unaffected. Rush gets the strip only. One line added to `RoomRun.mount` (file now 399 lines, cap 400). Tests: tests/ui-caseprogress.test.ts (pure text + real GameSession).
-- Still to do for item 9: Menu Resume button (needs autosave wiring from AI-1/AI-2; `snapshot.ts` exists), sessionLength in the mode picker, compound-gate finale presentation.
-- HomeScene slice 1 (`?view=home`, `SCENE.Home`): `HomeScene extends IsoRoomScene` under its own key, so Overview (house button, Dollhouse overlay) <-> Focus (room switch) and RoomRun rules work under Home; `__e2e = { hotspots, doors, focus(room), overview }`; `runScene()` routes ModeSelect/House to Home when the flag is set; `core/perf.ts` hook falls back to Home (AI-1's file, one line). NOT yet the single connected world: baked RoomLayer, global-grid camera pan/zoom and dimmed unfocused rooms are still to do and wait on `core/assets.ts` + AI-4 frames.
-- Contract v4 landed (SAVE_VERSION 4, SCENE.Home/Chill/Builder). Still missing: `core/assets.ts`, `logic/builder.ts`, `useTreat`, achievement progress.
-- Settings v2 (`settingsModel.ts` pure + `SettingsScene.ts`): two columns, every control >= 96 px: sfx, music, vibration, low fx, reduced motion, walk animation, match my clock, music/effect/ambience level (0/25/50/75/100%), quality (auto/low/high), case length (short/standard/long), two-step reset. Values persist in the save. Audio levels are applied for real: `engine.ts` got `setVolumes` and music/ambience buses join per-group gains (AI-4's folder, small edit because AI-4 is busy; `makeBus(c, gain, group?)`); Menu's first tap applies them. `quality`, `matchClock`, `walkAnim`, `sessionLength` are stored but nothing reads them yet (they belong to Home, the day/night overlay and the generator).
-- Pixel font (taken over from AI-4, who is busy): Silkscreen (OFL 1.1) woff in `public/fonts`, loaded by `src/ui/pixelFont.ts`, `theme.FONT` now uses it for all `makeText`/Button text; ledger line added; `?font=system` is the escape hatch. Measured with PIL: Silkscreen runs ~25-35% wider than a system sans, so every Button label still fits its width (checked by arithmetic, not on screen). It is a canvas-rendered pixel font, not yet a Phaser bitmap font, and the Boot screen and `art/palette.ts` still use the system font.
-- Evening Replay (deliverable 6): Result has a "Last night" button; `ReplayScene` (key `Replay`, local to scenes) walks AI-2's `replayScript` over the cutaway house tiles (avatar token, <= 600 ms walk per room change, item bubble, found items stamped), Skip jumps to the end state, calm/low-fx/reduced-motion shows the end state at once. Pure timing in `replayPlan.ts`, tested in tests/ui-replay.test.ts. Avatar is a code-drawn token until AI-4's `avatar/*` frames exist.
-- Journal achievements: all 15 achievements listed with name + description, earned = amber star, locked = muted (`scenes/achievementBook.ts`, tested in tests/ui-journal.test.ts). Header shows `earned / total`.
-- Reduced-motion audit (scenes + ui): every tween site checked. Item hop and clue flutter are already skipped when `isCalm`; Button press-scale was the only unguarded motion, now set instantly when calm. Toast fades are alpha only (kept). Room zoom, shimmer, tutorial ring pulse, mark badges already guarded.
-
-### Carried over from Phase 2/3 (still true)
-- `RoomRun` holds the rules (session, clock, gates, marks, feel, finish); `RoomScene` and `IsoRoomScene` plug in through `RunView`/`RunHost`. All feel rows wired in `RoomFeel`; `sfx.setIntensity` (Rush urgency) and `sfx.setRoomAmbience` (room switch, run start/end) are called.
-- Iso room, Dollhouse overlay, Menu backdrop, Result story, Puzzle Book (19 kinds), first-morning tutorial (relaxed), hit areas >= 96 px via `ui/hit.pickSpot`.
-
-## Verified (commands run)
-- `npm test` 314/314, `npx tsc --noEmit` clean, `npm run build` green, JS 436.6 KB gzip (budget 520), `node scripts/secret-scan.mjs` run before push.
+## Verified
+- `npx tsc --noEmit`: no errors. `npx vitest run tests/home`: 7 passed. `npm run build`: ok (dist 2245 KB, over the 2048 KB soft budget, under the 2560 KB limit). `npm run secret-scan`: clean.
 
 ## Not verified
-- Chill layout and how the noise beds sound (and whether the breathing circle reads well) are unseen/unheard.
-- Case strip and checkpoint bar placement (strip at y=70 under the HUD bar, bar at bottom centre) have not been seen on screen; they may overlap iso art.
-- `?view=home` has not been run in a browser (no Playwright browsers here); the Home slice only reuses the iso room, so it should look like `?view=iso`.
-- Anything visual or tactile (feel, fps, haptics, Journal layout of the longer achievement list): never seen on a device; owner checks with `?debug=1`.
-- Settings two-column layout and the volume feel (squared curve) have not been seen or heard.
-- Silkscreen layout in every scene (wrapped paragraphs, Journal rows, Settings) has not been seen on screen.
-- The Replay scene has not been seen in a browser (layout of caption/avatar vs tiles unchecked).
-- `?view=iso` and the Dollhouse have not been run in a browser by me. Playwright browsers are not installed here.
-- G4 leak counts not measured.
+- Not seen in a browser: no Playwright browser here, `npm run shots` does not exist yet (Gate 0). No screenshot, so no Gate A claim.
+- Not pushed: no GITHUB_TOKEN in this session.
+- Feel on a phone: only the owner can judge.
 
 ## Requests
-- AI-1: Chill free-play shelf needs a way to launch any unlocked puzzle kind outside RoomRun (random seed, level 1-3, no score, onDone returns to Chill); and photo-mode save on Android needs a Capacitor plugin.
-- AI-1: `tests/e2e/helpers.ts` and `perf.e2e.ts` wait for scene `'Room'`; under `?view=home` it is `'Home'` (use `?view=home` runs, accept either key). I did not edit tests/e2e.
-- AI-4 (FYI, owner asked me to cover while you are busy): I added the OFL pixel font (Silkscreen, `public/fonts`, `src/ui/pixelFont.ts`, ledger line). Your deliverables still open: bitmap-font conversion (optional now), nine-slice wood panels, button pressed frames, notebook paper, item tray, icons, Boot screen and `art/palette.ts` still on the system font. I did not touch `assets/`, `tools/`, `src/art/`. I will use your atlas/manifest keys when Contract v4 lands.
-- AI-1: Contract v4 still not on main; land it (SCENE.Home/Chill/Builder, ART, ISO 96x48, save v4) so HomeScene can be registered; add `?view=home`.
-- AI-4: `src/art/manifest.ts` + core atlas (bitmap font, nine-slice panels, icons) so the UI kit can replace `drawPlate` and system-font text.
-- AI-2: `ACHIEVEMENTS` needs `target` + `progress(profile)` per entry for progress bars (today only `test`); `Clue.facts` on number clues; `path.ts`, `builder.ts`, `replay.ts`, `useTreat`.
+- AI-1: `npm run shots` (home-overview, focus-<room>). AI-2: ROOM_SIZE / HOUSE_MAP v2 to replace the adapter in homeWorld.ts. AI-4: shell/<room> and prop/<id> frames.
+
+## Next
+- Drag-pan and pinch zoom; baked room layer and props; interactive pieces; menu-as-house with Play/Journal/Settings.

@@ -7,3 +7,10 @@ describe('home scene key', () => {
     expect(SCENE.Home).not.toBe(SCENE.Room);
   });
 });
+
+describe('home scene module', () => {
+  it('shell drawing covers every world room with a size', async () => {
+    const { HOUSE_WORLD, ROOM_SIZE } = await import('../src/scenes/homeWorld');
+    for (const s of HOUSE_WORLD) expect(ROOM_SIZE[s.room]).toBeDefined();
+  });
+});
