@@ -36,3 +36,15 @@ describe('packed atlases', () => {
     }
   });
 });
+
+describe('ui kit', () => {
+  it('nine-slice frames carry borders smaller than the frame; buttons have 3 states per colourway', () => {
+    const j = load('core'); const refs = parseAtlas(j, 'atlas_core');
+    for (const k of ['ui/panel9', 'ui/panelDark9', 'ui/paper9', 'ui/tray9', 'ui/btn_wood_up']) {
+      const r = refs.find((x) => x.key === k); expect(r?.slice, k).toBeDefined();
+      const [l, t, rr, b] = r!.slice!; expect(l + rr).toBeLessThan(r!.w); expect(t + b).toBeLessThan(r!.h);
+    }
+    for (const c of ['wood', 'sage', 'terracotta']) for (const s of ['up', 'hover', 'pressed']) expect(j.frames[`ui/btn_${c}_${s}`], `${c} ${s}`).toBeDefined();
+    expect(j.frames['ui/btn_wood_up'].frame.w).toBe(j.frames['ui/btn_wood_pressed'].frame.w);
+  });
+});

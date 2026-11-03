@@ -25,6 +25,7 @@ def pack(d, group):
         px, py = pos[name]; atlas.paste(im, (px, py))
         p = pv.get(name, {}).get('pivot', [im.width // 2, im.height - 2])
         frames[name] = {'frame': {'x': px, 'y': py, 'w': im.width, 'h': im.height}, 'pivot': {'x': p[0], 'y': p[1]}}
+        if 'slice' in pv.get(name, {}): frames[name]['slice'] = pv[name]['slice']
         m = re.match(r'^(.*)/(\d+)$', name)
         if m and (m.group(1).startswith('avatar') or m.group(1).startswith('pet')):
             t = tags.setdefault(m.group(1), {'from': 99, 'to': -1}); n = int(m.group(2)); t['from'] = min(t['from'], n); t['to'] = max(t['to'], n)

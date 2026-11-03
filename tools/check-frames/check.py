@@ -20,7 +20,7 @@ def main():
                 if a not in (0, 255): bad.add('alpha')
                 elif a and (r, g, b) not in OK: bad.add('#%02x%02x%02x' % (r, g, b))
         edge = [px[x, 0][3] for x in range(w)] + [px[x, h - 1][3] for x in range(w)] + [px[0, y][3] for y in range(h)] + [px[w - 1, y][3] for y in range(h)]
-        if any(edge): bad.add('no 1px padding')
+        if any(edge) and not fn.startswith(('ui__', 'mat__')): bad.add('no 1px padding')  # nine-slices and tiles are edge-to-edge
         if bad: print('frame:', fn, sorted(bad)[:4]); errs += 1
     print(f'check-frames: {n} files, {errs} problems'); sys.exit(1 if errs else 0)
 main()

@@ -19,6 +19,7 @@ export interface FrameRef {
   pivotX: number;    // anchor in art px from the frame's top-left
   pivotY: number;
   group: AtlasGroup;
+  slice?: [number, number, number, number]; // nine-slice borders [left, top, right, bottom] in art px
   tags?: Record<string, { from: number; to: number; ms: number }>;
 }
 
