@@ -1,124 +1,26 @@
-# AI-2 Brain status
+# AI-2 status (Phase 5: logic, content, world layout, case builder)
 
 ## Done
-- src/logic: rng, evening (simulator), clues, generator, validator, solver, session, progression, index
-- src/content: house (55 spots), items, decor (15), templates (18, split into templatesA/B + templateKit), phrases
-- tests/logic.test.ts: determinism, 400 seeds x 3 modes x 3 profiles valid + solvable, spatial rules, session, stars/coins, immutability, perf
-- Locally: tsc strict + noUncheckedIndexedAccess clean, 20/20 tests pass, ~0.3ms per scenario, 0 fallbacks
+- Roster check: `ENABLED` (src/content/puzzleRoster.ts) equals `IMPLEMENTED` (src/puzzles/manifest.ts): 11 kinds.
+- World layout v2, minimal form: `src/content/world.ts` with `ROOM_SIZE`, `HOUSE_MAP_V2` (HouseSlot[], world cells),
+  `WORLD_DOORS`, `STAIRS`, `worldDoorCell()`, `walkGrid()`. Tests: `tests/logic.world.test.ts`.
+- House: ground entrance | living | kitchen, upper bathroom | bedroom | study; one staircase living -> bedroom (back-right corner).
+  Sizes (w x d tiles): entrance 8x9, living 12x9, kitchen 10x9, bathroom 8x9, bedroom 12x9, study 10x9.
 
-## Design notes
-- Item locations are derived from the last evening step touching them (validator re-checks this).
-- Difficulty 1 names spots in clue text; 2+ uses oblique hints (content/phrases.ts IMPLY).
-- parSearches = ideal chain length + 2. Stars: 3 needs <= par*1.25 and 0 hints.
-- Extra exports (not in index): fallbackScenario, validateScenario, solveScenario, simulateEvening, anySpot (content/decor).
+## Verified
+- `npx vitest run tests/logic.fairness.test.ts`: 3 passed (5000 seeds, all enabled kinds).
+- `npx vitest run tests/logic.world.test.ts`: 6 passed. `npx tsc --noEmit`: clean.
 
-## Phase 2 progress
-- Marks: `setMark(spotId, mark|null): boolean`, `cycleMark(spotId)`, `marks()`, `on('mark')` (payload `{spotId, mark}`). Searching clears the mark. Tests added.
-- `habitHits()` implemented. `spotsIn(room)` now cached per room (do not mutate the returned array).
-- `SpotMark` now comes from shared types (Contract v2 landed).
-
-- Fuzz: tests/logic.fuzz.test.ts (random inspect/take/solveGate/hint/marks/finish incl. bogus ids and duplicates): invariants hold, no throws.
+## Not verified
+- Full `npm test`, `npm run build`, `npm run verify` after this push (run before pushing, see git log).
+- Fairness with 3 modes x 3 profiles was not re-run separately; only the existing 5000-seed test.
+- Props, study spots/templates/clues, 12-pieces-per-room rule on new rooms, path on new grids: not started.
 
 ## Requests
-- AI-1: land Contract v2 (SAVE_VERSION 2, ProfileStats, PlayerProfile v2 fields, RunResult habitHits/newAchievements, SCENE.Journal, tex.mark/fx) plus save migration. Week plan, stats and achievements wiring in `applyRun` are blocked on it.
+- AI-1/AI-3: HOUSE_MAP_V2 is additive so old scenes keep working; at Gate B it replaces HOUSE_MAP (old one is DollhouseSlot).
+- AI-3: door cell on the left room is (w-1, at), on the right room (0, at); both share the same world row.
+- AI-4: prop kind names not yet agreed; `docs/art/ASSET-LIST.md` not read yet.
 
-## Next up
-- Cross-check AI-3/AI-4 usage of logic API once pushed; fix anything they flag.
-
-## Notes for AI-3
-- Marks: `session.cycleMark(id)` on long-press or mark button; render from `session.marks()`; listen with `on('mark')`.
-- `session.habitHits()` after the run for the Result screen.
-- `session.inspect` counts a search only when a spot first opens (locked attempts are free). After the puzzle, call `solveGate(spotId, skipped)` then `inspect` again.
-- Hint results: first call returns room only, second adds spotId. `hint()` returns null once all targets are found.
-- Storage decor spots exist only if owned; use `session.spotsIn(room)` to render, not HOUSE.
-- Habit sticky notes have clue id `habit-<item>` if you want to style them.
-
-## Notes for AI-4
-- Cosmetic decor ids were chosen to hit your keyword drawings (plantHerbs, lampLights, shelfTowels, rugBathMat, curtains, clock, mirror).
-- Storage spot labels: 'Key hook', 'Wallet bowl', 'Shoe bench', 'Bag hook', 'Pegged coat', 'Charging dock', 'Catch-all tray'.
-- Word gate: payload = answer word (uppercase), context = riddle. Untangle payload 'cables'; sort payload 'colour'.
-
-## Phase 3 (AI-2: Logic, Content and Puzzle Generators)
-
-### Done (pushed)
-- `src/logic/puzzles/`: framework (`types.ts`) + 11 pure generators with generate / check / solve / hint / parSeconds: Tier 1 `code`, `target`, `sequence`, `lights`, `slide`, `pipes`, `mastermind`, `memory`, plus the three existing kinds ported to pure logic: `untangle`, `sort`, `word` (same rules as the scenes; scenes do not use them yet, AI-1 adopts them). Registry `PUZZLES` + `PuzzleTypes` in `index.ts`.
-- `src/content/puzzleRoster.ts`: `ENABLED = ['untangle','sort','word']` (kinds with generator AND scene). `tests/puzzles/roster.test.ts` enforces ENABLED is a subset of `IMPLEMENTED` and of the registry.
-- `src/content/layout.ts` (+ `layoutSpots.ts`, `layoutProps.ts`): `LAYOUTS` (5 rooms, 8x8 to 10x8, doors for entrance-living, living-kitchen, living-bedroom (stairs), bedroom-bathroom, windows), `HOUSE_MAP`, `KIND_FOOT`, `spotIso`, `DECOR_ISO`, `PROPS` (6 per room), hand-placed iso for all 55 spots + 7 storage slots + 8 cosmetic decor. `house.ts`/`decor.ts` now take `iso` from it (isoFromBox removed). No spot or decor id changed.
-- Tests: `tests/puzzles/puzzles.test.ts` (per kind x 3 difficulties), `tests/puzzles/roster.test.ts`, `tests/logic.layout.test.ts` (29 tests: ids/footprints, bounds, no overlaps incl. all storage owned, wall mounts touch a wall, doors/windows clear, free floor connected, free neighbour per spot, door symmetry, HOUSE_MAP).
-
-### Scenario v3 (pushed with this update)
-- `src/logic/gates.ts` (+ `gateBudget.ts`): density by day (1 / 2 / 3 / 4 gates; Big Search up to 6, rare, day 12+), lockable containers only, about half the gates are decoys (spots holding no target/clue), kind variety (fresh kinds first, skipped kinds down-weighted from `profile.puzzles`), at most one difficulty-3 gate and only from day 8 (ties to scenario difficulty 3), `code` weighted x3 when the clues can support it. The daily ignores day and puzzle history (gate profile fixed), so it is still identical for everyone.
-- Code locks: `Gate.needs` = clue ids that carry the facts; need-clues are never behind a gate (`gatesFair`, validator). Clue facts: 14 fact kinds in `src/content/facts.ts`, 31 clues across the 18 templates carry one (`ClueDef.facts` + `{fact:key}` in text; values rolled per seed into `Clue.facts`).
-- Validator: gates must be lockable, kind valid, <= 1 difficulty-3, none before day 8, code gate needs valid and feasible. Solver: opens need-clue spots before a code gate, returns `seconds` (sum of `parSeconds` of gates it opens); `idealSearchCount` includes the need-clue chains.
-- Day 1 (non-daily): `guidedScenario` = fixed morning, 2 targets, one difficulty-1 gate on `entrance.console` using the first enabled of untangle/sort/word. `generateScenario(seed, mode, profile, { enabled? })` accepts a roster override for tests/sims.
-- `tests/logic.gates.test.ts` (12 tests, all Tier-1 kinds enabled): density, lockable only, validity + solvability, difficulty-3 rule, decoy share, variety, every kind appears, code locks always producible at launch, solver seconds, determinism, day-1.
-- Timing (400 mornings, day 12, all kinds): generateScenario p50 0.3 ms, p99 9 ms, 0 fallbacks.
-- Code lock rule change vs brief: difficulty 2 also allows a product of two facts (sums of two facts rarely reach 3 digits).
-- Existing tests updated to the new rules (day 1 now has exactly one easy gate; 'days 1-3' also checks days 2-3 <= 2 gates; template-count test ignores the guided title; clue text bound counts `{fact:}` as 2 digits).
-
-### Progression and balance (pushed with this update)
-- `applyRun` now folds `RunResult.puzzleLog` into `profile.puzzles` (solved / skipped / bestMs; skipped never counts as solved), updates `stats` (mornings, perfect, itemsFound, hintsUsed, puzzlesSolved, bestStreak, fastestMs), the week board (`weekMorning` 1..6 then wraps, `weekStars`) and `achievements`. Nothing updated these before. Still immutable.
-- `src/logic/achievements.ts`: `ACHIEVEMENTS` (15, ids stable and saved, with `name`/`desc`) and `earnedAchievements(before, after, run)`. The Journal currently prints raw ids: AI-3 can map them through `ACHIEVEMENTS` for names.
-- Time limit: the old formula ignored puzzles, so from day 5 an ideal player needed >80% of the Rush limit in over a third of mornings (63% by day 20). `timeLimitSec` now adds `solveScenario(s).seconds * 1.2` (par time of the gates on the ideal path). Ideal time / limit is now about 0.45 on every day, worst case 0.69 (`tests/sim/balance.test.ts`, 3 s per search assumed).
-- `tests/logic.progress.test.ts` (6 tests).
-
-### Verified (commands run)
-- `PUZZLE_SEEDS=2000 npx vitest run tests/puzzles` -> 58 passed (2000 seeds x 3 difficulties x 11 kinds incl. generate -> solve -> check, wrong answers rejected, determinism, generate p99 <= 10 ms). A real bug was caught and fixed on the way (untangle jitter could remove the crossings after they were counted).
-- Layout mutation check: moving the TV onto the sideboard, and the bedroom wardrobe in front of the door, makes the tests fail as expected; restored.
-- `npm test` / `npm run build` green before push (see Integration log in AI-1.md).
-
-### Not verified / not done yet
-- Layout vs art footprints (AI-4 review) and layout look on screen: not seen rendered. Positions are by hand, only checked by the geometric tests.
-- G10 note: Entrance has 11 house spots + 5 storage decor = 16 interactive pieces once everything is bought (brief says 8-14). Ids may not change, so I kept it; owner decides whether to cap storage purchases in the entrance.
-- Median ideal-bot time per difficulty (G9) not measured yet; `parSeconds` is set (code 18/35/65, target 18/40/75, sequence 12/25/45, lights 20/40/70, slide 25/45/80, pipes 25/45/80, mastermind 25/50/80, memory 12/25/45, untangle 15/35/70, sort 14/25/50, word 12/25/50).
-- Still to do, in order: template growth 18 -> ~28 (facts exist now), median ideal-bot time per puzzle difficulty (G9), fuzz extension to 5000 seeds, then Tier 2 kinds after the parity gate.
-- Scene side (AI-1/AI-3): scenes must build code-lock `ctx.facts` from the clues listed in `Gate.needs` (in that order, `clue.facts` concatenated). Until `code` etc. are in `IMPLEMENTED` and `ENABLED` the live game only produces untangle/sort/word gates (now on lockable containers only).
-
-### Layout conventions (for AI-3 / AI-4)
-- gx runs along the RIGHT wall (plane gy = 0), gy along the LEFT wall (plane gx = 0); cell (0,0) is the back corner; front/open edges are gx = cols and gy = rows. Door/window `at`: wall 'right' -> gx, wall 'left' -> gy. Door entry cell = (at,0) on the right wall, (0,at) on the left wall; always free floor.
-- Footprints come only from `KIND_FOOT[kind]` (w along gx, d along gy, h in height units, `gz` for wall mounts: jacket, keyHook, charger). No rotation: every kind is drawn with its long side along gx. `WALL_H` = 10, windows occupy heights 3..8 (`WINDOW_Z`).
-- A piece blocks walking if gz = 0 and h > 1 (rugs, mats, runners and shoe racks are walk-over). `PROPS[room]` entries have `kind: PropKind`; `lampHang` is the only prop with gz > 0 that is not on a wall.
-- Dollhouse: `HOUSE_MAP`: ground floor entrance(col0), living(col1), kitchen(col2); upper floor bedroom(col1, above living), bathroom(col2, above kitchen).
-
-### Notes for AI-1/3/4 (puzzle API, additions only)
-- `import { PUZZLES } from 'src/logic/puzzles'`; `PUZZLES[kind].generate(seed, difficulty, ctx?)`; `ctx` = `{ facts?, payload?, context? }` (payload/context = Gate fields, used by word and untangle). Specs are plain JSON and contain solution fields, so scenes must not render them.
-- Answer shapes: code `string`; target `Array<{a,b,op}>` (a,b index the growing pool: originals first, each step's result appended; both operands consumed; ops `+ - * /`; results positive integers; solved when any result equals `target`); sequence `number` (the chosen option); lights `number[]` (cells pressed, duplicates cancel); slide `number[]` (cells tapped, each next to the gap); pipes `number[]` (final rotation 0..3 per cell); mastermind `number[][]` (all guesses so far, last = secret, count <= `maxAttempts`; `feedback(secret, guess)` gives exact/misplaced); memory `number[]` (whole sequence); untangle `Array<[x,y]>` normalised 0..1 per node (solved = `crossings(spec.edges, pts) === 0`, helper exported); sort `number[]` (bin index per piece in spec order); word `string` (anagrams of list words also accepted unless `spec.custom`).
-- `code`: `spec.facts` lists the facts the rule uses (their keys become `Gate.needs`); `spec.own` true = it invented facts (show them on the lock).
-- `hint(spec, progress)`: pass how many hints were already shown for this puzzle.
-- Tests: env `PUZZLE_SEEDS` raises the seed count (default 300).
-
-### Requests
-- AI-1: when you adopt the logic generators in the scenes, add the kinds to `IMPLEMENTED` and tell me; I then add them to `ENABLED`.
-- AI-4: please review `KIND_FOOT`/`PROPS` against your iso art footprints (a kind whose art needs a different footprint: tell me the numbers and I change the data, the tests will tell if it still fits).
-
-## Phase 4 (AI-2)
-
-### Done (pushed)
-- ENABLED now lists all 11 IMPLEMENTED kinds (roster test green).
-- 5000-seed fairness test `tests/logic.fairness.test.ts` (3 modes x 3 profiles, all kinds): valid + solvable, ~2 s.
-- Owner default: max 12 interactive pieces per room incl. bought storage (`MAX_SPOTS_PER_ROOM`, `roomFull`, `spotCount`; `buyDecor`/`listDecor.canBuy` refuse). Current counts: kitchen 12, bedroom 12, entrance 11 (+1 max), living 11, bathroom 9. So the kitchen tray and bedroom dock cannot be bought until the layout/new rooms add capacity (rule works as the owner asked; flagging the effect).
-
-### Verified
-- `npm test`: 26 files, 232 tests pass; `npm run build`: JS 427.9 KB gzip.
-
-- `src/logic/path.ts`: `pathTo(room, from, to, opts?)` A* (4-neighbour, deterministic, [] if unreachable, blocked target -> ends beside it), `pathLengthCells` (-1 unreachable), `doorCell`, `standCells(room, spotId)`, `blockedCells`, `isWalkable`. `opts.owned` (storage ids) and `opts.extra` (builder footprints). Uses the CURRENT 5-room layouts; picks up layout v2 automatically. Tests: tests/logic.path.test.ts (6).
-- `src/logic/replay.ts`: `replayScript(scenario, run?)` -> `ReplayStep[] {t, room, spotId?, verb, icon, itemId?, found?}`, `replayDuration`. Icon key = `icon/<item>` else `icon/<verb>` (AI-4: please add `icon/<verb>` for the 10 verbs). Test: replay ends where each item ended up, 600 scenarios. Tests: tests/logic.replay.test.ts (4).
-
-- `src/logic/puzzles/sudoku.ts` (Tier 2, first of deliverable 7): 4x4 (levels 1-2) and 6x6 2x3-box (levels 3-5), unique solution checked at generation, `sudokuLevel(seed, level 1-5)`, `countSolutions`, 3-step hint ladder (nudge, rule, reveal cell), aha documented in file header, `LEVEL_PAR_SECONDS`. Registered in PUZZLES but NOT in ENABLED (no scene yet). Tests: tests/puzzles/sudoku.test.ts; `PUZZLE_SEEDS=2000` run: 5 levels x 2000 seeds all unique, generate p99 <= 10 ms.
-- `src/logic/puzzles/kenken.ts` (Tier 2): 3x3 to 5x5, cages with + - × ÷ =, unique solution enforced (cages split until one solution), `kenkenLevel(seed, 1-5)`, `kenkenSolutions`, 3-step hint ladder, aha in header. Registered, NOT in ENABLED (no scene). `PUZZLE_SEEDS=2000`: all levels unique, p99 <= 10 ms; level 5 averages 3.4 free givens in 25 cells.
-- `src/logic/puzzles/balance.ts` (Tier 2): weighing scales, 3-5 shapes, 1-3 questions (answer = list of counts, so no blind guessing), `balanceLevel(seed, 1-5)`, `balanceDetermined`, exported `SHAPES`. Fair by construction: equation rank = shapes-1 (exact integer elimination) plus an independent brute-force test (levels 1-3) that all consistent weight sets give the same answers. `spec.weights` is the hidden truth: the scene must NOT display it. Registered, NOT in ENABLED. 2000 seeds x all levels pass, p99 <= 10 ms.
-- `src/logic/puzzles/dial.ts` (Tier 2): linked dials, 3-5 dials, 5 or 7 positions, buttons with backwards turns from level 4; answer = press count per button. Layout is an invertible system mod a prime, so exactly one press vector in 0..m-1 (brute-force test for all 5 levels); `check` accepts counts that differ by full turns. `dialLevel`, `dialSolutions`. Registered, NOT in ENABLED. 2000 seeds x all levels pass, p99 <= 10 ms.
-- `src/logic/puzzles/tangram.ts` (Tier 2): rectangle (3x3 to 5x5) cut by random region growth into 3-7 connected pieces (2-5 cells); answer = [x, y, turns] per piece; turns (quarter turns, no flips) required from level 3. `check` is geometric so ANY valid tiling is accepted (independent backtracking-solver test confirms, and near-misses rejected). Exports `tangramLevel`, `tangramPlaced(spec, i, x, y, turns)` for the scene to draw placements. Registered, NOT in ENABLED. 2000 seeds x all levels pass, p99 <= 10 ms.
-
-### Not verified / not started
-- BLOCKED on Contract v4 (AI-1; `types.ts` still has 5 rooms, SAVE_VERSION 3): deliverable 2 (layout v2: 8 rooms, `ROOM_UNLOCK_DAY`, world `HOUSE_MAP`), builder save shape (5), pet/chill profile fields (6), `Gate.chain`/`level` in Spec (10), snapshot type reference (12), Tier 3 kinds (mirror/jigsaw/flow/gears are not in PUZZLE_KINDS yet).
-- Not started (unblocked): rest of Tier 2 (cipher, logic, nonogram), builder pure logic with local types, snapshot.ts, case builder (9), session sim (11), clue templates 18->28, achievements >= 20.
-
-### Requests
-- Owner: confirm that the storage purchases above (tray, dock, most entrance storage) being blocked is intended, or raise the cap.
-- AI-1: land Contract v4 (Art Bible v1 is published) so I can do layout v2 and the builder/pet/chill save fields.
-- AI-4: Asset List prop/decor ids are now readable; I will use them when I add decor and props.
-
-### Notes for AI-1/3/4
-- AI-1: Contract v4 `ReplayStep` may stay as specified; my type is a superset (optional `itemId`, `found`), so either reuse mine or add the two optional fields.
-- AI-3: avatar walking: `pathTo(room, avatarCell, standCells(room, spotId)[0])`; cross-room via `doorCell`.
+## Next
+1. Fill PROPS (25-40 per room, rot per section 4) with layout tests; study spots/templates/clues/evening steps.
+2. Path on world grids; case builder; session sim; snapshot; puzzle levels and hints.
