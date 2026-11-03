@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
-import { openGame, playPerfect, startMorning, tapMatch, waitScene } from '../e2e/helpers';
+import { interactives, openGame, startMorning, tapMatch, tapWhenReady, waitScene } from '../e2e/helpers';
 import { IMPLEMENTED } from '../../src/puzzles/manifest';
 import { PUZZLE_SCENE } from '../../src/shared/types';
 import type { PuzzleKind } from '../../src/shared/types';
@@ -77,12 +77,20 @@ for (const kind of SHOT_PUZZLES.filter((k) => IMPLEMENTED.includes(k))) {
 }
 
 test('result', async ({ page }) => {
-  test.setTimeout(600_000);
-  test.setTimeout(600_000);
   await openGame(page);
   await startMorning(page, 'relaxed');
-  await playPerfect(page);
-  await waitScene(page, 'Result', 60_000);
-  await page.waitForTimeout(2500);
+  // A real scenario from the running session, a synthetic 3-star result: no bot, so it cannot flake on slow GL.
+  await page.evaluate(() => {
+    const api = window.__scatterly!;
+    const sc = (api.session() as { scenario: { id: string; targets: string[] } }).scenario;
+    const result = {
+      scenarioId: sc.id, mode: 'relaxed', targets: sc.targets, found: sc.targets, timeMs: 412000, searches: 14,
+      hintsUsed: 0, timedOut: false, stars: 3, coinsEarned: 42, habitHits: [], newAchievements: [], puzzleLog: [],
+    };
+    api.game.scene.stop('Room');
+    api.game.scene.start('Result', { result, scenario: sc });
+  });
+  await waitScene(page, 'Result', 30_000);
+  await page.waitForTimeout(3000);
   await snap(page, 'result');
 });
