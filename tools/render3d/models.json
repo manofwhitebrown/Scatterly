@@ -1,0 +1,12 @@
+{
+  "spot/sofa/closed":      { "model": "loungeSofa",         "foot": [3, 1], "h": 3 },
+  "spot/fridge/closed":    { "model": "kitchenFridge",      "foot": [1, 1], "h": 7 },
+  "spot/bed/closed":       { "model": "bedDouble",          "foot": [3, 2], "h": 2 },
+  "spot/tv/closed":        { "model": "televisionModern",   "foot": [2, 1], "h": 3 },
+  "spot/plant/closed":     { "model": "pottedPlant",        "foot": [1, 1], "h": 4 },
+  "spot/sink/closed":      { "model": "kitchenSink",        "foot": [2, 1], "h": 3 },
+  "prop/tableCoffee":      { "model": "tableCoffee",        "foot": [2, 1], "h": 2 },
+  "prop/lampSquareFloor":  { "model": "lampSquareFloor",    "foot": [1, 1], "h": 5 },
+  "prop/bookcaseOpen":     { "model": "bookcaseOpen",       "foot": [2, 1], "h": 5 },
+  "prop/stoolBar":         { "model": "stoolBar",           "foot": [1, 1], "h": 3 }
+}
