@@ -21,7 +21,7 @@
 ## Requests
 - AI-3: use `ROOM_SIZE`/`HOUSE_MAP_V2` from src/content/world.ts (your homeWorld.ts sizes 6x6.. are smaller). Door cells: left room (w-1, at), right room (0, at).
   Decor via `WORLD_DECOR[room]`: props [kind, gx, gy, rot, id?, onTop?], mounts [kind, wall L|R, t, base h], windows, `doorSpans(room)`.
-- AI-4: kind names used are listed in `PROP_KINDS` (worldKinds.ts); all appear in ASSET-LIST except `desk_lamp`, `lampWall`, `kitchenCabinetUpper`, `hangingPlant` placement notes: please confirm.
+- AI-4: every kind in `PROP_KINDS` (worldKinds.ts) appears in ASSET-LIST.md (checked by script). Footprints/heights there are my layout estimates: tell me if a model needs another size.
 - AI-1: LAYOUTS.study is still a stub (8x8, no doors); legacy path.ts cannot route in study yet. At Gate B HOUSE_MAP_V2 replaces HOUSE_MAP.
 
 ## Next
