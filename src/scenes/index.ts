@@ -6,10 +6,11 @@ import { JournalScene } from './JournalScene';
 import { MenuScene } from './MenuScene';
 import { ModeSelectScene } from './ModeSelectScene';
 import { ResultScene } from './ResultScene';
+import { ReplayScene } from './ReplayScene';
 import { RoomScene } from './RoomScene';
 import { SettingsScene } from './SettingsScene';
 
 /** `?view=iso` swaps the Room scene for the isometric one; the default stays the flat room until Parity. */
 export const gameScenes: Phaser.Types.Scenes.SceneType[] = [
-  MenuScene, ModeSelectScene, flags().iso ? IsoRoomScene : RoomScene, ResultScene, SettingsScene, JournalScene, HouseScene,
+  MenuScene, ModeSelectScene, flags().iso ? IsoRoomScene : RoomScene, ResultScene, ReplayScene, SettingsScene, JournalScene, HouseScene,
 ];

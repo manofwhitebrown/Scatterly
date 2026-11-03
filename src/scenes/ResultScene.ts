@@ -5,6 +5,7 @@ import type { EveningStep, ItemId, ResultSceneData } from '../shared/types';
 import { Button } from '../ui/Button';
 import { ScrollArea } from '../ui/ScrollArea';
 import { COLOR, CSS, SIZE, enterFade, fmtClock, go, isCalm, makeText } from '../ui/theme';
+import { REPLAY_KEY } from './ReplayScene';
 import { STAR_FIRST_MS, STAR_STEP_MS, habitLine, revealStepMs } from './resultStory';
 
 const RIGHT_X = 580;
@@ -64,9 +65,10 @@ export class ResultScene extends Phaser.Scene {
     );
     this.buildTargets(result.targets, result.found);
 
-    new Button(this, 250, 662, 300, 'Organise', () => go(this, SCENE.Organise));
-    new Button(this, 640, 662, 300, 'Next morning', () => go(this, SCENE.ModeSelect), { variant: 'primary' });
-    new Button(this, 1030, 662, 300, 'Menu', () => go(this, SCENE.Menu));
+    new Button(this, 160, 662, 280, 'Last night', () => go(this, REPLAY_KEY, data));
+    new Button(this, 460, 662, 280, 'Organise', () => go(this, SCENE.Organise));
+    new Button(this, 760, 662, 280, 'Next morning', () => go(this, SCENE.ModeSelect), { variant: 'primary' });
+    new Button(this, 1060, 662, 280, 'Menu', () => go(this, SCENE.Menu));
 
     this.scroll = new ScrollArea(this, layer, zone, { viewHeight: VIEW_BOTTOM - VIEW_TOP });
     this.scroll.setContentHeight(contentH - VIEW_TOP);
