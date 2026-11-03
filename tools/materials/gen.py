@@ -87,4 +87,4 @@ if __name__ == '__main__':
     out = sys.argv[1]; os.makedirs(out, exist_ok=True)
     for room, c, r in (('living', 10, 8), ('kitchen', 9, 8), ('bedroom', 9, 8)):
         im, pv = shell(room, c, r, 10, room_cfg(room))
-        Image.fromarray(im).save(os.path.join(out, f'shell__{room}.png')); print(room, im.shape[1], im.shape[0], pv)
+        Image.fromarray(im).save(os.path.join(out, f'shell__{room}__full.png')); print(room, im.shape[1], im.shape[0], pv)

@@ -1,0 +1,152 @@
+{
+"spot/sofa/closed": {
+"pivot": [
+18,
+10
+]
+},
+"spot/fridge/closed": {
+"pivot": [
+18,
+29
+]
+},
+"spot/bed/closed": {
+"pivot": [
+34,
+6
+]
+},
+"spot/tv/closed": {
+"pivot": [
+11,
+12
+]
+},
+"spot/plant/closed": {
+"pivot": [
+12,
+13
+]
+},
+"spot/sink/closed": {
+"pivot": [
+18,
+12
+]
+},
+"prop/tableCoffee": {
+"pivot": [
+18,
+10
+]
+},
+"prop/lampSquareFloor": {
+"pivot": [
+18,
+22
+]
+},
+"prop/bookcaseOpen": {
+"pivot": [
+18,
+22
+]
+},
+"prop/stoolBar": {
+"pivot": [
+14,
+11
+]
+},
+"spot/drawer/closed": {
+"pivot": [
+18,
+14
+]
+},
+"spot/drawer/open": {
+"pivot": [
+18,
+14
+]
+},
+"spot/cabinet/closed": {
+"pivot": [
+18,
+20
+]
+},
+"spot/cabinet/open": {
+"pivot": [
+18,
+20
+]
+},
+"spot/fridge/open": {
+"pivot": [
+18,
+29
+]
+},
+"spot/wardrobe/closed": {
+"pivot": [
+18,
+30
+]
+},
+"spot/wardrobe/open": {
+"pivot": [
+18,
+30
+]
+},
+"spot/shelf/closed": {
+"pivot": [
+18,
+22
+]
+},
+"spot/shelf/open": {
+"pivot": [
+18,
+22
+]
+},
+"spot/sink/open": {
+"pivot": [
+18,
+12
+]
+},
+"spot/sideTable/closed": {
+"pivot": [
+18,
+14
+]
+},
+"spot/sideTable/open": {
+"pivot": [
+18,
+14
+]
+},
+"shell/living/full": {
+"pivot": [
+129,
+41
+]
+},
+"shell/kitchen/full": {
+"pivot": [
+129,
+41
+]
+},
+"shell/bedroom/full": {
+"pivot": [
+129,
+41
+]
+}
+}
