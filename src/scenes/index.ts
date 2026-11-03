@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
 import { flags } from '../core/flags';
+import { HomeScene } from './HomeScene';
 import { HouseScene } from './HouseScene';
 import { IsoRoomScene } from './IsoRoomScene';
 import { JournalScene } from './JournalScene';
@@ -10,7 +11,7 @@ import { ReplayScene } from './ReplayScene';
 import { RoomScene } from './RoomScene';
 import { SettingsScene } from './SettingsScene';
 
-/** `?view=iso` swaps the Room scene for the isometric one; the default stays the flat room until Parity. */
+/** `?view=home` runs the Phase 4 Home scene; `?view=iso` swaps the Room scene for the isometric one; the default stays the flat room until Parity. */
 export const gameScenes: Phaser.Types.Scenes.SceneType[] = [
-  MenuScene, ModeSelectScene, flags().iso ? IsoRoomScene : RoomScene, ResultScene, ReplayScene, SettingsScene, JournalScene, HouseScene,
+  MenuScene, ModeSelectScene, flags().home ? HomeScene : flags().iso ? IsoRoomScene : RoomScene, ResultScene, ReplayScene, SettingsScene, JournalScene, HouseScene,
 ];

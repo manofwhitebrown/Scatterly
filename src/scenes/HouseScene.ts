@@ -7,6 +7,7 @@ import { Button } from '../ui/Button';
 import { COLOR, CSS, DEPTH, ROOM_LABEL, SIZE, enterFade, getProfile, go, isCalm, makeText, fmtClock } from '../ui/theme';
 import { buildHouseTiles } from './houseTiles';
 import type { RoomProgress } from './houseProgress';
+import { runScene } from './runScene';
 
 export interface HouseSceneData {
   /** True when opened over a running morning (the Room scene keeps running underneath). */
@@ -90,7 +91,7 @@ export class HouseScene extends Phaser.Scene {
     this.picked = true;
     const go0 = (): void => {
       if (this.data0.onPick) this.data0.onPick(room);
-      else go(this, SCENE.Room, { mode: 'relaxed' });
+      else go(this, runScene(), { mode: 'relaxed' });
       if (this.data0.overlay) this.scene.stop();
     };
     if (isLowFx(this.game) || isCalm(this)) {

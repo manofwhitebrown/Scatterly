@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { flags } from '../core/flags';
 import { SCENE } from '../shared/types';
-import type { RoomSceneData } from '../shared/types';
+import type { RoomId, RoomSceneData } from '../shared/types';
 import { enterFade } from '../ui/theme';
 import { IsoRoomView } from './IsoRoomView';
 import { RoomMarks } from './RoomMarks';
@@ -12,6 +12,8 @@ import { RoomTutorial } from './RoomTutorial';
 interface E2eHooks {
   hotspots(): Array<{ spotId: string; x: number; y: number }>;
   doors(): Array<{ to: string; x: number; y: number }>;
+  focus(room: RoomId): void;
+  overview(): void;
 }
 
 /** Isometric room, selected by `?view=iso`. Shares every rule with the flat room through RoomRun. */
@@ -25,8 +27,8 @@ export class IsoRoomScene extends Phaser.Scene {
   private marks: RoomMarks | null = null;
   private tut: RoomTutorial | null = null;
 
-  constructor() {
-    super(SCENE.Room);
+  constructor(key: string = SCENE.Room) {
+    super(key);
   }
 
   init(data: RoomSceneData): void {
@@ -84,7 +86,7 @@ export class IsoRoomScene extends Phaser.Scene {
       run.setCurrent(r);
       run.feel.roomSwitch(r);
     });
-    if (flags().e2e) this.__e2e = { hotspots: () => view.hotspots(), doors: () => view.doors() };
+    if (flags().e2e) this.__e2e = { hotspots: () => view.hotspots(), doors: () => view.doors(), focus: (r) => this.nav?.goTo(r), overview: () => run.openHouse() };
     run.begin();
   }
 

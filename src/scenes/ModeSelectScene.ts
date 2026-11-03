@@ -4,6 +4,7 @@ import { SCENE } from '../shared/types';
 import type { GameMode, RoomSceneData } from '../shared/types';
 import { Button } from '../ui/Button';
 import { COLOR, CSS, SIZE, drawPlate, enterFade, getProfile, go, localDateKey, makeText, starText } from '../ui/theme';
+import { runScene } from './runScene';
 
 interface CardDef {
   mode: GameMode;
@@ -68,6 +69,6 @@ export class ModeSelectScene extends Phaser.Scene {
   private start(mode: GameMode): void {
     const seed = mode === 'daily' ? dailySeed() : Math.floor(Math.random() * 2147483647);
     const data: RoomSceneData = { mode, seed };
-    go(this, SCENE.Room, data);
+    go(this, runScene(), data);
   }
 }

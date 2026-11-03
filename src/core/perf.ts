@@ -54,7 +54,7 @@ function sampleFirstRoom(game: Phaser.Game): void {
 function attachRoomHook(game: Phaser.Game): void {
   // HOOK: the Room scene's own 'start' event (Phaser.Scenes.Events.START). Fires the first time
   // Room starts; later restarts are ignored so the sampler never runs twice.
-  const room = game.scene.getScene(SCENE.Room);
+  const room = game.scene.getScene(SCENE.Room) ?? game.scene.getScene(SCENE.Home);
   if (!room) {
     logDebug('Room scene not found; fps auto-detect disabled');
     return;
