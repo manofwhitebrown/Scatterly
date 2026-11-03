@@ -19,3 +19,8 @@ export function flags(): Flags {
   if (!cached) cached = parseFlags(typeof window === 'undefined' ? '' : window.location.search);
   return cached;
 }
+
+/** The scene Boot hands over to. `?view=home` boots the new house directly; every other URL keeps the old Menu until Gate B. */
+export function firstScene(f: Flags): 'Home' | 'Menu' {
+  return f.home ? 'Home' : 'Menu';
+}

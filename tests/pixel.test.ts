@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseFlags } from '../src/core/flags';
+import { firstScene, parseFlags } from '../src/core/flags';
 import { PX, snap, toGame } from '../src/core/pixel';
 
 describe('pixel helpers', () => {
@@ -19,5 +19,14 @@ describe('flags', () => {
     expect(parseFlags('?view=home').home).toBe(true);
     expect(parseFlags('?view=home').iso).toBe(false);
     expect(parseFlags('?artdebug=1').artdebug).toBe(true);
+  });
+});
+
+describe('boot path', () => {
+  it('?view=home boots Home, everything else keeps the Menu', () => {
+    expect(firstScene(parseFlags('?view=home'))).toBe('Home');
+    expect(firstScene(parseFlags('?e2e=1&view=home'))).toBe('Home');
+    expect(firstScene(parseFlags(''))).toBe('Menu');
+    expect(firstScene(parseFlags('?view=iso'))).toBe('Menu');
   });
 });

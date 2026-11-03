@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
-import { interactives, openGame, playPerfect, startMorning, tapMatch, tapWhenReady, waitScene } from '../e2e/helpers';
+import { openGame, playPerfect, startMorning, tapMatch, waitScene } from '../e2e/helpers';
 import { IMPLEMENTED } from '../../src/puzzles/manifest';
 import { PUZZLE_SCENE } from '../../src/shared/types';
 import type { PuzzleKind } from '../../src/shared/types';
@@ -20,17 +20,6 @@ async function snap(page: Page, name: string): Promise<void> {
   await page.setViewportSize({ width: 1280, height: 720 });
 }
 
-/** Taps intro and coach cards (any scene) until none is left. */
-async function clearCards(page: Page): Promise<void> {
-  for (let i = 0; i < 12; i++) {
-    await page.waitForTimeout(500);
-    const labels = (await interactives(page)).map((x) => x.label);
-    const btn = ['Start', 'Next', 'Got it'].find((l) => labels.includes(l));
-    if (!btn) return;
-    await tapMatch(page, btn);
-  }
-}
-
 test.beforeAll(() => mkdirSync(OUT, { recursive: true }));
 
 test('menu', async ({ page }) => {
@@ -40,20 +29,17 @@ test('menu', async ({ page }) => {
 });
 
 test('home overview and focus rooms (?view=home)', async ({ page }) => {
-  await openGame(page, '&view=home'); // until the Home boot path lands, Home starts via Play -> mode select
-  await tapWhenReady(page, 'Play');
-  await waitScene(page, 'ModeSelect');
-  await tapWhenReady(page, 'Start', 1);
+  await page.goto('/?e2e=1&view=home'); // Boot hands over to Home directly
   await waitScene(page, 'Home', 60_000);
-  for (let i = 0; i < 12; i++) { // intro and coach cards cover the house; click through them
-    await page.waitForTimeout(400);
-    const labels = (await interactives(page)).filter((x) => x.scene === 'Home').map((x) => x.label);
-    const btn = ['Start', 'Next', 'Got it'].find((l) => labels.includes(l));
-    if (!btn) break;
-    await tapMatch(page, btn);
-  }
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2500);
   await snap(page, 'home-overview');
+  if (await tapMatch(page, 'Play')) { // the small Play sheet over the house
+    await page.waitForTimeout(800);
+    await snap(page, 'home-play-sheet');
+    await page.goto('/?e2e=1&view=home');
+    await waitScene(page, 'Home', 60_000);
+    await page.waitForTimeout(1500);
+  }
   const rooms = ['entrance', 'living', 'kitchen', 'bedroom', 'bathroom', 'study'];
   for (const room of rooms) {
     const ok = await page.evaluate((r) => {
@@ -78,7 +64,6 @@ for (const kind of SHOT_PUZZLES.filter((k) => IMPLEMENTED.includes(k))) {
 }
 
 test('result', async ({ page }) => {
-  test.setTimeout(600_000);
   test.setTimeout(600_000);
   await openGame(page);
   await startMorning(page, 'relaxed');

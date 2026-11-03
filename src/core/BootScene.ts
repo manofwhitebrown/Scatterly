@@ -1,4 +1,5 @@
 import { prefetchGroups } from './assets';
+import { firstScene, flags } from './flags';
 import Phaser from 'phaser';
 import { GAME_H, GAME_W, SCENE } from '../shared/types';
 import { generateAllTextures } from '../art';
@@ -78,7 +79,7 @@ export class BootScene extends Phaser.Scene {
       this.running = false;
       markBooted();
       prefetchGroups(this, ['core']); // background: the menu never waits for atlases
-      this.scene.start(SCENE.Menu);
+      this.scene.start(firstScene(flags()) === 'Home' ? SCENE.Home : SCENE.Menu);
     } catch (err) {
       this.running = false;
       this.showError(err);
