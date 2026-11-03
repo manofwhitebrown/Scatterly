@@ -6,19 +6,23 @@ import type { PlayerProfile } from '../shared/types';
 import { Button } from '../ui/Button';
 import { Toast } from '../ui/Toast';
 import { CSS, SIZE, buzz, enterFade, getProfile, go, makeText } from '../ui/theme';
+import { COLUMNS, applyRow, rowActive, rowLabel } from './settingsModel';
+import type { Row, Settings } from './settingsModel';
 
-type SettingKey = keyof PlayerProfile['settings'];
+const COL_X = [40, 680] as const;
+const ROW_Y0 = 140;
+const ROW_STEP = 80;
+const CTRL_DX = 470;
+const CTRL_W = 220;
 
-const ROWS: Array<{ key: SettingKey; label: string }> = [
-  { key: 'sfx', label: 'Sound effects' },
-  { key: 'music', label: 'Music' },
-  { key: 'vibration', label: 'Vibration' },
-  { key: 'lowFx', label: 'Low effects (smoother on slow phones)' },
-  { key: 'reducedMotion', label: 'Reduced motion' },
-];
+/** Pushes every audio setting to the mixer. Shared with the Menu's first-tap unlock. */
+export function applyAudioSettings(s: Settings): void {
+  sfx.setEnabled(s.sfx, s.music);
+  sfx.setVolumes({ music: s.musicVol, sfx: s.sfxVol, ambience: s.ambienceVol });
+}
 
 export class SettingsScene extends Phaser.Scene {
-  private toggles = new Map<SettingKey, Button>();
+  private controls = new Map<Row, Button>();
   private resetBtn!: Button;
   private resetArmed = false;
   private resetTimer: Phaser.Time.TimerEvent | null = null;
@@ -30,28 +34,24 @@ export class SettingsScene extends Phaser.Scene {
 
   create(): void {
     enterFade(this);
-    this.toggles = new Map();
+    this.controls = new Map();
     this.resetArmed = false;
     this.resetTimer = null;
     this.toast = new Toast(this, 600);
-    makeText(this, 640, 70, 'Settings', { fontSize: `${SIZE.title}px`, fontStyle: 'bold', color: CSS.amber }).setOrigin(0.5);
-
-    ROWS.forEach((row, i) => {
-      const y = 150 + i * 74;
-      makeText(this, 160, y, row.label, { fontSize: `${SIZE.label}px` }).setOrigin(0, 0.5);
-      const on = getProfile(this).settings[row.key];
-      const btn = new Button(this, 1040, y, 200, on ? 'On' : 'Off', () => this.toggle(row.key), {
-        variant: on ? 'primary' : 'plain',
+    makeText(this, 640, 64, 'Settings', { fontSize: `${SIZE.title}px`, fontStyle: 'bold', color: CSS.amber }).setOrigin(0.5);
+    const s = getProfile(this).settings;
+    COLUMNS.forEach((rows, c) => {
+      rows.forEach((row, i) => {
+        const y = ROW_Y0 + i * ROW_STEP;
+        const x0 = COL_X[c] as number;
+        makeText(this, x0, y, row.label, { fontSize: `${SIZE.label}px` }).setOrigin(0, 0.5);
+        const btn = new Button(this, x0 + CTRL_DX, y, CTRL_W, rowLabel(s, row), () => this.change(row), {
+          variant: rowActive(s, row) ? 'primary' : 'plain',
+        });
+        this.controls.set(row, btn);
       });
-      this.toggles.set(row.key, btn);
     });
-
-    this.resetBtn = new Button(this, 640, 560, 420, 'Reset progress', () => this.onReset(), { variant: 'danger' });
-    makeText(this, 640, 636, 'Tip: long-press a spot to mark it ✕ ruled out or ? hunch.', {
-      fontSize: `${SIZE.body}px`,
-      color: CSS.muted,
-      align: 'center',
-    }).setOrigin(0.5);
+    this.resetBtn = new Button(this, 640, 636, 420, 'Reset progress', () => this.onReset(), { variant: 'danger' });
     new Button(this, 24 + 80, 664, 160, 'Back', () => go(this, SCENE.Menu));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.resetTimer?.remove(false);
@@ -59,19 +59,21 @@ export class SettingsScene extends Phaser.Scene {
     });
   }
 
-  private toggle(key: SettingKey): void {
-    const p = getProfile(this);
-    const settings = { ...p.settings, [key]: !p.settings[key] };
+  private refresh(s: Settings): void {
+    this.controls.forEach((btn, row) => btn.setLabel(rowLabel(s, row)).setVariant(rowActive(s, row) ? 'primary' : 'plain'));
+  }
+
+  private change(row: Row): void {
+    const p: PlayerProfile = getProfile(this);
+    const settings = applyRow(p.settings, row);
     commitProfile(this.game, { ...p, settings });
-    sfx.setEnabled(settings.sfx, settings.music);
-    if (key === 'music') {
+    applyAudioSettings(settings);
+    if (row.kind === 'toggle' && row.key === 'music') {
       if (settings.music) sfx.startMusic();
       else sfx.stopMusic();
     }
-    if (key === 'vibration' && settings.vibration) buzz(this, 30);
-    const btn = this.toggles.get(key);
-    const on = settings[key];
-    btn?.setLabel(on ? 'On' : 'Off').setVariant(on ? 'primary' : 'plain');
+    if (row.kind === 'toggle' && row.key === 'vibration' && settings.vibration) buzz(this, 30);
+    this.refresh(settings);
   }
 
   private onReset(): void {
@@ -85,11 +87,8 @@ export class SettingsScene extends Phaser.Scene {
     this.disarm();
     const fresh = defaultProfile();
     commitProfile(this.game, fresh);
-    sfx.setEnabled(fresh.settings.sfx, fresh.settings.music);
-    this.toggles.forEach((btn, key) => {
-      const on = fresh.settings[key];
-      btn.setLabel(on ? 'On' : 'Off').setVariant(on ? 'primary' : 'plain');
-    });
+    applyAudioSettings(fresh.settings);
+    this.refresh(fresh.settings);
     this.toast.show('Progress reset.');
   }
 

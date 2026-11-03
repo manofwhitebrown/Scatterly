@@ -6,6 +6,7 @@ import { Button } from '../ui/Button';
 import { Toast } from '../ui/Toast';
 import { CSS, SIZE, enterFade, getProfile, go, makeText } from '../ui/theme';
 import { buildHouseTiles } from './houseTiles';
+import { applyAudioSettings } from './SettingsScene';
 
 export class MenuScene extends Phaser.Scene {
   constructor() {
@@ -44,7 +45,7 @@ export class MenuScene extends Phaser.Scene {
     this.input.once('pointerdown', () => {
       sfx.unlock();
       const s = getProfile(this).settings;
-      sfx.setEnabled(s.sfx, s.music);
+      applyAudioSettings(s);
       sfx.startMusic();
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {

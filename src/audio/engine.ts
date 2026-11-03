@@ -5,6 +5,15 @@ const MASTER_GAIN = 0.9;
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let sfxBus: GainNode | null = null;
+export type VolGroup = 'music' | 'ambience';
+const groups: Partial<Record<VolGroup, GainNode>> = {};
+const trims: Record<'music' | 'sfx' | 'ambience', number> = { music: 1, sfx: 1, ambience: 1 };
+
+/** Slider value 0..1 to a gain trim; clamps junk, curve is squared so the low half is usable. */
+export function volumeTrim(v: number): number {
+  const x = Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 1;
+  return x * x;
+}
 let noiseBuf: AudioBuffer | null = null;
 let bedBuf: AudioBuffer | null = null;
 
@@ -26,24 +35,43 @@ export function getCtx(): AudioContext | null {
     master.connect(limiter);
     limiter.connect(ctx.destination);
     sfxBus = ctx.createGain();
-    sfxBus.gain.value = SFX_GAIN;
+    sfxBus.gain.value = SFX_GAIN * trims.sfx;
     sfxBus.connect(master);
+    for (const g of ['music', 'ambience'] as const) {
+      const n = ctx.createGain();
+      n.gain.value = trims[g];
+      n.connect(master);
+      groups[g] = n;
+    }
     return ctx;
   } catch {
     ctx = null;
     master = null;
     sfxBus = null;
+    groups.music = groups.ambience = undefined;
     return null;
   }
 }
 
 /** A new bus into the limited master (music, ambience). Caller owns disconnect. */
-export function makeBus(c: AudioContext, gain: number): GainNode {
+export function makeBus(c: AudioContext, gain: number, group?: VolGroup): GainNode {
   getCtx();
   const g = c.createGain();
   g.gain.value = gain;
-  g.connect(master ?? c.destination);
+  g.connect((group ? groups[group] : undefined) ?? master ?? c.destination);
   return g;
+}
+
+/** Player volume sliders (0..1). Safe before the AudioContext exists: values are applied when it is created. */
+export function setVolumes(v: { music: number; sfx: number; ambience: number }): void {
+  trims.music = volumeTrim(v.music);
+  trims.sfx = volumeTrim(v.sfx);
+  trims.ambience = volumeTrim(v.ambience);
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  sfxBus?.gain.setTargetAtTime(SFX_GAIN * trims.sfx, t, 0.03);
+  groups.music?.gain.setTargetAtTime(trims.music, t, 0.03);
+  groups.ambience?.gain.setTargetAtTime(trims.ambience, t, 0.03);
 }
 
 export function getSfxBus(): GainNode | null {

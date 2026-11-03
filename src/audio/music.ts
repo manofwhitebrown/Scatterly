@@ -121,7 +121,7 @@ export function runMusic(allowed: boolean): void {
   if (!c || timer !== null || !allowed || document.hidden) return;
   try {
     stopMusic();
-    bus = makeBus(c, MUSIC_GAIN);
+    bus = makeBus(c, MUSIC_GAIN, 'music');
     nextTime = c.currentTime + 0.05;
     step = 0;
     timer = window.setInterval(schedule, 100);

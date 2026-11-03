@@ -1,4 +1,4 @@
-import { envelope, getCtx, getSfxBus, isRunning, noiseBuffer, resumeCtx, suspendCtx } from './engine';
+import { envelope, getCtx, getSfxBus, isRunning, noiseBuffer, resumeCtx, setVolumes, suspendCtx } from './engine';
 import { ambienceRoom, setAmbience, syncAmbience } from './ambience';
 import { musicIntensity, runMusic, setMusicIntensity, stopMusic } from './music';
 import { RECIPES, SUCCESS_VARIANTS } from './recipes';
@@ -15,6 +15,7 @@ export interface SfxApi {
   setIntensity(level: number): void;
   setRoomAmbience(room: string | null): void;
   setEnabled(sfx: boolean, music: boolean): void;
+  setVolumes(v: { music: number; sfx: number; ambience: number }): void;
   startMusic(): void;
   stopMusic(): void;
 }
@@ -145,6 +146,7 @@ export const sfx: SfxApi = {
     if (!musicOn) stopMusic();
     else if (musicWanted) runMusic(true);
   },
+  setVolumes,
   startMusic(): void {
     musicWanted = true;
     if (!musicOn || !getCtx()) return;

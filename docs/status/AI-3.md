@@ -4,6 +4,8 @@
 Checked at f1e8cc6: `path.ts`, `replay.ts`, `src/art/manifest.ts` (stub) landed. STILL missing: Contract v4 (`SCENE.Home/Chill/Builder`, `ART`, save v4, ISO still 64x32), `src/core/assets.ts`, `src/logic/builder.ts`, `useTreat`. HomeScene, Builder, Chill, new Settings fields and the manifest-driven UI kit stay blocked on them (I do not edit `src/shared/types.ts`).
 
 ### Done this push
+- Contract v4 landed (SAVE_VERSION 4, SCENE.Home/Chill/Builder). Still missing: `core/assets.ts`, `logic/builder.ts`, `useTreat`, achievement progress.
+- Settings v2 (`settingsModel.ts` pure + `SettingsScene.ts`): two columns, every control >= 96 px: sfx, music, vibration, low fx, reduced motion, walk animation, match my clock, music/effect/ambience level (0/25/50/75/100%), quality (auto/low/high), case length (short/standard/long), two-step reset. Values persist in the save. Audio levels are applied for real: `engine.ts` got `setVolumes` and music/ambience buses join per-group gains (AI-4's folder, small edit because AI-4 is busy; `makeBus(c, gain, group?)`); Menu's first tap applies them. `quality`, `matchClock`, `walkAnim`, `sessionLength` are stored but nothing reads them yet (they belong to Home, the day/night overlay and the generator).
 - Pixel font (taken over from AI-4, who is busy): Silkscreen (OFL 1.1) woff in `public/fonts`, loaded by `src/ui/pixelFont.ts`, `theme.FONT` now uses it for all `makeText`/Button text; ledger line added; `?font=system` is the escape hatch. Measured with PIL: Silkscreen runs ~25-35% wider than a system sans, so every Button label still fits its width (checked by arithmetic, not on screen). It is a canvas-rendered pixel font, not yet a Phaser bitmap font, and the Boot screen and `art/palette.ts` still use the system font.
 - Evening Replay (deliverable 6): Result has a "Last night" button; `ReplayScene` (key `Replay`, local to scenes) walks AI-2's `replayScript` over the cutaway house tiles (avatar token, <= 600 ms walk per room change, item bubble, found items stamped), Skip jumps to the end state, calm/low-fx/reduced-motion shows the end state at once. Pure timing in `replayPlan.ts`, tested in tests/ui-replay.test.ts. Avatar is a code-drawn token until AI-4's `avatar/*` frames exist.
 - Journal achievements: all 15 achievements listed with name + description, earned = amber star, locked = muted (`scenes/achievementBook.ts`, tested in tests/ui-journal.test.ts). Header shows `earned / total`.
@@ -14,10 +16,11 @@ Checked at f1e8cc6: `path.ts`, `replay.ts`, `src/art/manifest.ts` (stub) landed.
 - Iso room, Dollhouse overlay, Menu backdrop, Result story, Puzzle Book (19 kinds), first-morning tutorial (relaxed), hit areas >= 96 px via `ui/hit.pickSpot`.
 
 ## Verified (commands run)
-- `npm test` 236/236 (27 files), `npx tsc --noEmit` clean, `npm run build` green, JS 429.0 KB gzip (budget 520), `node scripts/secret-scan.mjs` run before push.
+- `npm test` 278/278, `npx tsc --noEmit` clean, `npm run build` green, JS 433.0 KB gzip (budget 520), `node scripts/secret-scan.mjs` run before push.
 
 ## Not verified
 - Anything visual or tactile (feel, fps, haptics, Journal layout of the longer achievement list): never seen on a device; owner checks with `?debug=1`.
+- Settings two-column layout and the volume feel (squared curve) have not been seen or heard.
 - Silkscreen layout in every scene (wrapped paragraphs, Journal rows, Settings) has not been seen on screen.
 - The Replay scene has not been seen in a browser (layout of caption/avatar vs tiles unchecked).
 - `?view=iso` and the Dollhouse have not been run in a browser by me. Playwright browsers are not installed here.

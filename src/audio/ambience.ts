@@ -43,7 +43,7 @@ function startBed(room: string): Bed | null {
   const spec = BEDS[room];
   if (!c || !spec) return null;
   try {
-    const bus = makeBus(c, 0);
+    const bus = makeBus(c, 0, 'ambience');
     const src = c.createBufferSource();
     src.buffer = bedBuffer(c);
     src.loop = true;
