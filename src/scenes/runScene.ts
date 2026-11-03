@@ -1,4 +1,5 @@
+import { flags } from '../core/flags';
 import { SCENE } from '../shared/types';
 
-/** The scene that runs a morning: the Room scene (flat or iso) until RoomRun moves into Home at Gate B. */
-export const runScene = (): string => SCENE.Room;
+/** The scene that runs a morning: Home under `?view=home`, otherwise the Room scene (flat or iso). */
+export const runScene = (): string => (flags().home ? SCENE.Home : SCENE.Room);

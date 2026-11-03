@@ -51,7 +51,7 @@ export class HomeMenu {
     const p = getProfile(s);
     row(y + 138, SHEET_MODES.map((m) => m.label), 0, (i) => { this.mode = SHEET_MODES[i].mode; });
     row(y + 252, SHEET_LENGTHS.map((l) => l.label), SHEET_LENGTHS.findIndex((l) => l.length === p.settings.sessionLength), (i) => this.setLength(SHEET_LENGTHS[i].length));
-    const start = new Button(s, GAME_W / 2, y + h - 12 - BH / 2 + 4, 320, 'Start', () => go(s, SCENE.Room, startData(this.mode)), { variant: 'primary', height: BH });
+    const start = new Button(s, GAME_W / 2, y + h - 12 - BH / 2 + 4, 320, 'Start', () => go(s, SCENE.Home, startData(this.mode)), { variant: 'primary', height: BH });
     start.setDepth(DEPTH.panel);
     this.sheet.push(start);
   }

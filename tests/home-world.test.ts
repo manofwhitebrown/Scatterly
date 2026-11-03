@@ -16,7 +16,7 @@ describe('home world', () => {
   it('tapping a room floor centre selects that room', () => {
     for (const s of HOUSE_WORLD) {
       const cam = overviewCamera(1280, 720);
-      const c = project(s.wx + 3, s.wy + 3, s.floor * 72);
+      const c = project(s.wx + 6, s.wy + 6, s.floor * 72);
       const a = screenToArt({ x: 640 + (c.x - cam.cx) * cam.zoom, y: 360 + (c.y - cam.cy) * cam.zoom }, cam, 1280, 720);
       expect(roomAt(a)).toBe(s.room);
     }
@@ -24,5 +24,21 @@ describe('home world', () => {
   it('camera lerp hits both ends', () => {
     const a = overviewCamera(1280, 720); const b = focusCamera('living', 1280, 720);
     expect(lerpCamera(a, b, 0).zoom).toBeCloseTo(a.zoom); expect(lerpCamera(a, b, 1).zoom).toBeCloseTo(b.zoom);
+  });
+});
+
+describe('spots fit the world rooms', () => {
+  it('every spot of every legacy room lies inside its ROOM_SIZE', async () => {
+    const { allSpots } = await import('../src/logic');
+    const { defaultProfile } = await import('../src/core/save');
+    const { ROOM_SIZE } = await import('../src/scenes/homeWorld');
+    const spots = allSpots(defaultProfile());
+    expect(spots.length).toBeGreaterThan(20);
+    for (const sp of spots) {
+      const size = ROOM_SIZE[sp.room];
+      if (!size) continue;
+      expect(sp.iso.gx + sp.iso.w, sp.id).toBeLessThanOrEqual(size.w);
+      expect(sp.iso.gy + sp.iso.d, sp.id).toBeLessThanOrEqual(size.d);
+    }
   });
 });

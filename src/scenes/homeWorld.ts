@@ -12,18 +12,19 @@ export const SLAB_PX = 8;
 export const FLOOR1_RAISE = 72;
 export const ART_PX = 3;
 
+/** Sizes match the Phase 3 room layouts so existing spot cells fit until AI-2 publishes ROOM_SIZE v2. */
 export const ROOM_SIZE: Partial<Record<RoomId, { w: number; d: number }>> = {
-  entrance: { w: 6, d: 6 }, living: { w: 8, d: 6 }, kitchen: { w: 7, d: 6 },
-  bathroom: { w: 6, d: 6 }, bedroom: { w: 8, d: 6 }, study: { w: 7, d: 6 },
+  entrance: { w: 8, d: 8 }, living: { w: 10, d: 8 }, kitchen: { w: 9, d: 8 },
+  bathroom: { w: 8, d: 8 }, bedroom: { w: 9, d: 8 }, study: { w: 8, d: 8 },
 };
 
 export const HOUSE_WORLD: HouseSlot[] = [
   { room: 'entrance', floor: 0, wx: 0, wy: 0 },
-  { room: 'living', floor: 0, wx: 6, wy: 0 },
-  { room: 'kitchen', floor: 0, wx: 14, wy: 0 },
+  { room: 'living', floor: 0, wx: 8, wy: 0 },
+  { room: 'kitchen', floor: 0, wx: 18, wy: 0 },
   { room: 'bathroom', floor: 1, wx: 0, wy: 0 },
-  { room: 'bedroom', floor: 1, wx: 6, wy: 0 },
-  { room: 'study', floor: 1, wx: 14, wy: 0 },
+  { room: 'bedroom', floor: 1, wx: 8, wy: 0 },
+  { room: 'study', floor: 1, wx: 18, wy: 0 },
 ];
 
 /** Door and stairs links between rooms; every room must be reachable from the Overview in at most 2 taps. */
