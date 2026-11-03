@@ -5,9 +5,9 @@ import type { RunView } from './RoomRun';
 import { FLOOR1_RAISE, HOUSE_WORLD, project } from './homeWorld';
 import type { CameraState, Pt } from './homeWorld';
 import { CSS, isCalm, makeText } from '../ui/theme';
+import { UNIT } from './homeProps';
 import { GAME_H, GAME_W } from '../shared/types';
 
-const UNIT = 6; // art px per layout height unit
 const HIT_R = 56; // game px: 112 px targets, nearest centre wins
 
 const shade = (c: number, k: number): number => {

@@ -35,7 +35,7 @@ describe('spots fit the world rooms', () => {
     const spots = allSpots(defaultProfile());
     expect(spots.length).toBeGreaterThan(20);
     for (const sp of spots) {
-      const size = ROOM_SIZE[sp.room];
+      const size = (ROOM_SIZE as Record<string, { w: number; d: number } | undefined>)[sp.room];
       if (!size) continue;
       expect(sp.iso.gx + sp.iso.w, sp.id).toBeLessThanOrEqual(size.w);
       expect(sp.iso.gy + sp.iso.d, sp.id).toBeLessThanOrEqual(size.d);

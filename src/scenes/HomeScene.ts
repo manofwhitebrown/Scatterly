@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { flags } from '../core/flags';
+import type { WorldRoom } from '../content/world';
 import { allSpots } from '../logic';
 import { GAME_H, GAME_W, SCENE } from '../shared/types';
 import type { RoomId, RoomSceneData, Spot } from '../shared/types';
@@ -9,6 +10,7 @@ import { HomeSpots } from './HomeSpots';
 import { RoomRun } from './RoomRun';
 import type { RunView } from './RoomRun';
 import { drawRoomShell } from './homeDraw';
+import { drawRoomProps } from './homeProps';
 import {
   HOUSE_WORLD, LINKS, roomAt, roomBounds, focusCamera, lerpCamera, overviewCamera, screenToArt,
 } from './homeWorld';
@@ -68,6 +70,7 @@ export class HomeScene extends Phaser.Scene {
     for (const s of HOUSE_WORLD) {
       const g = this.add.graphics();
       drawRoomShell(g, s.room);
+      drawRoomProps(g, s.room as WorldRoom);
       this.world.add(g);
       this.shells.set(s.room, g);
     }

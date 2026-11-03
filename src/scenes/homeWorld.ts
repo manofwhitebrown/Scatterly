@@ -1,3 +1,5 @@
+import { HOUSE_MAP_V2, ROOM_SIZE, STAIRS, WORLD_DOORS } from '../content/world';
+import type { WorldRoom } from '../content/world';
 import type { HouseSlot, RoomId } from '../shared/types';
 
 /**
@@ -12,24 +14,13 @@ export const SLAB_PX = 8;
 export const FLOOR1_RAISE = 72;
 export const ART_PX = 3;
 
-/** Sizes match the Phase 3 room layouts so existing spot cells fit until AI-2 publishes ROOM_SIZE v2. */
-export const ROOM_SIZE: Partial<Record<RoomId, { w: number; d: number }>> = {
-  entrance: { w: 8, d: 8 }, living: { w: 10, d: 8 }, kitchen: { w: 9, d: 8 },
-  bathroom: { w: 8, d: 8 }, bedroom: { w: 9, d: 8 }, study: { w: 8, d: 8 },
-};
-
-export const HOUSE_WORLD: HouseSlot[] = [
-  { room: 'entrance', floor: 0, wx: 0, wy: 0 },
-  { room: 'living', floor: 0, wx: 8, wy: 0 },
-  { room: 'kitchen', floor: 0, wx: 18, wy: 0 },
-  { room: 'bathroom', floor: 1, wx: 0, wy: 0 },
-  { room: 'bedroom', floor: 1, wx: 8, wy: 0 },
-  { room: 'study', floor: 1, wx: 18, wy: 0 },
-];
+export { ROOM_SIZE } from '../content/world';
+export const HOUSE_WORLD: HouseSlot[] = HOUSE_MAP_V2;
 
 /** Door and stairs links between rooms; every room must be reachable from the Overview in at most 2 taps. */
 export const LINKS: ReadonlyArray<readonly [RoomId, RoomId]> = [
-  ['entrance', 'living'], ['living', 'kitchen'], ['living', 'bedroom'], ['bedroom', 'bathroom'], ['bedroom', 'study'],
+  ...WORLD_DOORS.map((d): readonly [RoomId, RoomId] => [d.a, d.b]),
+  [STAIRS.lower, STAIRS.upper],
 ];
 
 export interface Pt { x: number; y: number }
@@ -44,7 +35,7 @@ const slotOf = (room: RoomId): HouseSlot => {
   return s;
 };
 const sizeOf = (room: RoomId): { w: number; d: number } => {
-  const s = ROOM_SIZE[room];
+  const s = ROOM_SIZE[room as WorldRoom] as { w: number; d: number } | undefined;
   if (!s) throw new Error(`homeWorld: no size for ${room}`);
   return s;
 };

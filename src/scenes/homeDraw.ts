@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { WorldRoom } from '../content/world';
 import type { RoomId } from '../shared/types';
 import { FLOOR1_RAISE, HOUSE_WORLD, ROOM_SIZE, SLAB_PX, WALL_PX, project } from './homeWorld';
 
@@ -18,7 +19,7 @@ const poly = (g: Phaser.GameObjects.Graphics, c: number, pts: Array<{ x: number;
 /** Placeholder cutaway shell for one room (floor slab, two back walls) in art px; replaced by shell frames when art lands. */
 export function drawRoomShell(g: Phaser.GameObjects.Graphics, room: RoomId): void {
   const slot = HOUSE_WORLD.find((s) => s.room === room);
-  const size = ROOM_SIZE[room];
+  const size = ROOM_SIZE[room as WorldRoom] as { w: number; d: number } | undefined;
   if (!slot || !size) return;
   const t = TINT[room] ?? TINT.living;
   const h = slot.floor * FLOOR1_RAISE;

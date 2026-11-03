@@ -11,6 +11,7 @@ describe('home scene key', () => {
 describe('home scene module', () => {
   it('shell drawing covers every world room with a size', async () => {
     const { HOUSE_WORLD, ROOM_SIZE } = await import('../src/scenes/homeWorld');
-    for (const s of HOUSE_WORLD) expect(ROOM_SIZE[s.room]).toBeDefined();
+    type WorldRoom = keyof typeof ROOM_SIZE;
+    for (const s of HOUSE_WORLD) expect(ROOM_SIZE[s.room as WorldRoom]).toBeDefined();
   });
 });
