@@ -72,3 +72,15 @@ docs/status/          one status file per contributor
 - `?debug=1` debug overlay, `?e2e=1` test hooks (never changes gameplay), `?view=iso` selects the isometric Room/House (default stays the flat view until the Parity flip).
 - `npm run secret-scan` fails if a `github_pat_` / `ghp_` string is in the tree (also a CI step).
 - `npm run verify` = secret-scan + tsc + unit tests + build + e2e smoke. JS gzip budget 520 KB (hard fail 600).
+
+## Screenshots (`npm run shots`)
+1. `npm ci` once. Playwright needs Chromium: `npx playwright install chromium` (software GL is fine).
+2. If the download is blocked, point `SHOTS_CHROMIUM` at any Chromium binary (e.g. from `@sparticuz/chromium`).
+3. `npm run shots` builds, serves `vite preview` on :4174 and writes PNGs to `docs/shots/`.
+4. Names: `menu`, `home-overview`, `focus-<room>`, `puzzle-<kind>`, `result`; each at 1280x720 and `-800` (800x360).
+5. Files are overwritten every run; commit them with every visual push.
+6. Run one shot only: `npx playwright test -c playwright.shots.config.ts -g home`.
+7. Home shots use `?view=home`; focus shots need the Home scene's `__e2e.focus(room)` hook and are skipped without it.
+8. Software GL is slow (a few fps): the spec polls, it never sleeps on game time.
+9. The full run takes about 5-8 minutes locally.
+10. Never put tokens in specs or output.
