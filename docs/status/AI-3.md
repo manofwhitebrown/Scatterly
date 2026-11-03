@@ -4,6 +4,8 @@
 Checked at f1e8cc6: `path.ts`, `replay.ts`, `src/art/manifest.ts` (stub) landed. STILL missing: Contract v4 (`SCENE.Home/Chill/Builder`, `ART`, save v4, ISO still 64x32), `src/core/assets.ts`, `src/logic/builder.ts`, `useTreat`. HomeScene, Builder, Chill, new Settings fields and the manifest-driven UI kit stay blocked on them (I do not edit `src/shared/types.ts`).
 
 ### Done this push
+- Chill v1 (`SCENE.Chill`, Menu button): ambience picker (rain/birds/fire/night, saved in `settings.ambience`), paced breathing circle (4 s in / 4 s out, static + "Breathe slowly" when reduced motion/low fx; no health claims), focus timer 25/5 with a bell at each switch, sleep timer (off/15/30/60 min, then music and ambience stop), whole minutes + sessions saved to `profile.chill` on exit. No score, no fail state. Pure logic in `chillModel.ts` (tests/ui-chill.test.ts). The four ambience beds are synthesised noise stand-ins I added to `src/audio/ambience.ts` (AI-4's folder; AI-4 busy): they are NOT recorded rain/birds/fire and will sound like filtered noise.
+- Chill still to do: radio (needs AI-4 tracks beyond the one lofi loop), cat during focus, free-play puzzle shelf (needs a launch path for puzzles outside a run: Request to AI-1), photo mode (web PNG save; Android needs a plugin via AI-1), armchair hotspot entry from Home.
 - Case flow, first part (owner item 9): `caseProgress.ts` (pure, spoiler-free counts: rooms searched, found/targets, locks left) + `CaseUi.ts`: a strip under the HUD ("Rooms 1/4  Found 1/3  Locks 5") and a NON-modal checkpoint bar after each find ("Nice find! 2 more to go." with Keep going / Take a break, auto-hides after 7 s; Take a break opens Pause). Not shown as a modal on purpose: it never blocks input or the clock, and the e2e bot is unaffected. Rush gets the strip only. One line added to `RoomRun.mount` (file now 399 lines, cap 400). Tests: tests/ui-caseprogress.test.ts (pure text + real GameSession).
 - Still to do for item 9: Menu Resume button (needs autosave wiring from AI-1/AI-2; `snapshot.ts` exists), sessionLength in the mode picker, compound-gate finale presentation.
 - HomeScene slice 1 (`?view=home`, `SCENE.Home`): `HomeScene extends IsoRoomScene` under its own key, so Overview (house button, Dollhouse overlay) <-> Focus (room switch) and RoomRun rules work under Home; `__e2e = { hotspots, doors, focus(room), overview }`; `runScene()` routes ModeSelect/House to Home when the flag is set; `core/perf.ts` hook falls back to Home (AI-1's file, one line). NOT yet the single connected world: baked RoomLayer, global-grid camera pan/zoom and dimmed unfocused rooms are still to do and wait on `core/assets.ts` + AI-4 frames.
@@ -19,9 +21,10 @@ Checked at f1e8cc6: `path.ts`, `replay.ts`, `src/art/manifest.ts` (stub) landed.
 - Iso room, Dollhouse overlay, Menu backdrop, Result story, Puzzle Book (19 kinds), first-morning tutorial (relaxed), hit areas >= 96 px via `ui/hit.pickSpot`.
 
 ## Verified (commands run)
-- `npm test` 307/307, `npx tsc --noEmit` clean, `npm run build` green, JS 435.3 KB gzip (budget 520), `node scripts/secret-scan.mjs` run before push.
+- `npm test` 314/314, `npx tsc --noEmit` clean, `npm run build` green, JS 436.6 KB gzip (budget 520), `node scripts/secret-scan.mjs` run before push.
 
 ## Not verified
+- Chill layout and how the noise beds sound (and whether the breathing circle reads well) are unseen/unheard.
 - Case strip and checkpoint bar placement (strip at y=70 under the HUD bar, bar at bottom centre) have not been seen on screen; they may overlap iso art.
 - `?view=home` has not been run in a browser (no Playwright browsers here); the Home slice only reuses the iso room, so it should look like `?view=iso`.
 - Anything visual or tactile (feel, fps, haptics, Journal layout of the longer achievement list): never seen on a device; owner checks with `?debug=1`.
@@ -32,6 +35,7 @@ Checked at f1e8cc6: `path.ts`, `replay.ts`, `src/art/manifest.ts` (stub) landed.
 - G4 leak counts not measured.
 
 ## Requests
+- AI-1: Chill free-play shelf needs a way to launch any unlocked puzzle kind outside RoomRun (random seed, level 1-3, no score, onDone returns to Chill); and photo-mode save on Android needs a Capacitor plugin.
 - AI-1: `tests/e2e/helpers.ts` and `perf.e2e.ts` wait for scene `'Room'`; under `?view=home` it is `'Home'` (use `?view=home` runs, accept either key). I did not edit tests/e2e.
 - AI-4 (FYI, owner asked me to cover while you are busy): I added the OFL pixel font (Silkscreen, `public/fonts`, `src/ui/pixelFont.ts`, ledger line). Your deliverables still open: bitmap-font conversion (optional now), nine-slice wood panels, button pressed frames, notebook paper, item tray, icons, Boot screen and `art/palette.ts` still on the system font. I did not touch `assets/`, `tools/`, `src/art/`. I will use your atlas/manifest keys when Contract v4 lands.
 - AI-1: Contract v4 still not on main; land it (SCENE.Home/Chill/Builder, ART, ISO 96x48, save v4) so HomeScene can be registered; add `?view=home`.

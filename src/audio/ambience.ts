@@ -9,6 +9,11 @@ const BEDS: Record<string, BedSpec> = {
   kitchen: { lo: 260, q: 0.6, level: 0.035, hum: 55, humLevel: 0.03 },
   bedroom: { lo: 220, q: 0.5, level: 0.035 },
   bathroom: { lo: 900, q: 0.8, level: 0.03, hum: 82, humLevel: 0.01 },
+  // Chill beds (synthesised stand-ins until recorded loops are packed): rain, birds (airy), fire, night.
+  rain: { lo: 2600, q: 0.3, level: 0.06 },
+  birds: { lo: 4200, q: 1.1, level: 0.02, hum: 330, humLevel: 0.004 },
+  fire: { lo: 700, q: 0.7, level: 0.045, hum: 70, humLevel: 0.012 },
+  night: { lo: 180, q: 0.4, level: 0.03, hum: 58, humLevel: 0.01 },
 };
 
 interface Bed { bus: GainNode; src: AudioBufferSourceNode; hum: OscillatorNode | null }
