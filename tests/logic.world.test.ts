@@ -28,6 +28,15 @@ describe('world layout v2', () => {
     }
   });
 
+  it('every upper room sits exactly within the footprint of the ground-floor room below it', () => {
+    for (const up of HOUSE_MAP_V2.filter((s) => s.floor === 1)) {
+      const U = ROOM_SIZE[up.room as WorldRoom];
+      const below = HOUSE_MAP_V2.find((g) => g.floor === 0 && g.wx <= up.wx && g.wy <= up.wy
+        && up.wx + U.w <= g.wx + ROOM_SIZE[g.room as WorldRoom].w && up.wy + U.d <= g.wy + ROOM_SIZE[g.room as WorldRoom].d);
+      expect(below, `${up.room} has no room below`).toBeDefined();
+    }
+  });
+
   it('door cells are in bounds, walkable and line up in world coordinates', () => {
     for (const d of WORLD_DOORS) {
       const ca = worldDoorCell(d.a, d.b) as Cell2, cb = worldDoorCell(d.b, d.a) as Cell2;

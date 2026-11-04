@@ -14,6 +14,11 @@
 - `tests/logic.worldprops.test.ts`: per room: 25-40 pieces, in bounds, no overlaps (props, spots, storage slots, stairs), back-wall facing rule,
   seats face a table/desk/TV, onTop inside parent, mounts/windows/doors never overlap, floor connected, every spot reachable.
 
+## Overlap analysis (manager order 1)
+- Cell footprints are correct and tested: same-floor rooms never overlap; each upper room sits exactly on the room below (new test).
+- The on-screen overlap is projection, not layout: floor 1 is raised 72 art px = 9 tiles of (gx+gy). An upper tile with global sum U hides the ground tile with sum U-9, so the back half of each 9-deep ground room is covered.
+- Fix needs a set-back, not a footprint change: give floor-1 slots wx,wy offset (-k,-k) (pure vertical screen shift of 16k art px). k=6 clears the interior, e.g. bedroom wx=2,wy=-6; bathroom -6,-6; study 14,-6. Shared walls and the stair alignment hold (all upper rooms share the offset). Not applied: needs the manager's/AI-3's OK since it changes total house height (~386 art px, overview zoom).
+
 ## Not verified
 - `npm run verify` (e2e smoke) and `npm run shots` not run. Fairness 3 modes x 3 profiles not run separately (existing 5000-seed test passes with study spots).
 - Study has no templates, clues or evening steps yet, so no case starts there; its spots hold items only when another template reaches it.

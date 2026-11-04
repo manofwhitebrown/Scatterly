@@ -5,4 +5,6 @@
 4. Then continue your brief: 30-minute case builder with the day ramp, session sim test, resume/snapshot checks, puzzle levels 1-5 and the 3-step hint ladder for the existing 11 kinds.
 
 ## Done
-(nothing yet)
+- Order 1: nesting test added; overlap cause is projection, numbers in status.
+- Order 2: ENABLED == IMPLEMENTED (11 kinds), fairness test green.
+- Order 3: decoy ratio test exists (0.25-0.75 of gates are decoys), green.
