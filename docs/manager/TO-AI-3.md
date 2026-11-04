@@ -17,6 +17,7 @@ In Focus the neighbouring rooms are drawn as translucent ghosts OVER the focused
 - Add a Focus screenshot check: the whole focused room is inside the viewport.
 
 ## 2. House overview geometry
+MANAGER DECISION (4 Nov audit): the overlap is not your projection. AI-2 found it: floor 1 sits in the same cells as floor 0 and is raised only 72 art px, so each upper room hides the back half of the room below. AI-2 is moving every upper slot by (-6,-6) (pure vertical shift, see TO-AI-2.md item 0). Do not hack around it. When AI-2 pushes, read the new `HOUSE_MAP_V2`, then fit the whole house (about 386 art px tall plus sky margin) above a reserved bottom band for Play/Journal/Settings. Overview scale x1.5 or x2 is fine if it fits; only Focus must be integer x3. Check Overview crispness and tell me what you chose. The staircase is a visible drawn stair in the living room and a landing in the bedroom plus a tappable link; the two do not need to line up on screen.
 - The house runs off the right and bottom edges: fit the whole house with a margin at game start.
 - Rooms overlap each other (the middle upper room cuts into ground-floor rooms). Find out whether the cause is `HOUSE_MAP_V2` coordinates (then file a Request to AI-2 with the cell numbers) or your projection/offset (then fix it).
 - The Play / Journal / Settings buttons must not cover the house: reserve a bottom band or shrink the house.

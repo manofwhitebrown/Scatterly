@@ -6,4 +6,4 @@
 5. Then continue your brief: puzzle shell skin hook and hint ladder UI, Gate B cleanup when the manager says so, Gate C APK.
 
 ## Done
-(nothing yet)
+- Items 1 and 2: verified by the manager on 4 Nov (all shots regenerated from latest main, each PNG shows its named scene). Items 3 and 4 still open (dist 2264 KB over the 2048 budget; pixel-crispness defect).
