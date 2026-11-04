@@ -1,5 +1,7 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## Audio sources: read `docs/manager/AUDIO-PACKS.md` (CC0 packs and music links the owner downloads and attaches to your chat; how to convert and log them). Do not wait for them.
+
 ## OWNER: purple bars on laptop, and what a phone shows (manager tested the 4 Nov 09:13 build at 1200x540 = 20:9 phone: 120 px dark bars each side, 20 percent of the screen wasted)
 Do this right after the current item. Goal: no empty bars on any phone or laptop; the game fills the screen.
 1. Logical size: height stays 720; width = clamp(window aspect, 16:9 .. 21:9) x 720, i.e. 1280..1680, computed at boot and on resize/orientationchange (`scale.setGameSize`, FIT, centred). Export `LAYOUT = { w, h, safeX }` from `src/core/layout.ts` (`safeX = (w - 1280) / 2`).
