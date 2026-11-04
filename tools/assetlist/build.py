@@ -47,6 +47,8 @@ add('ui','ui/<name> (nine-slices, buttons x3 states, tray, notebook, toggles, sl
 add('icon','icon/<item> (8 items + 8 clue types + 10 actions + 20 decor + 14 misc)','16x16 and 32x32',60,'centre','static','S','B','item and clue icons')
 add('fx','fx/<name>/<n> (16 FxNames x about 4 frames + rain streak + dust mote + steam + sparkle)','4x4..16x16',20+16*4,'centre','once','S','B','pixel particle frames')
 add('ambient','ambient/<name>/<n> (steam, curtain sway, plant sway, clock, fire, tv flicker, lamp pulse, window light, dust, rain)','varies',10*4,'object anchor','loop','A','B','focused room only')
+add('yard','yard/lawn_<0-2>, path, flowers_<0-3>, bush_<0-2>, tree_<0-1>, fence_<r|l|corner|gate>, mailbox','tiles 32x16, sprites up to 70x50',19,'tile top vertex / sprite footprint','-','S','B','exterior kit, day palette, non-interactive (TO-AI-4); group house')
+add('porch','porch/floor, steps, awning, railing, door, mat, lamp, lamp_glow, plant','tile 32x16, sprites up to 44x34',8,'footprint','lamp glow variant','S','B','front-door side, matches entrance shell colours')
 add('puzzle','puzzle/<kind>/<name>','close-up skins, about 6 pieces per kind',23*6,'top-left','state frames','S for code/lights/memory, else A','B','themed mechanisms: lock dials, light switches, memory cards, etc. (23 kinds)')
 def count(e): return e['frames']
 total = sum(count(e) for e in E_)

@@ -1,6 +1,6 @@
 {
  "version": 1,
- "total_frames": 777,
+ "total_frames": 804,
  "entries": [
   {
    "group": "spot",
@@ -840,6 +840,30 @@
    "prio": "A",
    "src": "B",
    "note": "focused room only",
+   "ids": []
+  },
+  {
+   "group": "yard",
+   "key": "yard/lawn_<0-2>, path, flowers_<0-3>, bush_<0-2>, tree_<0-1>, fence_<r|l|corner|gate>, mailbox",
+   "size": "tiles 32x16, sprites up to 70x50",
+   "frames": 19,
+   "anchor": "tile top vertex / sprite footprint",
+   "states": "-",
+   "prio": "S",
+   "src": "B",
+   "note": "exterior kit, day palette, non-interactive (TO-AI-4); group house",
+   "ids": []
+  },
+  {
+   "group": "porch",
+   "key": "porch/floor, steps, awning, railing, door, mat, lamp, lamp_glow, plant",
+   "size": "tile 32x16, sprites up to 44x34",
+   "frames": 8,
+   "anchor": "footprint",
+   "states": "lamp glow variant",
+   "prio": "S",
+   "src": "B",
+   "note": "front-door side, matches entrance shell colours",
    "ids": []
   },
   {

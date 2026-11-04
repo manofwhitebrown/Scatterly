@@ -5,7 +5,7 @@ Usage: pack.py  (packs every dir below). Shelf packing, max width 1024. Output P
 import json, os, re, sys
 from PIL import Image
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
-GROUPS = {'core': 'core', 'room-slice': 'room:slice'}
+GROUPS = {'core': 'core', 'room-slice': 'room:slice', 'house': 'house'}
 MS = {'walk': 100, 'idle': 400, 'sleep': 500, 'react': 150, 'eat': 200, 'reach': 120}
 def pack(d, group):
     src = os.path.join(ROOT, 'assets', 'frames', d); pv = {}

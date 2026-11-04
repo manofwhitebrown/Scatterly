@@ -1,0 +1,164 @@
+{
+"yard/lawn_0": {
+"pivot": [
+16,
+0
+]
+},
+"yard/lawn_1": {
+"pivot": [
+16,
+0
+]
+},
+"yard/lawn_2": {
+"pivot": [
+16,
+0
+]
+},
+"yard/path": {
+"pivot": [
+16,
+0
+]
+},
+"porch/floor": {
+"pivot": [
+16,
+0
+]
+},
+"yard/flowers_0": {
+"pivot": [
+9,
+10
+]
+},
+"yard/flowers_1": {
+"pivot": [
+9,
+10
+]
+},
+"yard/flowers_2": {
+"pivot": [
+9,
+10
+]
+},
+"yard/flowers_3": {
+"pivot": [
+9,
+10
+]
+},
+"yard/bush_0": {
+"pivot": [
+12,
+16
+]
+},
+"yard/bush_1": {
+"pivot": [
+12,
+16
+]
+},
+"yard/bush_2": {
+"pivot": [
+12,
+16
+]
+},
+"yard/tree_0": {
+"pivot": [
+16,
+43
+]
+},
+"yard/tree_1": {
+"pivot": [
+16,
+43
+]
+},
+"yard/fence_r": {
+"pivot": [
+3,
+15
+]
+},
+"yard/fence_l": {
+"pivot": [
+34,
+15
+]
+},
+"yard/fence_corner": {
+"pivot": [
+35,
+15
+]
+},
+"yard/fence_gate": {
+"pivot": [
+3,
+15
+]
+},
+"porch/railing": {
+"pivot": [
+3,
+13
+]
+},
+"yard/mailbox": {
+"pivot": [
+7,
+12
+]
+},
+"porch/mat": {
+"pivot": [
+9,
+6
+]
+},
+"porch/plant": {
+"pivot": [
+7,
+11
+]
+},
+"porch/lamp": {
+"pivot": [
+6,
+13
+]
+},
+"porch/door": {
+"pivot": [
+9,
+22
+]
+},
+"porch/steps": {
+"pivot": [
+19,
+17
+]
+},
+"porch/awning": {
+"pivot": [
+3,
+3
+]
+},
+"porch/lamp_glow": {
+"pivot": [
+16,
+23
+]
+}
+}
