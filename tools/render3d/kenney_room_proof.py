@@ -24,8 +24,8 @@ def hx(h):
 
 
 RAMPS = {  # highlight, light, mid, shadow
-    "WOOD": ["#f0c389", "#d79b5e", "#b0703f", "#82492f"],
-    "WOOD_D": ["#c48a56", "#a56a3e", "#7d4a2c", "#573223"],
+    "WOOD": ["#fbe1b0", "#f2c48a", "#e0a068", "#b8724a"],
+    "WOOD_D": ["#f5d0a4", "#e6b283", "#cf9264", "#a8684c"],
     "TERRA": ["#f2a07f", "#d97a5c", "#b05646", "#7f3b3c"],
     "TEAL": ["#9ccfc4", "#6fb0aa", "#4d8c90", "#356a74"],
     "MUSTARD": ["#f8dc8c", "#eab75f", "#c58f45", "#8d6232"],
@@ -33,7 +33,7 @@ RAMPS = {  # highlight, light, mid, shadow
     "METAL": ["#d9d6cd", "#b3b1ac", "#8a8a8e", "#5f5f70"],
     "DARK": ["#6a6070", "#4e4659", "#3a3446", "#27222f"],
     "GREEN": ["#b8d58a", "#8fb868", "#689350", "#466e44"],
-    "FUR": ["#d9a979", "#b98458", "#8f6140", "#684330"],
+    "FUR": ["#e8bd8a", "#d09a68", "#b07a52", "#8a5a44"],
     "GLASS": ["#d8f0ea", "#b2dad6", "#8bbdc2", "#6a9ba8"],
     "LAMP": ["#fffbd6", "#fff0a3", "#ffe27a", "#f2c552"],
 }
@@ -248,11 +248,11 @@ def draw_shell(img):
         d.point((x, y), fill=hx("#352a3d")); d.point((x + 1, y), fill=hx("#352a3d"))
     # floor slab front edges
     th = 7
-    poly(d, [pf(0, D), pf(0, D, -th), pf(W, D, -th), pf(W, D)], hx("#6b4230"))
-    poly(d, [pf(0, D), pf(W, D), pf(W, D, -th), pf(0, D, -th)], hx("#6b4230"))
-    poly(d, [pf(0, D), pf(0, D, -th), pf(W, D, -th)][:0] or [pf(0, D), pf(W, D), pf(W, D, -th), pf(0, D, -th)], hx("#7c4d36"))
-    poly(d, [pf(W, 0), pf(W, D), pf(W, D, -th), pf(W, 0, -th)], hx("#563426"))
-    poly(d, [pf(0, D), pf(W, D), pf(W, D, -th), pf(0, D, -th)], hx("#7c4d36"))
+    poly(d, [pf(0, D), pf(0, D, -th), pf(W, D, -th), pf(W, D)], hx("#2f6d74"))
+    poly(d, [pf(0, D), pf(W, D), pf(W, D, -th), pf(0, D, -th)], hx("#2f6d74"))
+    poly(d, [pf(0, D), pf(0, D, -th), pf(W, D, -th)][:0] or [pf(0, D), pf(W, D), pf(W, D, -th), pf(0, D, -th)], hx("#3f7f86"))
+    poly(d, [pf(W, 0), pf(W, D), pf(W, D, -th), pf(W, 0, -th)], hx("#1f4a50"))
+    poly(d, [pf(0, D), pf(W, D), pf(W, D, -th), pf(0, D, -th)], hx("#3f7f86"))
     # floor planks (per-pixel inverse iso)
     fl = np.zeros((CH, CW, 4), np.uint8)
     ys, xs = np.mgrid[0:CH, 0:CW]
@@ -273,7 +273,7 @@ def draw_shell(img):
     img.alpha_composite(Image.fromarray(fl, "RGBA"))
     d = ImageDraw.Draw(img)
     # walls
-    wp, cr, wd, tr = hx("#f3dcb5"), hx("#e9c394"), hx("#b0703f"), hx("#f0c389")
+    wp, cr, wd, tr = hx("#f3dcb5"), hx("#e9c394"), hx("#7eaa73"), hx("#fff3dc")
     for wall, L_, shade in (("L", D, 0.86), ("R", W, 1.0)):
         sh = lambda c: tuple(int(v * shade) for v in c)
         poly(d, wall_quad(wall, 0, L_, 0, WH), sh(wp))
@@ -286,15 +286,15 @@ def draw_shell(img):
         poly(d, wall_quad(wall, 0, L_, 0, 17), sh(wd))
         t, k = 0.0, 0
         while t < L_:
-            poly(d, wall_quad(wall, t, t + 0.06, 0, 17), sh(hx("#8c5535")))
+            poly(d, wall_quad(wall, t, t + 0.06, 0, 17), sh(hx("#4f7a58")))
             t += 0.25
         poly(d, wall_quad(wall, 0, L_, 15, 18), sh(tr))
-        poly(d, wall_quad(wall, 0, L_, 0, 3), sh(hx("#e4b27a")))
+        poly(d, wall_quad(wall, 0, L_, 0, 3), sh(hx("#fff3dc")))
         poly(d, wall_quad(wall, 0, L_, WH - 5, WH), sh(hx("#fbeed0")))   # cornice
         poly(d, wall_quad(wall, 0, L_, WH - 6, WH - 5), sh(hx("#b98d66")))
     # thick cut ends
-    poly(d, [pw("L", D, WH), pw("L", D, 0), (pw("L", D, 0)[0] + 5, pw("L", D, 0)[1] + 2), (pw("L", D, WH)[0] + 5, pw("L", D, WH)[1] + 2)], hx("#c79a6e"))
-    poly(d, [pw("R", W, WH), pw("R", W, 0), (pw("R", W, 0)[0] - 5, pw("R", W, 0)[1] + 2), (pw("R", W, WH)[0] - 5, pw("R", W, WH)[1] + 2)], hx("#a97a58"))
+    poly(d, [pw("L", D, WH), pw("L", D, 0), (pw("L", D, 0)[0] + 5, pw("L", D, 0)[1] + 2), (pw("L", D, WH)[0] + 5, pw("L", D, WH)[1] + 2)], hx("#e8d5b5"))
+    poly(d, [pw("R", W, WH), pw("R", W, 0), (pw("R", W, 0)[0] - 5, pw("R", W, 0)[1] + 2), (pw("R", W, WH)[0] - 5, pw("R", W, WH)[1] + 2)], hx("#c2ab8e"))
     # window on right wall + curtains
     t0, t1, h0, h1 = 1.9, 3.9, 24, 54
     poly(d, wall_quad("R", t0 - 0.08, t1 + 0.08, h0 - 3, h1 + 3), hx("#f7e7c6"))
@@ -306,7 +306,7 @@ def draw_shell(img):
         poly(d, wall_quad("R", a, b, h0 - 6, h1 + 4), hx("#d97a5c"))
         poly(d, wall_quad("R", a + 0.08, a + 0.14, h0 - 6, h1 + 4), hx("#b05646"))
         poly(d, wall_quad("R", a + 0.2, a + 0.26, h0 - 6, h1 + 4), hx("#b05646"))
-    poly(d, wall_quad("R", t0 - 0.45, t1 + 0.45, h1 + 4, h1 + 6), hx("#82492f"))
+    poly(d, wall_quad("R", t0 - 0.45, t1 + 0.45, h1 + 4, h1 + 6), hx("#b8724a"))
     # wall sconce glow dots
     return img
 

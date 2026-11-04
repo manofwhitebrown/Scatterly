@@ -109,13 +109,14 @@ def shell(room, cols, rows, wallh_units, pal_cfg, windows=(), doors=(), tod='day
             if 0 <= gyl < rows and 0 <= hv < wh: img[sy, sx] = wall_col('left', int(gyl * 16), int(hv))
     return img, (px0, py0)
 
+WAINS = {'living': 'sage', 'kitchen': 'teal', 'bedroom': 'rose', 'bathroom': 'sky'}  # painted wainscot, no dark wood
 def room_cfg(room):
     r = PAL['rooms'][room]
     if room == 'kitchen': fl = floor_checker('stone', 'plaster'); wp = wall_striped('butter', 'plaster')
     elif room == 'bedroom': fl = floor_plank('woodWarm'); wp = wall_plain('sky')
     elif room == 'bathroom': fl = floor_stone('plaster'); wp = wall_plain('teal')
     else: fl = floor_plank(r['floor'] if r['floor'].startswith('wood') else 'woodWarm'); wp = wall_striped('plaster', r['accent'])
-    return {'floor_fn': fl, 'wall_fn': wp, 'wains_fn': wainscot('woodWarm'), 'trim_fn': trim_rail('woodDark')}
+    return {'floor_fn': fl, 'wall_fn': wp, 'wains_fn': wainscot(WAINS.get(room, 'sage')), 'trim_fn': trim_rail('plaster')}
 
 LAYOUT = {  # mirrors src/content/layout.ts (windows [(wall, at, w)], doors [(wall, at)])
     'living':  (10, 8, [('left', 1, 2), ('right', 5, 2)], [('left', 3), ('left', 6), ('right', 7)]),

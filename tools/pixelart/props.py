@@ -7,7 +7,7 @@ L = {  # shared legend
  'w': 'plaster.4', 'c': 'plaster.2', 'd': 'plaster.1', 'n': 'woodWarm.2', 'N': 'woodWarm.3', 'm': 'woodWarm.1',
  'r': 'terracotta.2', 'R': 'terracotta.3', 'q': 'terracotta.1', 'y': 'butter.2', 'Y': 'butter.3', 'z': 'butter.1',
  'g': 'sage.2', 'G': 'sage.3', 'h': 'sage.1', 't': 'teal.2', 'T': 'teal.3', 'u': 'teal.1', 'b': 'sky.2', 'B': 'sky.3', 'k': 'stone.2',
- 'K': 'stone.3', 'j': 'stone.1', 'p': 'rose.2', 'P': 'rose.3', 'l': 'plum.2', 'L': 'plum.3', 'v': 'navy.2', 'V': 'navy.3', 'i': 'ink', 'o': 'paper'}
+ 'K': 'stone.3', 'j': 'stone.1', 'p': 'rose.2', 'P': 'rose.3', 'l': 'slate.2', 'L': 'slate.3', 'v': 'navy.2', 'V': 'navy.3', 'i': 'ink', 'o': 'paper'}
 S = {}
 S['prop/teapot'] = ["...ii.....", "..iyyi....", ".tTTTTt.t.", "tTbTTTTtt.", "ttTTTTTt.t", "ttttttttt.", ".uttttu...", "..uuuu...."]
 S['prop/mug'] = ["........", ".rRRRR..", ".rRRRRr.", ".rrrrrr.", ".rrrrrr.", "..qqqq.."]

@@ -75,3 +75,8 @@ export const ISO = { tileW: 96, tileH: 48, unitH: 12 } as const;     // game px;
 
 ## 11. What this look cannot do (honest limits)
 Hand-pixeled richness (character in every prop) is not reachable from converted low-poly models. We close the gap with density (25-40 props per room), strict palette, baked light, animated ambience and sound. Anything that reads as "default" or mixed-scale is a defect, not a style.
+
+## Theme v2 (manager order): no dark brown fills
+- Rule: no dark brown fills anywhere. Wood is only furniture, in the lighter honey/peach `woodWarm`/`woodDark` ramps (outline plum-brown `#6a3f45`, never a large dark area). Trim, wainscot and the floor slab edge are painted: cream trim, per-room sage/teal/rose wainscot, teal slab. Backdrop and outlines use ink `#2a2030`.
+- UI: nine-slice panels use the `slate` ramp (panel `#2d4a53`, hi `#3f6a72`, lo `#1f3338`, outline `#16252a`); paper is cream `#fff3dc`. Buttons keep their keys: `btn_wood` = sun orange (butter ramp, primary), `btn_sage` = teal (secondary), `btn_terracotta` = danger.
+- `palette.json > theme` is the single source for AI-3's `src/ui/theme.ts`. The `plum` ramp was replaced by `slate` to stay at 64 colours.

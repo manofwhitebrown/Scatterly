@@ -1,31 +1,160 @@
 {
-  "version": 1,
-  "note": "Global palette, 64 colours max. Ramp order: [outline, shadow, base, light, highlight]. Source of truth for tools/render3d, tools/check-frames and src/art/manifest.ts.",
-  "ramps": {
-    "woodWarm":   ["#4a2e22", "#7a4a30", "#b0773f", "#d9a066", "#f2c98c"],
-    "woodDark":   ["#2f1d1a", "#553529", "#7d523a", "#a0734f", "#c29a6e"],
-    "plaster":    ["#8a7260", "#c2ab8e", "#e8d5b5", "#f6ead0", "#fff8e8"],
-    "terracotta": ["#5e2a24", "#9a4634", "#c9684a", "#e58d68", "#f5b794"],
-    "rose":       ["#6b2f3f", "#a5505e", "#d77f86", "#ecabab", "#f9d3cc"],
-    "butter":     ["#7a5a1e", "#c0902f", "#eab94a", "#f6d777", "#fdeeaa"],
-    "sage":       ["#2f4a3a", "#4f7a58", "#7eaa73", "#a8c98a", "#d0e3b0"],
-    "teal":       ["#1f4a50", "#2f7478", "#4fa0a0", "#7cc4bb", "#b3e2d4"],
-    "sky":        ["#2f4a6e", "#4f7ca8", "#7cabd0", "#a9d0e6", "#d6eef5"],
-    "navy":       ["#1f2748", "#33447a", "#536ba8", "#7e95c9", "#aebfe6"],
-    "plum":       ["#3c2850", "#5e4380", "#8a6aae", "#b296cf", "#d9c7ec"],
-    "stone":      ["#2a2f3a", "#4d5563", "#7f8794", "#aab1bb", "#d5d9df"]
+ "version": 1,
+ "note": "Global palette, 64 colours max. Ramp order: [outline, shadow, base, light, highlight]. Source of truth for tools/render3d, tools/check-frames and src/art/manifest.ts.",
+ "ramps": {
+  "woodWarm": [
+   "#6a3f45",
+   "#b8724a",
+   "#e0a068",
+   "#f2c48a",
+   "#fbe1b0"
+  ],
+  "woodDark": [
+   "#6a3f45",
+   "#a8684c",
+   "#cf9264",
+   "#e6b283",
+   "#f5d0a4"
+  ],
+  "plaster": [
+   "#8a7260",
+   "#c2ab8e",
+   "#e8d5b5",
+   "#f6ead0",
+   "#fff3dc"
+  ],
+  "terracotta": [
+   "#5e2a24",
+   "#9a4634",
+   "#c8604a",
+   "#e58d68",
+   "#f5b794"
+  ],
+  "rose": [
+   "#6b2f3f",
+   "#a5505e",
+   "#d77f86",
+   "#ecabab",
+   "#f9d3cc"
+  ],
+  "butter": [
+   "#7a5a1e",
+   "#c0902f",
+   "#f4a93d",
+   "#f6d777",
+   "#fdeeaa"
+  ],
+  "sage": [
+   "#2f4a3a",
+   "#4f7a58",
+   "#7eaa73",
+   "#a8c98a",
+   "#d0e3b0"
+  ],
+  "teal": [
+   "#1f4a50",
+   "#2f6d74",
+   "#3f7f86",
+   "#7cc4bb",
+   "#b3e2d4"
+  ],
+  "sky": [
+   "#2f4a6e",
+   "#4f7ca8",
+   "#7cabd0",
+   "#a9d0e6",
+   "#d6eef5"
+  ],
+  "navy": [
+   "#1f2748",
+   "#33447a",
+   "#536ba8",
+   "#7e95c9",
+   "#aebfe6"
+  ],
+  "stone": [
+   "#2a2f3a",
+   "#4d5563",
+   "#7f8794",
+   "#aab1bb",
+   "#d5d9df"
+  ],
+  "slate": [
+   "#16252a",
+   "#1f3338",
+   "#2d4a53",
+   "#3f6a72",
+   "#5f8f94"
+  ]
+ },
+ "specials": {
+  "ink": "#2a2030",
+  "paper": "#fff3dc",
+  "glow": "#fff2b8",
+  "shade": "#3a2a4a"
+ },
+ "dayNight": {
+  "morning": "#ffe9cf",
+  "noon": "#ffffff",
+  "dusk": "#ffc79a",
+  "night": "#6f7bb8"
+ },
+ "rooms": {
+  "entrance": {
+   "wall": "plaster",
+   "floor": "woodDark",
+   "accent": "terracotta"
   },
-  "specials": { "ink": "#2b1d2e", "paper": "#fffdf4", "glow": "#fff2b8", "shade": "#3a2a4a" },
-  "dayNight": { "morning": "#ffe9cf", "noon": "#ffffff", "dusk": "#ffc79a", "night": "#6f7bb8" },
-  "rooms": {
-    "entrance": { "wall": "plaster", "floor": "woodDark", "accent": "terracotta" },
-    "living":   { "wall": "plaster", "floor": "woodWarm", "accent": "terracotta" },
-    "kitchen":  { "wall": "butter",  "floor": "stone",    "accent": "sage" },
-    "laundry":  { "wall": "stone",   "floor": "plaster",  "accent": "teal" },
-    "bedroom":  { "wall": "sky",     "floor": "woodWarm", "accent": "rose" },
-    "bathroom": { "wall": "teal",    "floor": "plaster",  "accent": "sky" },
-    "study":    { "wall": "navy",    "floor": "woodDark", "accent": "butter" },
-    "balcony":  { "wall": "sky",     "floor": "woodWarm", "accent": "sage" },
-    "garden":   { "wall": "sage",    "floor": "sage",     "accent": "plum" }
+  "living": {
+   "wall": "plaster",
+   "floor": "woodWarm",
+   "accent": "terracotta"
+  },
+  "kitchen": {
+   "wall": "butter",
+   "floor": "stone",
+   "accent": "sage"
+  },
+  "laundry": {
+   "wall": "stone",
+   "floor": "plaster",
+   "accent": "teal"
+  },
+  "bedroom": {
+   "wall": "sky",
+   "floor": "woodWarm",
+   "accent": "rose"
+  },
+  "bathroom": {
+   "wall": "teal",
+   "floor": "plaster",
+   "accent": "sky"
+  },
+  "study": {
+   "wall": "navy",
+   "floor": "woodDark",
+   "accent": "butter"
+  },
+  "balcony": {
+   "wall": "sky",
+   "floor": "woodWarm",
+   "accent": "sage"
+  },
+  "garden": {
+   "wall": "sage",
+   "floor": "sage",
+   "accent": "plum"
   }
+ },
+ "theme": {
+  "panel": "#2d4a53",
+  "panelHi": "#3f6a72",
+  "panelLo": "#1f3338",
+  "outline": "#16252a",
+  "btnPrimary": "#f4a93d",
+  "btnSecondary": "#3f7f86",
+  "btnDanger": "#c8604a",
+  "text": "#fff3dc",
+  "textDim": "#b3c9c6"
+ }
 }
