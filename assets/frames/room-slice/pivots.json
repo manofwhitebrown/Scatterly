@@ -184,5 +184,125 @@
 129,
 41
 ]
+},
+"spot/basket/closed": {
+"pivot": [
+8,
+9
+]
+},
+"spot/basket/open": {
+"pivot": [
+8,
+9
+]
+},
+"spot/bin/closed": {
+"pivot": [
+7,
+10
+]
+},
+"spot/bin/open": {
+"pivot": [
+7,
+10
+]
+},
+"spot/charger/closed": {
+"pivot": [
+8,
+7
+]
+},
+"spot/charger/open": {
+"pivot": [
+8,
+9
+]
+},
+"spot/jacket/closed": {
+"pivot": [
+7,
+13
+]
+},
+"spot/jacket/open": {
+"pivot": [
+7,
+13
+]
+},
+"spot/papers/closed": {
+"pivot": [
+7,
+8
+]
+},
+"spot/papers/open": {
+"pivot": [
+8,
+10
+]
+},
+"spot/shoeRack/closed": {
+"pivot": [
+9,
+8
+]
+},
+"spot/shoeRack/open": {
+"pivot": [
+9,
+8
+]
+},
+"spot/bagSpot/closed": {
+"pivot": [
+7,
+12
+]
+},
+"spot/bagSpot/open": {
+"pivot": [
+7,
+12
+]
+},
+"spot/rug/closed": {
+"pivot": [
+39,
+1
+]
+},
+"spot/rug/open": {
+"pivot": [
+39,
+1
+]
+},
+"spot/sofa/open": {
+"pivot": [
+18,
+10
+]
+},
+"spot/bed/open": {
+"pivot": [
+34,
+6
+]
+},
+"spot/tv/open": {
+"pivot": [
+11,
+12
+]
+},
+"spot/plant/open": {
+"pivot": [
+12,
+13
+]
 }
 }

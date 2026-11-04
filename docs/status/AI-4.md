@@ -6,15 +6,17 @@
 - Exterior kit (27 frames, group `house`, public/atlas/house.png): yard/lawn_0-2, path, flowers_0-3, bush_0-2, tree_0-1, fence_r/l/corner/gate, mailbox; porch/floor, steps, awning, railing, door, mat, lamp, lamp_glow, plant. Generator tools/pixelart/yard.py; ledger rows added; check.py accepts yard/porch names.
 - Kitchen shell redesign: cream tile backsplash with teal cap, sage/cream checker floor (was grey). Bedroom shell: soft blue stripes with rose dot lattice and picture-rail line. Living unchanged.
 - Stairs: `prop/stairsUp` (1x3 tiles, 12 steps x 6 art px = 72 rise, climbs toward -gy at rot 0, procedural, pivot = footprint top vertex) and `shell/house/stairwell` (2x1 hole with cream rim for the upper floor), both in group `house`; tools/pixelart/stairs.py. Kenney stairs models rendered as a ladder at this size, not used.
+- Room contact sheet tool (art:sheet), kitchen/bedroom props, check-frames fronts check: closed/open now exist for every kind used by living, kitchen and bedroom (bagSpot, basket, bin, charger, jacket, papers, shoeRack, rug, table new; sofa/bed/tv/plant got an `open` state). tools/pixelart/spots.py + spots.json (table).
 ## Verified
 - check.py core: 74 files, 0 problems; room-slice: 49 files, 0 problems (see commit).
 ## Not verified
 - Not made: optional porch bench/bike/cat. Fence pivots are the segment start vertex (AI-3 to confirm placement). check-frames does not yet check fronts.json. How it looks: owner/manager judge.
 ## Weaknesses (honest)
+- sofa/bed/tv/plant `open` is only a small envelope peeking on the closed frame (no real animation); hand-built small spots are 10-14 art px and basic; rug lift is a lighter corner; padlock overlay is `ui/padlock` (not re-skinned).
 - Exterior is simple: flat lawn tiles, small door (12x19 art px), awning is a single striped slope, glow is dithered.
 - A few picture frames and the coat rack still use dark honey-brown outlines; kitchen/bedroom shells only recoloured, not redesigned.
 ## Requests
 - AI-2: stairsUp footprint is 2x1 in layoutProps.ts but the staircase needs 1 wide x 3 deep (or rotate to 3x1 with rot 1 once I add a mirrored frame). Tell me which; I can also re-cut it 2x1 with steeper rise.
 - AI-3: src/ui/theme.ts should read docs/art/palette.json `theme`. AI-1: add check_fronts.py to `npm run verify`.
 ## Next
-- Spot frames (spot/<kind>/closed|open, padlock overlay).
+- Room contact sheet tool (art:sheet), kitchen/bedroom props, check-frames fronts check (spot/<kind>/closed|open, padlock overlay).

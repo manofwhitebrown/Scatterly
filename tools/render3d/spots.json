@@ -1,9 +1,66 @@
 {
-  "drawer":   { "model": "cabinetBedDrawer",     "foot": [1, 1], "h": 3 },
-  "cabinet":  { "model": "kitchenCabinet",       "foot": [1, 1], "h": 5 },
-  "fridge":   { "model": "kitchenFridge",        "foot": [1, 1], "h": 7 },
-  "wardrobe": { "model": "bookcaseClosedDoors",  "foot": [2, 1], "h": 7 },
-  "shelf":    { "model": "bookcaseClosed",       "foot": [2, 1], "h": 5 },
-  "sink":     { "model": "kitchenSink",          "foot": [2, 1], "h": 3 },
-  "sideTable":{ "model": "sideTableDrawers",     "foot": [1, 1], "h": 3 }
+ "drawer": {
+  "model": "cabinetBedDrawer",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "cabinet": {
+  "model": "kitchenCabinet",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 5
+ },
+ "fridge": {
+  "model": "kitchenFridge",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 7
+ },
+ "wardrobe": {
+  "model": "bookcaseClosedDoors",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 7
+ },
+ "shelf": {
+  "model": "bookcaseClosed",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 5
+ },
+ "sink": {
+  "model": "kitchenSink",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 3
+ },
+ "sideTable": {
+  "model": "sideTableDrawers",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "table": {
+  "model": "tableCoffee",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 2
+ }
 }
