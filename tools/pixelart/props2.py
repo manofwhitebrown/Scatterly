@@ -44,12 +44,28 @@ def ellipse(w, h, fn):
             if d <= 1: px[x, y] = fn(x, y, d)
     return im
 def rug_rect():
+    """3x2 tile rug as a true iso diamond: thin low-contrast woven rug (cream field, rose band, butter dots)."""
+    W, H = 80, 40; im = new(W, H); px = im.load()
+    for y in range(H):
+        for x in range(W):
+            sx, sy = x + 0.5 - W / 2, y + 0.5
+            gx, gy = (sx / 16 + sy / 8) / 2, (sy / 8 - sx / 16) / 2
+            if not (0 <= gx < 3 and 0 <= gy < 2): continue
+            e = min(gx, 3 - gx, gy, 2 - gy)
+            if e < 0.14: c = col('plaster.1')
+            elif e < 0.3: c = col('rose.3') if (x + y) % 4 else col('rose.2')
+            elif e < 0.4: c = col('plaster.4')
+            else: c = col('butter.3') if (int(gx * 4) + int(gy * 4)) % 2 == 0 and (x + y) % 3 == 0 else (col('plaster.3') if (x // 2 + y) % 2 else col('plaster.2'))
+            px[x, y] = c
+    return im
+def rug_round():
+    """2x2 tile round rug, muted sage rings on cream."""
     def f(x, y, d):
-        if d > 0.86: return col('teal.2')
-        if d > 0.76: return col('plaster.4')
-        if d > 0.66: return col('terracotta.2')
-        return col('butter.3') if (x // 4 + y // 2) % 2 else col('plaster.3')
-    return disc(80, 40, f)
+        if d > 0.9: return col('sage.1')
+        if d > 0.72: return col('sage.3')
+        if d > 0.62: return col('plaster.4')
+        return col('plaster.3') if (x // 2 + y) % 2 else col('plaster.2')
+    return ellipse(56, 28, f)
 def shear(flat, left):
     w, h = flat.size; im = new(w, h + w // 2 + 1)
     for x in range(w): im.alpha_composite(flat.crop((x, 0, x + 1, h)), (x, x // 2))
@@ -81,6 +97,7 @@ if __name__ == '__main__':
     save('prop/bathMat', outline(disc(24, 12, lambda x, y, d: col('sky.1') if d > 0.85 else col('sky.3') if (x + y) % 6 < 3 else col('sky.2'))), (13, 7))
     rv = ellipse(14, 8, lambda x, y, d: col('stone.1') if d > 0.8 else col('plaster.2') if (x, y) != (9, 3) else col('rose.3')); save('prop/robotVacuum', outline(rv), (8, 5))
     save('prop/rugRect', outline(rug_rect()), (41, 21))
+    save('prop/rugRound', outline(rug_round()), (29, 15))
     for k, rows in M.items():
         flat = build(rows, L, outline=False) if False else None
         flat = new(max(len(r) for r in rows), len(rows)); px = flat.load()
