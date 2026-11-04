@@ -1,14 +1,12 @@
-import { GAME_H } from '../shared/types';
-
 /** Puzzle panel geometry in game px. Plain data (no Phaser) so tests can check it. */
 export const PX = 140;
-export const PY = 60;
+export const PY = 16;
 export const PW = 1000;
-export const PH = 600;
+export const PH = 688;
 
-/** Hint / Notes / Skip bar: 96 px tall, flush with the screen bottom. */
+/** Hint / Notes / Skip bar: 96 px tall, INSIDE the panel with a 14 px margin above the panel's bottom edge. */
 export const BTN_H = 96;
-export const BAR_TOP = GAME_H - BTN_H - 4;
+export const BAR_TOP = PY + PH - BTN_H - 14;
 
 export const KEY = 96;
 export const KEY_GAP = 6;

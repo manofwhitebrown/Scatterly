@@ -3,7 +3,7 @@ import { PUZZLE_SCENE } from '../shared/types';
 import { PUZZLES } from '../logic/puzzles';
 import type { LightsSpec } from '../logic/puzzles/lights';
 import { sfx } from '../audio/sfx';
-import { PAL, makeButton, makeText } from '../art/palette';
+import { PAL, makeButton, makeText } from './ui';
 import { PuzzleShell, PX, PY } from './PuzzleShell';
 
 const CELL = 96;

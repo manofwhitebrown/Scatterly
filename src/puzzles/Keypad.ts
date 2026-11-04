@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import { KEY, KEY_GAP as GAP } from './layout';
-import { PAL, makeButton } from '../art/palette';
+import { PAL, makeButton } from './ui';
 
 export { KEY, KEYPAD_W } from './layout';
 

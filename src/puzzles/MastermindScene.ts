@@ -3,8 +3,8 @@ import { PUZZLE_SCENE } from '../shared/types';
 import { PUZZLES, feedback } from '../logic/puzzles';
 import type { MastermindSpec } from '../logic/puzzles/mastermind';
 import { sfx } from '../audio/sfx';
-import { PAL, makeButton, makeText, panelBox } from '../art/palette';
-import type { Btn } from '../art/palette';
+import { PAL, makeButton, makeText, panelBox } from './ui';
+import type { Btn } from './ui';
 import { PuzzleShell, PX, PY } from './PuzzleShell';
 import { SYMBOL_COUNT, SYMBOL_NAMES, drawSymbol } from './Symbols';
 

@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import { GAME_H, GAME_W } from '../shared/types';
-import { PAL, makeButton, makeText, panelBox } from '../art/palette';
+import { PAL, makeButton, makeText, panelBox } from './ui';
 import { BTN_H } from './layout';
 
 /** First-time "how to play" card. `onClose` fires once, from the Got it button or from `close()` (Android Back). */

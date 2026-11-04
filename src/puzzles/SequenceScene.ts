@@ -3,8 +3,8 @@ import { PUZZLE_SCENE } from '../shared/types';
 import { PUZZLES } from '../logic/puzzles';
 import type { SequenceSpec } from '../logic/puzzles/sequence';
 import { sfx } from '../audio/sfx';
-import { PAL, makeButton, makeText, panelBox } from '../art/palette';
-import type { Btn } from '../art/palette';
+import { PAL, makeButton, makeText, panelBox } from './ui';
+import type { Btn } from './ui';
 import { PX, PY, PW, PuzzleShell } from './PuzzleShell';
 import { KEYPAD_W, buildKeypad } from './Keypad';
 

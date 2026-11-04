@@ -82,11 +82,22 @@ export async function startMorning(page: Page, mode: 'rush' | 'relaxed' | 'daily
 }
 
 /** Closes the first-time "how to play" card of a puzzle scene if it is showing (it appears once per kind per profile). */
-export async function dismissHowTo(page: Page): Promise<boolean> {
-  await page.waitForTimeout(400);
-  const has = (await interactives(page)).some((i) => i.label === 'Got it' && i.scene !== 'Room');
-  if (has) await tapMatch(page, 'Got it');
-  return has;
+export async function dismissHowTo(page: Page, waitMs = 2500): Promise<boolean> {
+  const hasCard = async (): Promise<boolean> => (await interactives(page)).some((i) => i.label === 'Got it' && i.scene !== 'Room');
+  const until = Date.now() + waitMs;
+  let found = await hasCard();
+  while (!found && Date.now() < until) {
+    await page.waitForTimeout(250);
+    found = await hasCard();
+  }
+  // A tap right after the scene is created can arrive before its input is live: confirm the card is gone, retry if not.
+  for (let attempt = 0; found && attempt < 4; attempt++) {
+    await page.waitForTimeout(300);
+    await tapMatch(page, 'Got it');
+    await page.waitForTimeout(400);
+    if (!(await hasCard())) break;
+  }
+  return found;
 }
 
 export async function dismissCards(page: Page): Promise<void> {

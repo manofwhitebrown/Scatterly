@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { PUZZLE_SCENE } from '../shared/types';
 import { sfx } from '../audio/sfx';
-import { PAL, makeButton, makeText, panelBox, shade } from '../art/palette';
-import type { G } from '../art/palette';
+import { PAL, makeButton, makeText, panelBox, shade } from './ui';
+import type { G } from './ui';
 import { PW, PX, PY, PuzzleShell, shuffle } from './PuzzleShell';
 
 const WORDS: string[] = [

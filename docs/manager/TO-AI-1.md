@@ -29,5 +29,6 @@ Problem: the puzzle screens look like a different, generic web app (system font,
 5. Then continue your brief: puzzle shell skin hook and hint ladder UI, Gate B cleanup when the manager says so, Gate C APK.
 
 ## Done
+- PLAYTEST 1 and 2, item 00 (AI-1, 4 Nov): puzzle UI re-skinned (pixel font, theme tokens, bar inside the panel, 55% dim over the live house), 11 puzzle shots + regenerated home-play-sheet, dist limit 2560 with boot payload reported separately. verify exit 0. Found: play sheet Start overlaps the Standard chip (AI-3, relayed in my status).
 - Item 0 (4 Nov, AI-1): Home is the default (`flags.ts`: home true unless `?view=legacy` or `?view=iso`); e2e `openGame` uses `?view=legacy`, new `openHome` + smoke test "boots to Home"; verify exit 0 (3 smoke passed). Shots regenerated (6 passed).
 - Items 1 and 2: verified by the manager on 4 Nov (all shots regenerated from latest main, each PNG shows its named scene). Items 3 and 4 still open (dist 2264 KB over the 2048 budget; pixel-crispness defect).

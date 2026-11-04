@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import type { Clue } from '../shared/types';
-import { PAL, makeText } from '../art/palette';
+import { PAL, makeText } from './ui';
 import { NOTES_W } from './layout';
 
 const MAX_SHOWN = 5;

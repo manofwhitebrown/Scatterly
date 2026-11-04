@@ -1,14 +1,15 @@
 import { test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
-import { dismissHowTo, interactives, openGame, startMorning, tapMatch, waitScene } from '../e2e/helpers';
+import { dismissHowTo, interactives, openGame, openHome, startMorning, tapMatch, waitScene } from '../e2e/helpers';
 import { IMPLEMENTED } from '../../src/puzzles/manifest';
 import { PUZZLE_SCENE } from '../../src/shared/types';
 import type { PuzzleKind } from '../../src/shared/types';
 
 /** Fixed-name screenshots for the manager. Run `npm run shots` (builds first). Output: docs/shots/<name>.png and <name>-800.png. */
 const OUT = 'docs/shots';
-const SHOT_PUZZLES: PuzzleKind[] = ['untangle', 'lights', 'mastermind'];
+/** Every puzzle with a scene: they all share the shell, so the whole set shows the skin. */
+const SHOT_PUZZLES: PuzzleKind[] = IMPLEMENTED;
 const SIZES = [{ w: 1280, h: 720, suffix: '' }, { w: 800, h: 360, suffix: '-800' }] as const;
 
 /** Fails the run when the named scene is not active (and, for Home, when the old Menu is) so a shot can never show the wrong view. */
@@ -71,15 +72,28 @@ test('home overview and focus rooms (the default URL boots Home)', async ({ page
 
 for (const kind of SHOT_PUZZLES.filter((k) => IMPLEMENTED.includes(k))) {
   test(`puzzle ${kind}`, async ({ page }) => {
-    await openGame(page);
+    await openHome(page); // the real flow: the puzzle opens over the dimmed house
+    await page.waitForTimeout(1500);
     await page.evaluate((k) => window.__scatterly!.openPuzzle(k, 2, 401), kind);
     await waitScene(page, PUZZLE_SCENE[kind]);
     await dismissHowTo(page);
     await page.waitForTimeout(1200);
     await expectScene(page, PUZZLE_SCENE[kind]);
+    await expectScene(page, 'Home'); // visible, dimmed, behind the panel
     await snap(page, `puzzle-${kind}`);
   });
 }
+
+test('home play sheet (Play opens the Relaxed / Rush / Daily chips)', async ({ page }) => {
+  await openHome(page);
+  await page.waitForTimeout(1500);
+  if (!(await tapMatch(page, 'Play'))) throw new Error('shot "home-play-sheet": no Play button');
+  await page.waitForTimeout(800);
+  const labels = (await interactives(page)).map((i) => i.label);
+  for (const chip of ['Relaxed', 'Rush', 'Daily']) if (!labels.includes(chip)) throw new Error(`shot "home-play-sheet": chip ${chip} missing, got [${labels.join(', ')}]`);
+  await expectScene(page, 'Home');
+  await snap(page, 'home-play-sheet');
+});
 
 test('result', async ({ page }) => {
   await openGame(page);

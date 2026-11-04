@@ -15,8 +15,8 @@ import type { PlayerProfile } from '../shared/types';
 import { BAR_TOP, BTN_H, NOTES_LEFT, NOTES_W, PH, PW, PX, PY } from './layout';
 import { sfx } from '../audio/sfx';
 import type { SfxName } from '../audio/sfx';
-import { PAL, makeButton, makeText, panelBox } from '../art/palette';
-import type { Btn } from '../art/palette';
+import { PAL, makeButton, makeText, panelBox } from './ui';
+import type { Btn } from './ui';
 
 export { PX, PY, PW, PH } from './layout';
 
@@ -116,7 +116,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
 
   create(): void {
     this.lowFx = isLowFx(this.game);
-    this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x1d130c, 0.62).setInteractive();
+    this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x08141a, 0.55).setInteractive(); // the room stays visible behind, dimmed
     const g = this.add.graphics();
     g.fillStyle(PAL.shadow, 0.3);
     g.fillRoundedRect(PX + 4, PY + 10, PW, PH, 28);
@@ -128,11 +128,11 @@ export abstract class PuzzleShell extends Phaser.Scene {
     this.buttons.push(makeButton(this, PX + PW - 56, PY + 54, BTN_H, BTN_H, '', () => this.cancel(), { fill: PAL.steel, glyph: 'close' }));
     this.build();
 
-    const hint = makeButton(this, PX + 120, BAR_Y + BTN_H / 2, 200, BTN_H, 'Hint', () => this.hint(), { fill: PAL.blue, size: 30 });
-    const notes = makeButton(this, PX + PW / 2, BAR_Y + BTN_H / 2, 200, BTN_H, 'Notes', () => this.drawer?.toggle(), { fill: PAL.sage, size: 30 });
+    const hint = makeButton(this, PX + 120, BAR_Y + BTN_H / 2, 200, BTN_H, 'Hint', () => this.hint(), { fill: PAL.terracotta, size: 30 });
+    const notes = makeButton(this, PX + PW / 2, BAR_Y + BTN_H / 2, 200, BTN_H, 'Notes', () => this.drawer?.toggle(), { fill: PAL.steel, size: 30 });
     const skip = makeButton(this, PX + PW - 120, BAR_Y + BTN_H / 2, 200, BTN_H, 'Skip', () => this.askSkip(), { fill: PAL.sageDark, size: 30 });
     this.buttons.push(hint, notes, skip);
-    this.drawer = new PuzzleNotes(this, NOTES_LEFT, PY + 110, PH - 150, this.notes);
+    this.drawer = new PuzzleNotes(this, NOTES_LEFT, PY + 110, BAR_TOP - 10 - (PY + 110), this.notes);
     this.drawer.set(this.req.kind === 'code');
     this.buildHintBox();
     this.buildConfirm();

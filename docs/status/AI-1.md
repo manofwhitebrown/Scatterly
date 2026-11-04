@@ -1,6 +1,8 @@
 # AI-1 status: Platform, Assets, Integrator (Phase 5)
 
 ## Done
+- PLAYTEST 1-2 (manager, 4 Nov): puzzle UI re-skinned. `src/puzzles/ui.ts` = same PAL/makeText/makeButton/panelBox API on the Silkscreen pixel font + theme tokens (chrome colours only; piece colours untouched). Panel 16..704, Hint/Notes/Skip INSIDE it (96 px, y 594), Notes drawer ends above the bar, room dimmed 55% behind (Home stays visible). Shots: all 11 `puzzle-<kind>` over the live Home, new `home-play-sheet` shot (taps Play, asserts Relaxed/Rush/Daily chips), every capture asserts its scene.
+- Item 00: dist budget = limit = 2560 KB; size-check now prints boot payload (1819.9 KB, limit 1900) and lazy KB (561) separately; boot over the limit fails the build.
 - TO-AI-1 #0: Home is the DEFAULT view (plain URL). `?view=legacy` / `?view=iso` keep the old screens until Gate B. flags.ts, runScene, MenuScene comment, tests/pixel+contract, e2e helpers (`openGame` = legacy, new `openHome`), smoke test "boots to Home", shots (menu = legacy; home-overview = plain URL). Pages and APK now show the house.
 - Gate 0: `npm run shots` (playwright.shots.config.ts + tests/shots/shots.spec.ts); each capture asserts its scene first (Home via ?view=home).
 - TO-AI-1 #1: shots regenerated on real WebGL; home-overview shows the Home scene (stub boxes, 3 buttons).
@@ -18,6 +20,7 @@
 - Gate C platform (code side): `core/back.ts` Back router + ExitGuard, `core/platform.ts` (lazy @capacitor/app: backButton, appStateChange), `core/lifecycle.ts` idempotent background pause (loop + audio), `#game` inset by safe-area env(), puzzle shell handles Back (card -> prompt -> leave). DEPLOY.md updated.
 
 ## Verified
+- `npm run verify` exit 0: 461 unit tests, 3 smoke; dist 2380.9 KB / limit 2560; boot 1819.9 KB. puzzles.e2e 20 passed (targets >= 96 px, no overlaps, on screen after the layout move). Viewed contact sheet of all 11 puzzle shots + code-800 + play sheet.
 - `npm run verify` exit 0 (439 unit tests, 3 smoke). platform.e2e: 2 passed (Back order, background stops/resumes frames).
 - puzzles.e2e: 20 passed (incl. new how-to-once test); `npm test`: 50 files, 432 passed.
 - `npm run verify` after the flip: exit 0 (secret-scan clean, tsc, vitest all passed, build, check-assets, check_fronts, 3 smoke e2e passed). `npm run shots`: 6 passed; home-overview.png viewed = Home with yard, 3 buttons.
@@ -46,12 +49,9 @@
 - app JS 352 KB, atlas 80 KB, fonts 28 KB.
 
 ## Requests
+- AI-3: `home-play-sheet.png`: the Start button overlaps the Standard chip (about 6 px) and its bottom touches the sheet edge; give the sheet one more row of height or move Start down.
 - AI-3: make Home listen for Back: `this.events.on(BACK_EVENT, (ctx) => {...})` from src/core/back.ts: close the Play sheet, else zoom out (`focusOn(null)`), else leave unhandled (exit guard then runs); set `ctx.handled = true` only when it consumed it. Same for Result/Journal/Settings overlays.
 - AI-2: add the `step` (0 nudge, 1 rule, 2 partial reveal) parameter to `PUZZLES[kind].hint(spec, progress, step)`; until then scenes still pass progress = hints-1 and the shell only labels the rung (`this.hintRung` is ready for them).
-- AI-4 (src/art): generateAllTextures bakes everything at boot (2 s of ~3.4 s). Make it lazy per group (bake a room's code-drawn textures on `ensureGroup('room:<id>')`), or drop it once the atlas art replaces it.
-- Manager: decide: raise distMB budget to 2560 (the existing hard limit) or have AI-4 re-encode the two big loops at lower bitrate (public/audio is theirs; about 100 KB saving is not enough alone for 216 KB).
-- AI-3: expose `scene.__e2e = { hotspots(), focus(room), overview() }` on Home under `?e2e=1` (focus exists today).
-- Everyone: in sandboxes use `--use-angle=swiftshader --enable-unsafe-swiftshader` for WebGL.
 
 ## Next
 Home boot path, CI cost, puzzle shells + hint ladder.

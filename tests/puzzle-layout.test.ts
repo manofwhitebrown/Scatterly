@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GAME_H, GAME_W } from '../src/shared/types';
-import { BAR_TOP, KEY, KEYPAD_W, NOTES_LEFT, PH, PW, PX, PY } from '../src/puzzles/layout';
+import { BAR_TOP, BTN_H, KEY, KEYPAD_W, NOTES_LEFT, PH, PW, PX, PY } from '../src/puzzles/layout';
 
 
 
@@ -42,5 +42,13 @@ describe('puzzle layout guards', () => {
   });
   it('keys are at least 96 px', () => {
     expect(KEY).toBeGreaterThanOrEqual(96);
+  });
+
+  it('Hint / Notes / Skip sit inside the panel, 96 px tall, and the panel stays on screen', () => {
+    expect(BTN_H).toBe(96);
+    expect(BAR_TOP + BTN_H).toBeLessThanOrEqual(PY + PH);
+    expect(BAR_TOP).toBeGreaterThanOrEqual(PY + 560); // below every scene's content (see the bounds above)
+    expect(PY).toBeGreaterThanOrEqual(0);
+    expect(PY + PH).toBeLessThanOrEqual(720 - 8);
   });
 });

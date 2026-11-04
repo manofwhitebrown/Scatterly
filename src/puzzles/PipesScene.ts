@@ -4,7 +4,7 @@ import { PUZZLES } from '../logic/puzzles';
 import { rotate } from '../logic/puzzles/pipes';
 import type { PipesSpec } from '../logic/puzzles/pipes';
 import { sfx } from '../audio/sfx';
-import { PAL, makeButton, makeText } from '../art/palette';
+import { PAL, makeButton, makeText } from './ui';
 import { PuzzleShell, PX, PY } from './PuzzleShell';
 
 const CELL = 96;

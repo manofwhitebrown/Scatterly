@@ -4,8 +4,8 @@ import { PUZZLES } from '../logic/puzzles';
 import { applyOp } from '../logic/puzzles/target';
 import type { Op, TargetSpec, TargetStep } from '../logic/puzzles/target';
 import { sfx } from '../audio/sfx';
-import { PAL, makeButton, makeText } from '../art/palette';
-import type { Btn, G } from '../art/palette';
+import { PAL, makeButton, makeText } from './ui';
+import type { Btn, G } from './ui';
 import { PX, PY, PW, PuzzleShell } from './PuzzleShell';
 
 const SIZE = 96;

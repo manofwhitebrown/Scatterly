@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import { PAL } from '../art/palette';
+import { PAL } from './ui';
 
 export const SYMBOL_COUNT = 6;
 export const SYMBOL_NAMES = ['Circle', 'Square', 'Triangle', 'Diamond', 'Star', 'Cross'] as const;

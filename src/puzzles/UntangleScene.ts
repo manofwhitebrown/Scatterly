@@ -2,8 +2,8 @@ import Phaser from 'phaser';
 import { PUZZLE_SCENE } from '../shared/types';
 import type { Difficulty } from '../shared/types';
 import { sfx } from '../audio/sfx';
-import { PAL, line, makeText, rrect, shade } from '../art/palette';
-import type { G } from '../art/palette';
+import { PAL, line, makeText, rrect, shade } from './ui';
+import type { G } from './ui';
 import { PW, PX, PY, PuzzleShell, shuffle } from './PuzzleShell';
 
 const AREA = { x: PX + 80, y: PY + 150, w: PW - 160, h: 390 };

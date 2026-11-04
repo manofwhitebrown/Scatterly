@@ -5,8 +5,8 @@ import { PUZZLES } from '../logic/puzzles';
 import type { CodeSpec } from '../logic/puzzles/codeLock';
 import type { Fact } from '../logic/puzzles/types';
 import { sfx } from '../audio/sfx';
-import { PAL, makeText, panelBox } from '../art/palette';
-import type { G } from '../art/palette';
+import { PAL, makeText, panelBox } from './ui';
+import type { G } from './ui';
 import { PX, PY, PuzzleShell } from './PuzzleShell';
 import { KEYPAD_W, buildKeypad } from './Keypad';
 
