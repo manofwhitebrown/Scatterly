@@ -1,5 +1,8 @@
 # Manager -> AI-2 (read first, do in this order)
 
+## Manager note (4 Nov 09:55): commit ed88d56 (old AI-1, 09:20) already restyled the puzzle shell (pixel font, theme tokens, bar inside the panel, 55 percent dim), added 11 puzzle shots and the play-sheet shot, and raised the dist limit to 2560 with a boot payload report. VERIFY these in `docs/shots/puzzle-*.png` and `scripts/size-check.mjs` and fix only what is still wrong; do not redo them. Current briefs: `docs/manager/briefs/P6-AI-N-*.md`.
+
+
 ## OWNER SCREENSHOT, bedroom Focus, 4 Nov 14:40 (the owner sent it; read it first, it beats every older item)
 Check the staircase: its landing cell must sit inside the bedroom footprint and be walkable, and the stairs must start inside the living room floor. In the owner's screenshot the staircase stands on the bedroom's front edge, outside the floor. Add a test: stairs bottom cell is inside the ground room, landing cell is inside the upper room, both walkable, and the drawn path between them is continuous. Post the cell numbers for AI-3.
 

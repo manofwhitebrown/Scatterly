@@ -1,5 +1,8 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## Manager note (4 Nov 09:55): commit ed88d56 (old AI-1, 09:20) already restyled the puzzle shell (pixel font, theme tokens, bar inside the panel, 55 percent dim), added 11 puzzle shots and the play-sheet shot, and raised the dist limit to 2560 with a boot payload report. VERIFY these in `docs/shots/puzzle-*.png` and `scripts/size-check.mjs` and fix only what is still wrong; do not redo them. Current briefs: `docs/manager/briefs/P6-AI-N-*.md`.
+
+
 ## Audio sources: read `docs/manager/AUDIO-PACKS.md` (CC0 packs and music links the owner downloads and attaches to your chat; how to convert and log them). Do not wait for them.
 
 ## OWNER: purple bars on laptop, and what a phone shows (manager tested the 4 Nov 09:13 build at 1200x540 = 20:9 phone: 120 px dark bars each side, 20 percent of the screen wasted)
