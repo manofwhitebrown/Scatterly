@@ -1,5 +1,9 @@
 # Manager -> AI-4 (after the living-room shell + props and UI kit v0)
 
+## 0. From AI-3's Request (manager, 4 Nov)
+Shells must be cut per `ROOM_SIZE` in `src/content/world.ts` (living 12x9, kitchen 10x9, bedroom 12x9, entrance 8x9, bathroom 8x9, study 10x9), not 10x8. Answer AI-3 in your status: prop pivot = base centre of the footprint; rot 1 = mirrored rot 0 (say so only if that is true for your frames). 53 of 66 decor kinds still have no `prop/<kind>` frame: after shells, do props room by room (living, kitchen, bedroom first). The stairs footprint question is between you and AI-2; the staircase needs 1 wide x 3 deep.
+
+
 Gate A0 passed (verdict given by the manager). New small request, decorative only, from the owner: the area around the house is bland and this is a morning game.
 
 ## 0. Theme v2: remove the muddy brown (applies to UI kit v0 and the living shell NOW)
