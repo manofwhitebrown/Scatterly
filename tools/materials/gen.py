@@ -21,7 +21,7 @@ def floor_plank(ramp):
     return f
 def floor_checker(a, b):
     def f(u, v):
-        if u % 8 == 0 or v % 8 == 0: return R(a, 1)
+        if u % 8 == 0 or v % 8 == 0: return R(a, 2)
         return R(a, 3) if ((u // 8) + (v // 8)) % 2 == 0 else R(b, 2)
     return f
 def floor_stone(ramp):
@@ -109,11 +109,29 @@ def shell(room, cols, rows, wallh_units, pal_cfg, windows=(), doors=(), tod='day
             if 0 <= gyl < rows and 0 <= hv < wh: img[sy, sx] = wall_col('left', int(gyl * 16), int(hv))
     return img, (px0, py0)
 
+def wall_tiled(c1, c2, top=34):
+    """Kitchen: striped paper above, cream tile backsplash (8x6 tiles, light grout) from the wainscot up to `top`."""
+    stripe = wall_striped(c1, c2)
+    def f(u, v):
+        if v < top:
+            if v == top - 1: return R('teal', 3)
+            if (v - 14) % 6 == 5 or (u + (3 if ((v - 14) // 6) % 2 else 0)) % 8 == 7: return R('plaster', 2)
+            return R('plaster', 4) if hsh_(u, v) > 14 else R('plaster', 3)
+        return stripe(u, v)
+    return f
+def hsh_(x, y): return ((x * 73856093) ^ (y * 19349663)) % 100
+def wall_dotted(ramp, dot):
+    """Bedroom: soft two-tone stripes with a sparse rose dot lattice, picture-rail line near the top."""
+    def f(u, v):
+        if v == 55: return R('plaster', 3)
+        if (u % 12 == 5 and v % 10 == 3) or (u % 12 == 11 and v % 10 == 8): return R(dot, 3)
+        return R(ramp, 3) if (u // 6) % 2 else R(ramp, 2)
+    return f
 WAINS = {'living': 'sage', 'kitchen': 'teal', 'bedroom': 'rose', 'bathroom': 'sky'}  # painted wainscot, no dark wood
 def room_cfg(room):
     r = PAL['rooms'][room]
-    if room == 'kitchen': fl = floor_checker('stone', 'plaster'); wp = wall_striped('butter', 'plaster')
-    elif room == 'bedroom': fl = floor_plank('woodWarm'); wp = wall_plain('sky')
+    if room == 'kitchen': fl = floor_checker('sage', 'plaster'); wp = wall_tiled('butter', 'plaster')
+    elif room == 'bedroom': fl = floor_plank('woodWarm'); wp = wall_dotted('sky', 'rose')
     elif room == 'bathroom': fl = floor_stone('plaster'); wp = wall_plain('teal')
     else: fl = floor_plank(r['floor'] if r['floor'].startswith('wood') else 'woodWarm'); wp = wall_striped('plaster', r['accent'])
     return {'floor_fn': fl, 'wall_fn': wp, 'wains_fn': wainscot(WAINS.get(room, 'sage')), 'trim_fn': trim_rail('plaster')}
