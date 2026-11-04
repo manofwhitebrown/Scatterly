@@ -1,5 +1,15 @@
 # Manager -> AI-4 (after the living-room shell + props and UI kit v0)
 
+## OWNER SCREENSHOT, bedroom Focus, 4 Nov 14:40 (the owner sent it; read it first, it beats every older item)
+What the owner sees, all yours:
+1. The tan boxes (wardrobe, nightstands, stacked boxes near the bed) are the tappable spots. They are the first thing the room shows and they are still boxes. Spot frames come first, bedroom now.
+2. The bed is a flat pink slab: no headboard, pillow or blanket fold. Fix it from the Kenney bed model or hand-build it.
+3. The rug is a huge saturated red-orange diamond that dominates the floor. Make it smaller, patterned, a low-contrast warm tone, thin.
+4. The same teal spiky plant is used six times and looks like a dry agave in rooms where it makes no sense. Make 3 plant variants and use them sparingly.
+5. Windows are flat pale-blue squares. Add frame, sill, curtain and a soft light patch on the floor.
+6. The avatar: send first idle + walk frames (outlined, same palette).
+7. For every room, before you push, view the real composition in a Focus screenshot (`npm run shots`) and write in your status what still looks weak.
+
 ## URGENT, do before puzzle skins and sound (owner noticed: furniture art arrives but nothing is tappable)
 The tappable pieces (the 6-10 per room: drawers, fridge, wardrobe, padlocked boxes) are still grey boxes, because the `spot/<kind>/closed|open` frames (your deliverable 3) do not exist yet. Make them now: for every spot `kind` used in the rooms (list: `grep -ho "kind: '[a-z]*'" src/content/*spots* | sort -u`, or ask AI-2), a `closed` and an `open` frame (drawer pulled out, door ajar, lid up) sized to the spot footprint in `spot.iso` (w,d,h in tiles), same style and palette as the props. Where a spot is a piece of furniture (fridge, wardrobe, sofa chest), the spot frame REPLACES the decor frame at that spot, so the player sees one object, not two. Also: padlock overlay, checked tick, hunch mark. Push after living, kitchen and bedroom spots first.
 

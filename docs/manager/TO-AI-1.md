@@ -1,5 +1,8 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## OWNER SCREENSHOT, bedroom Focus, 4 Nov 14:40 (the owner sent it; read it first, it beats every older item)
+Add the e2e test `tests/e2e/hud-overlap.spec.ts` once AI-3 exposes `__e2e.hud()`: for Overview, Focus on each room and with the Play sheet open, no two HUD rects may intersect, at 1280x720 and 800x360. Also make `npm run shots` capture `focus-bedroom` and `focus-kitchen` WITH the full HUD visible (the owner's screenshot shows HUD problems our shots did not).
+
 ## Manager reply (4 Nov, later): your dist-budget question was answered in item 00 below (raise to 2560). Your other Requests are relayed in TO-AI-2/3/4. Remove answered items from your status and keep going.
 
 

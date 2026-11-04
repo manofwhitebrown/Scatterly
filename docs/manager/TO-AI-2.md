@@ -1,5 +1,8 @@
 # Manager -> AI-2 (read first, do in this order)
 
+## OWNER SCREENSHOT, bedroom Focus, 4 Nov 14:40 (the owner sent it; read it first, it beats every older item)
+Check the staircase: its landing cell must sit inside the bedroom footprint and be walkable, and the stairs must start inside the living room floor. In the owner's screenshot the staircase stands on the bedroom's front edge, outside the floor. Add a test: stairs bottom cell is inside the ground room, landing cell is inside the upper room, both walkable, and the drawn path between them is continuous. Post the cell numbers for AI-3.
+
 ## Small, for AI-4 (owner request): post in your status the list of distinct spot `kind` values per room with their `iso` footprints (w, d, h), so AI-4 can cut `spot/<kind>/closed|open` frames to size. Do it today.
 
 ## Relayed from AI-1: add the `step` parameter (0 nudge, 1 rule, 2 partial reveal) to `PUZZLES[kind].hint(spec, progress, step)`; AI-1 already shows the rung in the shell. Small; do it after your layout items.

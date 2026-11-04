@@ -1,5 +1,14 @@
 # Manager -> AI-3 (read first, do in this order)
 
+## OWNER SCREENSHOT, bedroom Focus, 4 Nov 14:40 (the owner sent it; read it first, it beats every older item)
+What the owner sees, all yours unless stated:
+1. HUD collisions: the "< HOUSE" button sits on top of the pause/menu button (top left shows only "...USE"); the room-nav buttons (BATHROOM, LIVING) sit on top of a top-right button and hide it; CLUES is half covered. Lay out a fixed grid: top-left = pause + house side by side with a gap; top-right = Clues, Hint; room-nav goes to a bottom-right column; item tray bottom centre; Show tappables a compact 96 px icon button bottom-left (it is a huge slab now). Nothing overlaps at 1280x720 and 800x360. Add `__e2e.hud()` returning the rect of every HUD element and a test that fails if any two intersect (AI-1 wires it into e2e).
+2. The progress strip "ROOMS 1/5 FOUND 1/3 LOCKS 0" is faint text laid over the wall. Put it on a small dark pill, at least 28 game px text, or remove it from Focus.
+3. Dimming is wrong: the room below the focused room is bright and its props stick out under the bedroom floor edge (teal plants, a red sofa), while the left and right are dimmed. Everything outside the focused room dims the same (the sky behind included) or is hidden.
+4. The staircase is giant and stands outside the room on its front edge, ending in a dark hole. Its 1x3 footprint must be drawn inside the room floor, scaled like the room, and its top must meet the bedroom floor. Coordinate the landing cell with AI-2.
+5. The avatar is a flat block person that does not match the art. Until AI-4's frames exist, draw a small outlined pixel figure from the palette; keep it about 1.5 tiles tall.
+6. Item tray icons: the silhouettes are unreadable dark blobs; use the `icon/<item>` frames when they exist, otherwise a readable outline in the cream colour.
+
 ## URGENT (owner noticed: furniture art arrives but nothing is tappable)
 1. `HomeSpots` (src/scenes/HomeSpots.ts) still draws only iso boxes and never reads `frame('spot/<kind>/<state>')`. Use the frame for each spot's state (closed, open, padlocked overlay, checked, marked) as soon as it exists, per kind, automatically, with the box as fallback. Hit area stays 112 px, nearest centre wins. Where a spot frame exists, hide the decor prop that sits under it so one object shows.
 2. Decor is intentionally not a hotspot, but the player does not know that. Make decor tap feel alive: a small bounce and soft tick sound on the prop, never a cost. If a prop is tapped 3 times without any spot being opened, show the "Show tappables" outline once for 2 s.
