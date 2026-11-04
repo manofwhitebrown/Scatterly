@@ -4,6 +4,7 @@ import { WORLD_DECOR, doorSpans, worldProps } from '../content/worldProps';
 import type { WorldRoom } from '../content/world';
 import { FLOOR1_RAISE, HOUSE_WORLD, project } from './homeWorld';
 import type { Pt } from './homeWorld';
+import { frame } from '../art/manifest';
 
 export const UNIT = 6; // art px per layout height unit
 const PALETTE = [0xb08a5c, 0x9c7a52, 0xc2a070, 0x8f6f4c, 0xa9b08a, 0xc99a8a, 0x8aa5b0, 0xd6c08a];
@@ -18,7 +19,9 @@ const hash = (s: string): number => { let h = 7; for (let i = 0; i < s.length; i
  * Placeholder decor for one room: every prop of AI-2's `WORLD_DECOR` as a shaded iso box (its FRONT face is lighter, so a
  * wrong facing is visible), wall windows and door gaps. Painter order is by gx + gy. Replaced by baked `prop/<id>` frames.
  */
-export function drawRoomProps(g: Phaser.GameObjects.Graphics, room: WorldRoom): void {
+export function drawRoomProps(scene: Phaser.Scene, c: Phaser.GameObjects.Container, room: WorldRoom): void {
+  let g = scene.add.graphics();
+  c.add(g);
   const slot = HOUSE_WORLD.find((s) => s.room === room);
   if (!slot) return;
   const raise = slot.floor * FLOOR1_RAISE;
@@ -44,8 +47,19 @@ export function drawRoomProps(g: Phaser.GameObjects.Graphics, room: WorldRoom): 
     const f = footprint(p.kind, p.gx, p.gy, p.rot);
     const z0 = p.onTop ? topOf.get(p.onTop) ?? 0 : 0;
     const h = PROP_KINDS[p.kind].flat ? 0.15 : f.h;
-    const base = PALETTE[hash(p.kind) % PALETTE.length];
     const { gx, gy, w, d } = f;
+    const art = frame(`prop/${p.kind}`);
+    if (art) {
+      // Baked art: ground-anchored at the footprint centre; rot 1 faces +gx, so the rot-0 render is mirrored.
+      const at = P(gx + w / 2, gy + d / 2, z0);
+      const flip = p.rot === 1;
+      const img = scene.add.image(at.x, at.y, art.atlas, art.frame).setOrigin((flip ? art.w - art.pivotX : art.pivotX) / art.w, art.pivotY / art.h).setFlipX(flip);
+      c.add(img);
+      g = scene.add.graphics();
+      c.add(g);
+      continue;
+    }
+    const base = PALETTE[hash(p.kind) % PALETTE.length];
     const frontIsDown = p.rot === 0; const frontIsRight = p.rot === 1;
     quad(shade(base, frontIsDown ? 1 : 0.76), [P(gx, gy + d, z0), P(gx + w, gy + d, z0), P(gx + w, gy + d, z0 + h), P(gx, gy + d, z0 + h)]);
     quad(shade(base, frontIsRight ? 1 : 0.88), [P(gx + w, gy, z0), P(gx + w, gy + d, z0), P(gx + w, gy + d, z0 + h), P(gx + w, gy, z0 + h)]);

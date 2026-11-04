@@ -15,7 +15,7 @@ import { drawRoomProps } from './homeProps';
 import { ensureGroup } from '../core/assets';
 import { HomeSky } from './homeSky';
 import { bakeYard } from './homeYard';
-import { drawStairs, stairsTarget } from './homeStairs';
+import { drawStairs, drawStairsArt, stairsTarget } from './homeStairs';
 import {
   HOUSE_WORLD, LINKS, roomAt, roomBounds, roomPolygon, focusCamera, lerpCamera, overviewCamera, screenToArt,
 } from './homeWorld';
@@ -36,7 +36,7 @@ interface HomeHooks { spots(): Array<{ spotId: string; x: number; y: number }>; 
 export class HomeScene extends Phaser.Scene {
   __e2e?: HomeHooks;
   private world!: Phaser.GameObjects.Container;
-  private shells = new Map<RoomId, Phaser.GameObjects.Graphics>();
+  private shells = new Map<RoomId, Phaser.GameObjects.Container>();
   private dimmers = new Map<RoomId, Phaser.GameObjects.Graphics>();
   private rooms!: Phaser.GameObjects.Container;
   private sky: HomeSky | null = null;
@@ -81,12 +81,11 @@ export class HomeScene extends Phaser.Scene {
     this.world = this.add.container(0, 0);
     this.rooms = this.add.container(0, 0);
     this.world.add(this.rooms);
+    void Promise.all([ensureGroup(this, 'room:slice'), ensureGroup(this, 'house')]).then(() => { if (this.sys.isActive() && this.rooms.active) this.rebuildRooms(); });
     void ensureGroup(this, 'house').then(() => { if (this.sys.isActive() && this.rooms.active) this.world.addAt(bakeYard(this), 0); });
     for (const s of HOUSE_WORLD) {
-      const g = this.add.graphics();
-      drawRoomShell(g, s.room);
-      drawRoomProps(g, s.room as WorldRoom);
-      drawStairs(g, s.room as WorldRoom);
+      const g = this.add.container(0, 0);
+      this.buildRoom(g, s.room);
       const dim = this.add.graphics().setVisible(false);
       dim.fillStyle(COLOR.plateEdge, 0.75).fillPoints(roomPolygon(s.room), true);
       this.rooms.add([g, dim]);
@@ -99,6 +98,24 @@ export class HomeScene extends Phaser.Scene {
     this.input.on('pointerup', this.onTap, this);
     if (this.data0) { if (!this.startRun(this.data0)) return; } else this.menu = new HomeMenu(this);
     if (flags().e2e) this.__e2e = this.makeHooks();
+  }
+
+  /** (Re)builds one room's static layer: shell, then decor in painter order (baked `prop/<kind>` art where a frame exists, a box otherwise). */
+  private buildRoom(c: Phaser.GameObjects.Container, room: RoomId): void {
+    c.removeAll(true);
+    const g = this.add.graphics();
+    drawRoomShell(g, room);
+    c.add(g);
+    drawRoomProps(this, c, room as WorldRoom);
+    if (drawStairsArt(this, c, room as WorldRoom)) return;
+    const st = this.add.graphics();
+    drawStairs(st, room as WorldRoom);
+    c.add(st);
+  }
+
+  /** Called when the room art atlas arrives: swaps placeholder boxes for frames. */
+  private rebuildRooms(): void {
+    for (const [room, c] of this.shells) this.buildRoom(c, room);
   }
 
   /** A morning inside the house: RoomRun owns the rules, HomeSpots is its view. */

@@ -11,17 +11,21 @@
 - TO-AI-3 5: morning sky (src/scenes/homeSky.ts), code only; exterior kit baked behind the house from `house` atlas frames (homeYardPlan.ts plan, homeYard.ts bake): lawn, path, porch, fence+gate, trees, bushes, flowers, mailbox; missing frames skipped.
 - Theme mirrored from palette.json `theme` by tests/home-yard.test.ts (dim text now #b3c9c6).
 
+- Room layer uses baked art: decor draws `prop/<kind>` frames (ground-anchored at the footprint centre, rot 1 mirrored) where AI-4 has them (13 of 66 kinds today, atlas `room:slice`), a box otherwise; stairs use `prop/stairsUp` / `shell/house/stairwell`. Rooms rebuild when the atlases arrive.
+
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
 - `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.
 
 ## Not verified
+- Prop frame placement (pivot/flip) is assumed, never seen.
 - NO screenshots: this session has no Playwright browser (install fails: download blocked), so `npm run shots` was not run and the committed PNGs are still the old ones. No Gate A claim. Please run `npm run shots` where a browser exists.
 - Yard bake never seen rendered (frame anchors/pivots assumed ground-anchored).
 - Sky, dimming, stairs and padlock icon look: never seen rendered. Feel on a phone: only the owner can judge.
 - "Show tappables" button and shimmer are not built yet, so the lock-state-hiding rule there is untested.
 
 ## Requests
+- AI-4: `shell/<room>/full` (room-slice) is a 10x8 room but ROOM_SIZE is 12x9 (living), so I do NOT use it; need frames per ROOM_SIZE or the sizes agreed. 53 of 66 decor kinds still have no `prop/<kind>` frame. Please confirm the pivot is the base centre of the footprint and rot 1 = mirrored rot 0.
 - AI-2 (layout): at floor raise 72 art px an upper room's front corner sits at (w+d)*8-64 above its origin, so it ALWAYS covers the ground room below it (living 12x9 under bedroom 12x9 overlaps by about 100 art px). No-overlap would need raise >= (w+d)*8+72. Options: much shallower upper rooms (d <= 3), or stagger the upper floor, or the manager allows the cutaway overlap. Needs a decision.
 - AI-1: save v4 gained `settings.showLockIcons` (types.ts, saveFields.ts); please check the migration test is happy.
 - AI-4: `theme` block in docs/art/palette.json (interim values are in theme.ts).
