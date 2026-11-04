@@ -23,7 +23,7 @@ export const LIVING: WorldRoomDecor = {
     ['sideTable', 2, 6, 0, 's1'], ['lampRoundTable', 2, 6, 0, '', 's1'], ['bear', 2, 6, 0, '', 's1'],
     ['sideTable', 6, 6, 0, 's2'], ['radio', 6, 6, 0, '', 's2'], ['plantSmall2', 6, 6, 0, '', 's2'],
     ['lampRoundFloor', 7, 6, 0], ['bookcaseOpen', 0, 1, 1], ['bookcaseClosed', 0, 3, 1],
-    ['pottedPlant', 11, 3, 0], ['lampSquareFloor', 11, 6, 0], ['pottedPlant', 11, 8, 0], ['pottedPlant', 0, 8, 0],
+    ['pottedPlant', 11, 5, 0], ['lampSquareFloor', 11, 6, 0], ['pottedPlant', 11, 8, 0], ['pottedPlant', 0, 8, 0],
     ['rugRound', 8, 7, 0], ['rugDoormat', 1, 2, 1], ['catBed', 9, 6, 0], ['catBowl', 10, 7, 0], ['robotVacuum', 6, 8, 0],
     ['bowl', 3, 3, 0, '', 'living.coffeeTable'], ['magazine', 4, 4, 0, '', 'living.coffeeTable'], ['mug', 4, 3, 0, '', 'living.coffeeTable'], ['vase', 3, 4, 0, '', 'living.coffeeTable'],
     ['pillow', 3, 6, 0, '', 'living.sofa'], ['pillowBlue', 5, 6, 0, '', 'living.sofa'], ['bear', 4, 6, 0, '', 'living.sofa'],

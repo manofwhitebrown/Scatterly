@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { HOUSE } from '../src/content/house';
-import { HOUSE_MAP_V2, ROOM_SIZE, STAIRS, WORLD_DOORS, WORLD_ROOMS, worldDoorCell } from '../src/content/world';
+import { HOUSE_MAP_V2, ROOM_SIZE, STAIRS, UPPER_SETBACK, WORLD_DOORS, WORLD_ROOMS, worldDoorCell } from '../src/content/world';
 import { walkGrid } from '../src/content/worldGrid';
 import type { Cell2, WorldRoom } from '../src/content/world';
 
@@ -28,13 +28,28 @@ describe('world layout v2', () => {
     }
   });
 
-  it('every upper room sits exactly within the footprint of the ground-floor room below it', () => {
-    for (const up of HOUSE_MAP_V2.filter((s) => s.floor === 1)) {
-      const U = ROOM_SIZE[up.room as WorldRoom];
-      const below = HOUSE_MAP_V2.find((g) => g.floor === 0 && g.wx <= up.wx && g.wy <= up.wy
-        && up.wx + U.w <= g.wx + ROOM_SIZE[g.room as WorldRoom].w && up.wy + U.d <= g.wy + ROOM_SIZE[g.room as WorldRoom].d);
-      expect(below, `${up.room} has no room below`).toBeDefined();
+  it('every upper room is the ground room below it shifted by exactly (-UPPER_SETBACK, -UPPER_SETBACK)', () => {
+    expect(UPPER_SETBACK).toBe(6);
+    const ABOVE: Record<string, string> = { bathroom: 'entrance', bedroom: 'living', study: 'kitchen' };
+    for (const up of HOUSE_MAP_V2.filter((x) => x.floor === 1)) {
+      const g = slot(ABOVE[up.room] as WorldRoom);
+      expect(ROOM_SIZE[up.room as WorldRoom], up.room).toEqual(ROOM_SIZE[g.room as WorldRoom]);
+      expect(up.wx, `${up.room} wx`).toBe(g.wx - UPPER_SETBACK);
+      expect(up.wy, `${up.room} wy`).toBe(g.wy - UPPER_SETBACK);
     }
+  });
+
+  it('the set-back clears the ground floor on screen: no upper floor tile hides a ground floor tile', () => {
+    // Floor 1 is raised 72 art px = 9 tiles of (gx+gy). A ground tile is hidden when an upper tile with the same (gx-gy)
+    // has global gx+gy exactly 9 larger. None may exist.
+    const RAISE_TILES = 9;
+    const cells = (floor: number): Array<{ sum: number; diff: number }> => HOUSE_MAP_V2.filter((x) => x.floor === floor).flatMap((x) => {
+      const { w, d } = ROOM_SIZE[x.room as WorldRoom];
+      return Array.from({ length: w * d }, (_, k) => ({ sum: x.wx + (k % w) + x.wy + Math.floor(k / w), diff: x.wx + (k % w) - x.wy - Math.floor(k / w) }));
+    });
+    const upper = new Set(cells(1).map((c) => `${c.sum}:${c.diff}`));
+    const hidden = cells(0).filter((c) => upper.has(`${c.sum + RAISE_TILES}:${c.diff}`));
+    expect(hidden.length).toBe(0);
   });
 
   it('door cells are in bounds, walkable and line up in world coordinates', () => {
@@ -49,8 +64,8 @@ describe('world layout v2', () => {
   });
 
   it('the staircase joins the living room to the room above it, aligned, with free board and landing cells', () => {
-    expect(slot(STAIRS.upper).wx).toBe(slot(STAIRS.lower).wx);
-    expect(slot(STAIRS.upper).wy).toBe(slot(STAIRS.lower).wy);
+    expect(slot(STAIRS.upper).wx).toBe(slot(STAIRS.lower).wx - UPPER_SETBACK);
+    expect(slot(STAIRS.upper).wy).toBe(slot(STAIRS.lower).wy - UPPER_SETBACK);
     expect(slot(STAIRS.lower).floor).toBe(0);
     expect(slot(STAIRS.upper).floor).toBe(1);
     expect((walkGrid(STAIRS.lower)[STAIRS.board.y] as boolean[])[STAIRS.board.x], 'board').toBe(true);
@@ -102,5 +117,14 @@ describe('world layout v2', () => {
         expect(hit, `${s.id} on stairs`).toBe(false);
       }
     }
+  });
+
+  it('the staircase is 1 wide x 3 deep in the back-right corner, with board below and landing beside it', () => {
+    const f = STAIRS.footprint;
+    expect([f.w, f.d]).toEqual([1, 3]);
+    expect(f.y).toBe(0);
+    expect(f.x + f.w).toBe(ROOM_SIZE[STAIRS.lower].w);
+    expect(STAIRS.board).toEqual({ x: f.x, y: f.d });
+    expect(STAIRS.landing).toEqual({ x: f.x - 1, y: 0 });
   });
 });

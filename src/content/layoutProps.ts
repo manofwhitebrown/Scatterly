@@ -13,7 +13,7 @@ const PROPS_PHASE3: Record<LegacyRoomId, Prop[]> = {
     p('lampCorner', 'lampFloor', 0, 7, 1, 1, 4), p('stool', 'stool', 2, 4, 1, 1, 2), p('umbrellaPot', 'pot', 6, 2, 1, 1, 2),
   ],
   living: [
-    p('frameTv', 'frame', 3, 0, 2, 1, 2, 5), p('stairsUp', 'stairsUp', 1, 6, 2, 1, 1), p('lampSofa', 'lampFloor', 6, 6, 1, 1, 4),
+    p('frameTv', 'frame', 3, 0, 2, 1, 2, 5), p('stairsUp', 'stairsUp', 1, 5, 1, 3, 1), p('lampSofa', 'lampFloor', 6, 6, 1, 1, 4),
     p('pouf', 'pouf', 5, 2, 1, 1, 2), p('pot', 'pot', 9, 2, 1, 1, 3), p('mat', 'mat', 1, 3, 1, 1, 1),
   ],
   kitchen: [

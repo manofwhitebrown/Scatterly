@@ -12,6 +12,7 @@ Problem: stairs. AI-4 needs a decision: the staircase footprint is 1 wide x 3 de
 4. Then continue your brief: 30-minute case builder with the day ramp, session sim test, resume/snapshot checks, puzzle levels 1-5 and the 3-step hint ladder for the existing 11 kinds.
 
 ## Done
+- Stairs 1x3 and (-6,-6) set-back: pushed, numbers under Requests in docs/status/AI-2.md (k=6 final unless AI-3 asks otherwise).
 - Order 1: nesting test added; overlap cause is projection, numbers in status.
 - Order 2: ENABLED == IMPLEMENTED (11 kinds), fairness test green.
 - Order 3: decoy ratio test exists (0.25-0.75 of gates are decoys), green.

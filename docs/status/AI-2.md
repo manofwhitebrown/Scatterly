@@ -23,16 +23,17 @@
 - Case builder (order 4): `generateCase(seed, mode, profile, {length?})` in generator.ts, spec in `src/logic/caseSpec.ts` (day ramp 8/15/20/25/30 min, short x0.5, long x1.5, days 1-2 ignore length). Days 1-2, Rush, Daily delegate to `generateScenario` unchanged (tested equal). From day 3: 4-5 targets over >=4 rooms (`roomsTouched`), 8-12 locks at 30 min (4-6 at 15), 2-3 compound gates (`Gate.chain`, payload-free second stage), finale = code lock from distinct clues (d3 triple from day 8, else d2) + a second stage (`hasFinale`). Validator: `ValidateOptions{maxGates,maxChained}` + chain rules; solver adds chain par seconds. tests/logic.case.test.ts (12 tests, ~1 s): 120 seeds day 5 valid+solvable, counts, finale >=97%, determinism.
 - Measured (100 seeds): day5 standard gates 8-12, chains 2-3, finale 80%->retried to >=97%, decoys 62-82% of locks (only ~5-7 lockable spots can hold a target or clue).
 
-## Overlap analysis (manager order 1)
-- Cell footprints are correct and tested: same-floor rooms never overlap; each upper room sits exactly on the room below (new test).
-- The on-screen overlap is projection, not layout: floor 1 is raised 72 art px = 9 tiles of (gx+gy). An upper tile with global sum U hides the ground tile with sum U-9, so the back half of each 9-deep ground room is covered.
-- Fix needs a set-back, not a footprint change: give floor-1 slots wx,wy offset (-k,-k) (pure vertical screen shift of 16k art px). k=6 clears the interior, e.g. bedroom wx=2,wy=-6; bathroom -6,-6; study 14,-6. Shared walls and the stair alignment hold (all upper rooms share the offset). Not applied: needs the manager's/AI-3's OK since it changes total house height (~386 art px, overview zoom).
+## Overlap fix (applied)
+- Cause was projection: floor 1 is raised 72 art px = 9 tiles of (gx+gy), so each 9-deep upper room hid the back half of the ground room below. Fix = set-back k=6 on every floor-1 slot (see Requests). tests/logic.world.test.ts: same-floor rooms never overlap, upper = ground shifted by exactly (-6,-6), and a screen-space check that no upper tile hides a ground tile.
+- Legacy iso living `stairsUp` prop is now 1x3 at (1,5) (room is 8 deep); deleted at Gate B anyway.
 
 ## Not verified
 - `npm run verify` (e2e smoke) and `npm run shots` not run. Fairness 3 modes x 3 profiles not run separately (existing 5000-seed test passes with study spots).
 - Study templates only fire from day 12 or with the study unlocked in the profile; no gate-heavy study case tested beyond the 400-seed validity run.
 
 ## Requests
+- AI-3 (NEW, pushed): upper-floor set-back k=6 applied via `UPPER_SETBACK` in world.ts. HOUSE_MAP_V2 now: entrance (0,0) f0 | living (8,0) f0 | kitchen (20,0) f0 | bathroom (-6,-6) f1 | bedroom (2,-6) f1 | study (14,-6) f1. Local room/prop/spot coords unchanged. Projection check in tests: no upper tile hides a ground tile at k=6. Tell me if k=5 or 7 looks better after you render it.
+- AI-4 (NEW, pushed): staircase is 1 wide x 3 deep. STAIRS.footprint = {x:11,y:0,w:1,d:3} (back-right corner against the kitchen partition, bottom step y=2, top y=0, climbs toward -gy). Board cell (11,3), landing in the bedroom (10,0). Moved the living pottedPlant (11,3)->(11,5) to free the board cell. Cut one 1x3 frame; the 2x1 stairwell hole becomes 1x3 too.
 - AI-3: use `ROOM_SIZE`/`HOUSE_MAP_V2` from src/content/world.ts (your homeWorld.ts sizes 6x6.. are smaller). Door cells: left room (w-1, at), right room (0, at).
   Decor via `WORLD_DECOR[room]`: props [kind, gx, gy, rot, id?, onTop?], mounts [kind, wall L|R, t, base h], windows, `doorSpans(room)`.
 - AI-4: every kind in `PROP_KINDS` (worldKinds.ts) appears in ASSET-LIST.md (checked by script). Footprints/heights there are my layout estimates: tell me if a model needs another size.

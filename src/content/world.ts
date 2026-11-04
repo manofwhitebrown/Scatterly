@@ -16,13 +16,20 @@ export const ROOM_SIZE: Record<WorldRoom, { w: number; d: number }> = {
   bathroom: { w: 8, d: 9 }, bedroom: { w: 12, d: 9 }, study: { w: 10, d: 9 },
 };
 
+/**
+ * Upper-floor set-back k: every floor-1 slot is the ground room below it shifted by (-k, -k) world cells. Floor 1 is raised 72 art px
+ * (= 9 tiles of gx+gy), so without it an upper room hides the back half of the ground room under it. A shift of (-k,-k) moves it
+ * straight up the screen by 16k art px; k=6 clears the ground interior. Local room coordinates are unaffected.
+ */
+export const UPPER_SETBACK = 6;
+
 export const HOUSE_MAP_V2: HouseSlot[] = [
   { room: 'entrance', floor: 0, wx: 0, wy: 0 },
   { room: 'living', floor: 0, wx: 8, wy: 0 },
   { room: 'kitchen', floor: 0, wx: 20, wy: 0 },
-  { room: 'bathroom', floor: 1, wx: 0, wy: 0 },
-  { room: 'bedroom', floor: 1, wx: 8, wy: 0 },
-  { room: 'study', floor: 1, wx: 20, wy: 0 },
+  { room: 'bathroom', floor: 1, wx: 0 - UPPER_SETBACK, wy: 0 - UPPER_SETBACK },
+  { room: 'bedroom', floor: 1, wx: 8 - UPPER_SETBACK, wy: 0 - UPPER_SETBACK },
+  { room: 'study', floor: 1, wx: 20 - UPPER_SETBACK, wy: 0 - UPPER_SETBACK },
 ];
 
 export interface Cell2 { x: number; y: number }
@@ -33,11 +40,14 @@ export const WORLD_DOORS: WorldDoor[] = [
   { a: 'bathroom', b: 'bedroom', at: 4 }, { a: 'bedroom', b: 'study', at: 4 },
 ];
 
-/** The one staircase: climbs along -gy in the back-right corner (bottom at y=2, top at y=0); footprint is blocked on both floors. */
+/**
+ * The one staircase: 1 wide x 3 deep, climbing along -gy in the back-right corner against the partition (bottom at y=2, top at y=0);
+ * footprint is blocked on both floors. You board from the cell below the bottom step and arrive beside the top step.
+ */
 export const STAIRS = {
   lower: 'living' as WorldRoom, upper: 'bedroom' as WorldRoom,
-  footprint: { x: 10, y: 0, w: 2, d: 3 },
-  board: { x: 10, y: 3 }, landing: { x: 9, y: 0 },
+  footprint: { x: 11, y: 0, w: 1, d: 3 },
+  board: { x: 11, y: 3 }, landing: { x: 10, y: 0 },
 };
 
 /** Cell just inside `room` where the door to `other` opens, or undefined when they are not neighbours. */
