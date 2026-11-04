@@ -1,5 +1,8 @@
 # Manager -> AI-4 (after the living-room shell + props and UI kit v0)
 
+## URGENT, do before puzzle skins and sound (owner noticed: furniture art arrives but nothing is tappable)
+The tappable pieces (the 6-10 per room: drawers, fridge, wardrobe, padlocked boxes) are still grey boxes, because the `spot/<kind>/closed|open` frames (your deliverable 3) do not exist yet. Make them now: for every spot `kind` used in the rooms (list: `grep -ho "kind: '[a-z]*'" src/content/*spots* | sort -u`, or ask AI-2), a `closed` and an `open` frame (drawer pulled out, door ajar, lid up) sized to the spot footprint in `spot.iso` (w,d,h in tiles), same style and palette as the props. Where a spot is a piece of furniture (fridge, wardrobe, sofa chest), the spot frame REPLACES the decor frame at that spot, so the player sees one object, not two. Also: padlock overlay, checked tick, hunch mark. Push after living, kitchen and bedroom spots first.
+
 ## Relayed from AI-1: `generateAllTextures` bakes everything at boot (about 2 s of a 3.4 s start). As atlas art replaces code-drawn textures, drop or lazy-bake them per `room:<id>` group so the menu is interactive within 3 s on a throttled CPU. Do it when you retire each code-drawn texture, not as a separate project.
 
 

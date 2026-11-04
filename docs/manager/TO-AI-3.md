@@ -1,5 +1,10 @@
 # Manager -> AI-3 (read first, do in this order)
 
+## URGENT (owner noticed: furniture art arrives but nothing is tappable)
+1. `HomeSpots` (src/scenes/HomeSpots.ts) still draws only iso boxes and never reads `frame('spot/<kind>/<state>')`. Use the frame for each spot's state (closed, open, padlocked overlay, checked, marked) as soon as it exists, per kind, automatically, with the box as fallback. Hit area stays 112 px, nearest centre wins. Where a spot frame exists, hide the decor prop that sits under it so one object shows.
+2. Decor is intentionally not a hotspot, but the player does not know that. Make decor tap feel alive: a small bounce and soft tick sound on the prop, never a cost. If a prop is tapped 3 times without any spot being opened, show the "Show tappables" outline once for 2 s.
+3. In `?debug=1` overlay show `spots with art: X/N` next to `props with art`.
+
 ## Relayed from AI-1: make Home listen for Back via `this.events.on(BACK_EVENT, ctx => ...)` from src/core/back.ts: close the Play sheet first, else zoom out (`focusOn(null)`), else leave unhandled; set `ctx.handled = true` only when you consumed it. Same for Result, Journal and Settings overlays. Needed for the Android Back button.
 
 

@@ -1,5 +1,7 @@
 # Manager -> AI-2 (read first, do in this order)
 
+## Small, for AI-4 (owner request): post in your status the list of distinct spot `kind` values per room with their `iso` footprints (w, d, h), so AI-4 can cut `spot/<kind>/closed|open` frames to size. Do it today.
+
 ## Relayed from AI-1: add the `step` parameter (0 nudge, 1 rule, 2 partial reveal) to `PUZZLES[kind].hint(spec, progress, step)`; AI-1 already shows the rung in the shell. Small; do it after your layout items.
 
 
