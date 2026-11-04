@@ -71,3 +71,18 @@ describe('idle shimmer order', () => {
     expect(nextShimmer(['x'] as never[], 'gone' as never)).toBe('x');
   });
 });
+
+import { clampCamera, panCamera, pinchCamera } from '../src/scenes/homeGesture';
+describe('gestures', () => {
+  const base = overviewCamera(1280, 720);
+  it('drag moves the world with the finger', () => {
+    const c = panCamera(base, 30, -20);
+    expect(c.cx).toBeCloseTo(base.cx - 30 / base.zoom); expect(c.cy).toBeCloseTo(base.cy + 20 / base.zoom);
+  });
+  it('pinch is clamped around the fitted zoom and the house cannot be dragged away', () => {
+    expect(pinchCamera(base, 10, base).zoom).toBeCloseTo(base.zoom * 2);
+    expect(pinchCamera(base, 0.01, base).zoom).toBeCloseTo(base.zoom * 0.85);
+    const far = clampCamera({ zoom: 1, cx: 1e6, cy: -1e6 });
+    expect(far.cx).toBeLessThan(houseBounds().x + houseBounds().w + 61);
+  });
+});

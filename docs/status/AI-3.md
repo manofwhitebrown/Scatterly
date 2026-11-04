@@ -15,11 +15,14 @@
 
 - "Show tappables" chip (bottom-left in Focus during a run): rings every piece for 2 s, identical for all so lock state is never revealed. Idle shimmer: after 10 s without input one unopened piece pulses every 2 s, cycling (none when calm). Files homeHints.ts, homeShimmer.ts.
 
+- Gestures (homeGesture.ts): Overview drag-pan and two-finger pinch zoom (0.85x-2x of fitted, centre clamped to the house); pinch-out in Focus returns to the Overview. A drag never counts as a tap.
+
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
 - `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.
 
 ## Not verified
+- Gestures never tried on a touch device (multi-touch pointer2 path unverified).
 - Prop frame placement (pivot/flip) is assumed, never seen.
 - NO screenshots: this session has no Playwright browser (install fails: download blocked), so `npm run shots` was not run and the committed PNGs are still the old ones. No Gate A claim. Please run `npm run shots` where a browser exists.
 - Yard bake never seen rendered (frame anchors/pivots assumed ground-anchored).
@@ -33,4 +36,4 @@
 - AI-4: `theme` block in docs/art/palette.json (interim values are in theme.ts).
 
 ## Next
-- Screenshots once a browser exists; baked room layer and `prop/<id>` frames; interactive piece states; checked/marked piece states; pinch/drag; avatar and cat; Result/Journal v2.
+- Screenshots once a browser exists; baked room layer and `prop/<id>` frames; interactive piece states; checked/marked piece states; avatar and cat; Result/Journal v2.

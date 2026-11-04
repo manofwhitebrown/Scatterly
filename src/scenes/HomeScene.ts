@@ -13,6 +13,7 @@ import type { RunView } from './RoomRun';
 import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
 import { ensureGroup } from '../core/assets';
+import { PINCH_OUT, clampCamera, dist, panCamera, pinchCamera } from './homeGesture';
 import { SpotHints } from './homeHints';
 import { HomeSky } from './homeSky';
 import { bakeYard } from './homeYard';
@@ -42,6 +43,8 @@ export class HomeScene extends Phaser.Scene {
   private rooms!: Phaser.GameObjects.Container;
   private sky: HomeSky | null = null;
   private hints: SpotHints | null = null;
+  private pinch: { d0: number; cam: CameraState } | null = null;
+  private panning = false;
   private cam!: CameraState;
   private readonly baseCam: CameraState = overviewCamera(GAME_W, GAME_H);
   private focusRoom: RoomId | null = null;
@@ -99,6 +102,8 @@ export class HomeScene extends Phaser.Scene {
     this.refreshDim();
     this.input.on('pointerdown', this.onDown, this);
     this.input.on('pointerup', this.onTap, this);
+    this.input.on('pointermove', this.onMove, this);
+    this.input.addPointer(1);
     if (this.data0) { if (!this.startRun(this.data0)) return; } else this.menu = new HomeMenu(this);
     if (flags().e2e) this.__e2e = this.makeHooks();
   }
@@ -173,7 +178,32 @@ export class HomeScene extends Phaser.Scene {
     this.longTimer = this.time.delayedCall(LONG_MS, () => { this.longFired = true; this.run?.onLong(spot); });
   }
 
+  /** Overview: one finger drags the house, two fingers pinch-zoom. Focus: pinching out returns to the Overview. */
+  private onMove(p: Phaser.Input.Pointer): void {
+    if (this.run?.modalOpen() || this.tween) return;
+    const a = this.input.pointer1; const b = this.input.pointer2;
+    if (a.isDown && b.isDown) {
+      const d = dist({ x: a.x, y: a.y }, { x: b.x, y: b.y });
+      if (!this.pinch) { this.pinch = { d0: d, cam: this.cam }; this.panning = true; return; }
+      const ratio = d / Math.max(1, this.pinch.d0);
+      if (this.focusRoom) { if (ratio < PINCH_OUT) { this.pinch = null; this.focusOn(null); } return; }
+      this.apply(pinchCamera(this.pinch.cam, ratio, this.baseCam));
+      return;
+    }
+    this.pinch = null;
+    if (this.focusRoom || !p.isDown || this.menuOpen()) return;
+    if (!this.panning && Phaser.Math.Distance.Between(p.downX, p.downY, p.x, p.y) <= TAP_SLOP) return;
+    this.panning = true;
+    this.apply(clampCamera(panCamera(this.cam, p.x - p.prevPosition.x, p.y - p.prevPosition.y)));
+  }
+
+  private menuOpen(): boolean { return this.menu?.sheetOpen() ?? false; }
+
   private onTap(p: Phaser.Input.Pointer): void {
+    const dragged = this.panning;
+    this.panning = false;
+    this.pinch = null;
+    if (dragged) return;
     this.longTimer?.remove();
     if (this.longFired) return;
     if (Phaser.Math.Distance.Between(p.downX, p.downY, p.upX, p.upY) > TAP_SLOP) return;
@@ -269,6 +299,7 @@ export class HomeScene extends Phaser.Scene {
     this.longTimer?.remove();
     this.input.off('pointerdown', this.onDown, this);
     this.input.off('pointerup', this.onTap, this);
+    this.input.off('pointermove', this.onMove, this);
     this.run?.destroy();
     this.spots?.destroy();
     this.run = null;

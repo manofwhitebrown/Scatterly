@@ -61,6 +61,8 @@ export class HomeMenu {
     commitProfile(this.scene.game, { ...p, settings: { ...p.settings, sessionLength: length } });
   }
 
+  sheetOpen(): boolean { return this.sheet.length > 0; }
+
   closeSheet(): void {
     for (const o of this.sheet) o.destroy();
     this.sheet = [];
