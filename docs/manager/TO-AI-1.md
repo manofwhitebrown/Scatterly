@@ -1,5 +1,14 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## OWNER: purple bars on laptop, and what a phone shows (manager tested the 4 Nov 09:13 build at 1200x540 = 20:9 phone: 120 px dark bars each side, 20 percent of the screen wasted)
+Do this right after the current item. Goal: no empty bars on any phone or laptop; the game fills the screen.
+1. Logical size: height stays 720; width = clamp(window aspect, 16:9 .. 21:9) x 720, i.e. 1280..1680, computed at boot and on resize/orientationchange (`scale.setGameSize`, FIT, centred). Export `LAYOUT = { w, h, safeX }` from `src/core/layout.ts` (`safeX = (w - 1280) / 2`).
+2. Legacy scenes (old Menu/Room/Iso) keep their 1280 layout: centre them by offsetting their main camera by `safeX`. Puzzle scenes (yours): centre the panel in the 1280 safe box, dim the full-width backdrop. Home opts out and uses `LAYOUT.w` (AI-3).
+3. Beyond 21:9 (ultrawide desktop) bars may remain; make `html, body` background `#1f3a40` (the HUD teal) and the splash the same, so no purple anywhere.
+4. Portrait: show a "turn your phone sideways" overlay and lock the APK to landscape in the Capacitor/Android manifest.
+5. Shots: add viewports 1200x540 (20:9), 800x360 and 1024x768 (4:3, bars top and bottom, matched colour) for home-overview and one focus room. Test: `LAYOUT.w` is within 1280..1680 for those viewports.
+Tell AI-3 in Requests when `LAYOUT` is pushed.
+
 ## OWNER SCREENSHOT, bedroom Focus, 4 Nov 14:40 (the owner sent it; read it first, it beats every older item)
 Add the e2e test `tests/e2e/hud-overlap.spec.ts` once AI-3 exposes `__e2e.hud()`: for Overview, Focus on each room and with the Play sheet open, no two HUD rects may intersect, at 1280x720 and 800x360. Also make `npm run shots` capture `focus-bedroom` and `focus-kitchen` WITH the full HUD visible (the owner's screenshot shows HUD problems our shots did not).
 

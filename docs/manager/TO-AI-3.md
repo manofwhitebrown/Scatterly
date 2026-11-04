@@ -1,5 +1,9 @@
 # Manager -> AI-3 (read first, do in this order)
 
+## OWNER: purple bars on laptop, and what a phone shows (manager tested the 4 Nov 09:13 build at 1200x540 = 20:9 phone: 120 px dark bars each side, 20 percent of the screen wasted)
+Home must use the full logical width once AI-1 pushes `src/core/layout.ts` (`LAYOUT.w`, `LAYOUT.safeX`): extend the sky, hills, grass and trees across the whole width (no hard edge at 1280); anchor HUD buttons to the left and right edges of `LAYOUT.w` inside the platform safe-area inset, and keep the house, Play sheet and Play/Journal/Settings centred. Put the 3 buttons and all important content inside the central 1280 box. Check in shots at 1200x540 and 1024x768.
+ALSO: on main at 09:13 the Overview shows the new striped shells but the rooms are EMPTY (no props, no spots, no cat) 9 s after boot. If props are only drawn in Focus, that is wrong: the owner's references show furnished rooms from outside. Draw the baked props in Overview too (static layer, no live sprites). If it is a load failure, fix the fallback and tell me what happened.
+
 ## OWNER SCREENSHOT, bedroom Focus, 4 Nov 14:40 (the owner sent it; read it first, it beats every older item)
 What the owner sees, all yours unless stated:
 1. HUD collisions: the "< HOUSE" button sits on top of the pause/menu button (top left shows only "...USE"); the room-nav buttons (BATHROOM, LIVING) sit on top of a top-right button and hide it; CLUES is half covered. Lay out a fixed grid: top-left = pause + house side by side with a gap; top-right = Clues, Hint; room-nav goes to a bottom-right column; item tray bottom centre; Show tappables a compact 96 px icon button bottom-left (it is a huge slab now). Nothing overlaps at 1280x720 and 800x360. Add `__e2e.hud()` returning the rect of every HUD element and a test that fails if any two intersect (AI-1 wires it into e2e).
