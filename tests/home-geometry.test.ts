@@ -101,3 +101,13 @@ describe('avatar and cat timing', () => {
     expect(catDelay(0)).toBe(8000); expect(catDelay(1)).toBe(14000); expect(catDelay(5)).toBe(14000);
   });
 });
+
+import { urgencyAt } from '../src/scenes/feelMath';
+describe('Rush urgency window', () => {
+  it('starts at 20 s, ramps music 0.6 to 1, pulses and turns red late', () => {
+    expect(urgencyAt(21)).toBeNull(); expect(urgencyAt(0)).toBeNull();
+    expect(urgencyAt(20)!.intensity).toBeCloseTo(0.6); expect(urgencyAt(20)!.pulse).toBe(false);
+    expect(urgencyAt(1)!.intensity).toBe(1);
+    expect(urgencyAt(10)!.pulse).toBe(true); expect(urgencyAt(5)!.red).toBe(true); expect(urgencyAt(6)!.red).toBe(false);
+  });
+});

@@ -250,7 +250,7 @@ export class HomeScene extends Phaser.Scene {
     this.menu?.setShown(!room);
     this.spots?.showRoom(room);
     this.actors?.setRoom(room);
-    if (room) this.run?.setCurrent(room);
+    if (room) { this.run?.setCurrent(room); this.run?.feel.roomSwitch(room); }
     this.tweenTo(to);
   }
 

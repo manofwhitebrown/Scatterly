@@ -19,6 +19,8 @@
 
 - Avatar (homeActors.ts): walks `pathTo` to a cell beside the tapped container, at most 600 ms, instant when calm, Rush, walkAnim off or no frames; the action runs on arrival. Cat (lives in the living room): sleeps, wanders every 8-14 s, reacts to a tap at no cost. Frames from the core atlas (avatar se/sw idle/walk/reach, pet/cat).
 
+- Audio hooks: Rush `setIntensity` now ramps over the last 20 s (feelMath.ts; tint red in the last 5 s, pulse FX in the last 10 s); focusing a room calls `feel.roomSwitch` (swoosh + `setRoomAmbience`).
+
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
 - `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.

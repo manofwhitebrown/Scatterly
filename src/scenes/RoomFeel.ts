@@ -1,3 +1,4 @@
+import { urgencyAt } from './feelMath';
 import type Phaser from 'phaser';
 import { sfx } from '../audio/sfx';
 import { playFx } from '../fx';
@@ -72,13 +73,13 @@ export class RoomFeel {
     this.scene.tweens.add({ targets: bar, x: 1400, duration: 200 });
   }
 
-  /** Rush last 10 s, called once per displayed second. */
+  /** Rush last 20 s, called once per displayed second. */
   urgency(sec: number): void {
-    if (sec > 10 || sec <= 0) return;
-    const k = 10 - sec;
-    sfx.setIntensity(Math.min(1, 0.6 + k * 0.04));
-    this.tint.setFillStyle(sec > 5 ? WARM : RED, 0.06 + k * 0.02);
-    playFx(this.scene, 'urgent', 640, 360);
+    const u = urgencyAt(sec);
+    if (!u) return;
+    sfx.setIntensity(u.intensity);
+    this.tint.setFillStyle(u.red ? RED : WARM, u.alpha);
+    if (u.pulse) playFx(this.scene, 'urgent', 640, 360);
   }
 
   win(): void {
