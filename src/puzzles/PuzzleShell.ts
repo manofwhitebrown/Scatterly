@@ -7,6 +7,8 @@ import { playFx } from '../fx';
 import { PuzzleNotes } from './PuzzleNotes';
 import { buildHowToCard } from './PuzzleCards';
 import { skinPanel } from './skin';
+import { BACK_EVENT } from '../core/back';
+import type { BackCtx } from '../core/back';
 import { hintLabel, hintStep, howToText } from './howto';
 import { commitProfile } from '../core/save';
 import type { PlayerProfile } from '../shared/types';
@@ -67,6 +69,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
   private hintText: Phaser.GameObjects.Text | null = null;
   private hintTimer: Phaser.Time.TimerEvent | null = null;
   private confirmBox: Phaser.GameObjects.Container | null = null;
+  private howToCard: { close(): void } | null = null;
   private readonly buttons: Btn[] = [];
   private readonly onVis = (): void => this.tick(document.hidden);
 
@@ -134,6 +137,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
     this.buildHintBox();
     this.buildConfirm();
     this.maybeShowHowTo();
+    this.events.on(BACK_EVENT, this.onBack, this);
 
     document.addEventListener('visibilitychange', this.onVis);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
@@ -203,7 +207,8 @@ export abstract class PuzzleShell extends Phaser.Scene {
     const profile = this.registry.get('profile') as PlayerProfile | undefined;
     const kind = this.req.kind;
     if (!profile || profile.puzzles[kind]?.seen === true) return;
-    buildHowToCard(this, this.defaultTitle(), howToText(kind), () => {
+    this.howToCard = buildHowToCard(this, this.defaultTitle(), howToText(kind), () => {
+      this.howToCard = null;
       this.lastTick = performance.now();
       this.elapsed = 0;
       const cur = this.registry.get('profile') as PlayerProfile | undefined;
@@ -250,7 +255,22 @@ export abstract class PuzzleShell extends Phaser.Scene {
     this.finish({ solved: false, skipped: false });
   }
 
+  /** Android Back: close the rules card, else the skip prompt, else leave the puzzle (same as the X button). */
+  private onBack(ctx: BackCtx): void {
+    ctx.handled = true;
+    if (this.howToCard) {
+      this.howToCard.close();
+      return;
+    }
+    if (this.confirmBox?.visible) {
+      this.confirmBox.setVisible(false);
+      return;
+    }
+    this.cancel();
+  }
+
   private cleanup(): void {
+    this.events.off(BACK_EVENT, this.onBack, this);
     document.removeEventListener('visibilitychange', this.onVis);
     this.hintTimer?.remove(false);
     this.hintTimer = null;

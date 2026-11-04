@@ -5,6 +5,8 @@ import type { FrameStats } from './frameStats';
 import { readMetrics } from './metrics';
 import type { Metrics } from './metrics';
 import { errorLog } from './errors';
+import { gameBack } from './back';
+import { isBackground, setBackground } from './lifecycle';
 
 /** Surface of window.__scatterly. Exists ONLY when the page was opened with ?e2e=1. */
 export interface ScatterlyE2E {
@@ -25,6 +27,11 @@ export interface ScatterlyE2E {
   lastPuzzleResult: PuzzleResult | null;
   /** The open puzzle's bot hooks (autoSolve / hint / skip), or null. */
   puzzleBot(): { autoSolve(): void; hint(): void; skip(confirm: boolean): void } | null;
+  /** Simulates the Android Back button: offers it to the scenes, top-most first. */
+  pressBack(): 'handled' | 'unhandled';
+  /** Simulates the app going to the background (true) or coming back (false). */
+  setBackground(hidden: boolean): void;
+  backgrounded(): boolean;
   /** Converts game coordinates to page (client) coordinates for real pointer events. */
   toClient(x: number, y: number): { x: number; y: number };
 }
@@ -81,6 +88,9 @@ export function installE2e(game: Phaser.Game, stats: FrameStats): void {
     metrics: () => readMetrics(game, stats),
     resetFrameStats: () => stats.reset(),
     errors: () => errorLog(),
+    pressBack: () => gameBack(game),
+    setBackground: (hidden) => setBackground(game, hidden),
+    backgrounded: () => isBackground(),
     activeScenes: () => game.scene.getScenes(true).map((s) => s.scene.key),
     session: () => {
       // Room (flat) and IsoRoom keep the session inside their RoomRun (`run`); older builds kept it on the scene.

@@ -10,7 +10,7 @@
   <link rel="icon" type="image/svg+xml" href="/icon.svg" />
   <style>
     html,body{margin:0;height:100%;background:#2b2230;overflow:hidden;overscroll-behavior:none;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-    #game{position:fixed;inset:0}
+    #game{position:fixed;top:env(safe-area-inset-top,0px);right:env(safe-area-inset-right,0px);bottom:env(safe-area-inset-bottom,0px);left:env(safe-area-inset-left,0px)}
     #game canvas{display:block}
     #splash{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#2b2230;color:#f6e7cf;font:600 28px system-ui,"Segoe UI",Roboto,sans-serif;letter-spacing:.04em;pointer-events:none}
     #splash i{display:block;width:140px;height:6px;border-radius:3px;background:#4a3d52;overflow:hidden;position:relative}

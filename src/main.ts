@@ -7,6 +7,8 @@ import { sfx } from './audio/sfx';
 import { gameScenes } from './scenes';
 import { puzzleScenes } from './puzzles';
 import { organiseScenes } from './organise';
+import { setBackground } from './core/lifecycle';
+import { installNative } from './core/platform';
 
 installErrorHandlers();
 
@@ -32,11 +34,9 @@ try {
   attachGame(game);
   installPerf(game);
 
-  // Stop the loop while hidden; wake(true) shifts the clock so no time passes while away (no timer drift).
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) game.loop.sleep();
-    else game.loop.wake(true);
-  });
+  // Stop the loop and audio while hidden (no timer drift); Android's appStateChange calls the same function.
+  document.addEventListener('visibilitychange', () => setBackground(game, document.hidden));
+  installNative(game);
 
   // Browsers only allow audio after a user gesture.
   window.addEventListener(

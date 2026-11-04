@@ -15,3 +15,10 @@ GitHub Pages from a private repo needs a paid GitHub plan, and free Actions minu
 5. CI cost: path filters, cached installs and browsers, cancel-in-progress and heavy e2e on `main` only are already in `ci.yml`.
 
 No change is needed until the owner decides to go private.
+
+## Android platform behaviour (Gate C)
+- **Back button:** `src/core/platform.ts` (native only, plugin `@capacitor/app` loaded lazily). Back is offered to the running scenes top-most first via the `scatterly:back` scene event (`src/core/back.ts`); a scene consumes it with `ctx.handled = true`. Puzzles: rules card, then skip prompt, then leave the puzzle. Unhandled: `history.back()` when the WebView can go back (legacy Room), else "Press Back again to exit" (second press within 2 s exits).
+- **Safe areas:** `#game` is inset by `env(safe-area-inset-*)` (index.html, `viewport-fit=cover`), so the FIT canvas scales inside the cutout/gesture areas. `android.yml` already sets `windowLayoutInDisplayCutoutMode=shortEdges` and sensor landscape.
+- **Background:** `src/core/lifecycle.ts` `setBackground()` sleeps the loop (clock shifted on wake, no timer drift) and suspends audio; called by `visibilitychange` and Android `appStateChange`. Idempotent.
+- **Test hooks (`?e2e=1`):** `__scatterly.pressBack()`, `setBackground(hidden)`, `backgrounded()`.
+- **Not verifiable without a device:** real Back button and gesture navigation, notch/gesture-bar insets, audio really stopping in the background, battery and fps. Check these on the phone after the next APK.
