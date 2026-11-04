@@ -162,7 +162,7 @@ export class Hud {
     this.clueCount = count;
     this.badge.setVisible(count > 0);
     this.badgeText.setText(String(count));
-    if (grew && !isLowFx(this.scene.game)) {
+    if (grew && !isLowFx(this.scene.game) && !isCalm(this.scene)) {
       this.scene.tweens.killTweensOf(this.badge);
       this.badge.setScale(1);
       this.scene.tweens.add({ targets: this.badge, scale: 1.35, duration: 120, yoyo: true });
@@ -197,7 +197,7 @@ export class Hud {
 
   flashTab(room: RoomId): void {
     const tab = this.tabs.get(room) ?? this.houseBtn;
-    if (!tab) return;
+    if (!tab || isCalm(this.scene)) return;
     this.scene.tweens.killTweensOf(tab);
     tab.setAlpha(1);
     this.scene.tweens.add({

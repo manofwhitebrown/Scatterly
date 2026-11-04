@@ -137,7 +137,7 @@ export class HomeScene extends Phaser.Scene {
     const spots = new HomeSpots(this, this.world, allSpots(run.profile).filter((sp) => run.rooms.includes(sp.room)), run.session, () => this.cam, { gated: (id) => run.scenario.gates[id] !== undefined, early: () => run.profile.settings.showLockIcons });
     this.spots = spots;
     this.hints = new SpotHints(this, this.world, spots);
-    this.actors = new HomeActors(this, this.world, () => isCalm(this) || run.mode === 'rush' || !run.profile.settings.walkAnim, 'living');
+    this.actors = new HomeActors(this, this.world, () => isCalm(this) || run.mode === 'rush' || !run.profile.settings.walkAnim, 'living', () => isCalm(this));
     const view: RunView = {
       playAction: (sp) => spots.playAction(sp), refresh: (id) => spots.refresh(id), pulse: (id) => spots.pulse(id),
       center: (id) => spots.center(id), zoomTo: (sp, done) => this.zoomToSpot(sp, done), resetZoom: () => this.resetZoom(),

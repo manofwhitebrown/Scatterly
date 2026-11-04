@@ -45,14 +45,14 @@ export class HomeActors {
   private walking = false;
   private catTimer: Phaser.Time.TimerEvent | null = null;
 
-  constructor(private readonly scene: Phaser.Scene, private readonly world: Phaser.GameObjects.Container, private readonly instant: () => boolean, private readonly catRoom: RoomId) {}
+  constructor(private readonly scene: Phaser.Scene, private readonly world: Phaser.GameObjects.Container, private readonly instant: () => boolean, private readonly catRoom: RoomId, private readonly calm: () => boolean = instant) {}
 
   private make(prefix: string, idleAnim: string): Phaser.GameObjects.Sprite | null {
     const f = frame(`${prefix}/0`);
     if (!f) return null;
     const s = this.scene.add.sprite(0, 0, f.atlas, f.frame).setOrigin(f.pivotX / f.w, f.pivotY / f.h);
     this.world.add(s);
-    if (!this.instant()) s.play(idleAnim);
+    if (!this.calm()) s.play(idleAnim);
     return s;
   }
 
@@ -78,13 +78,13 @@ export class HomeActors {
     anim(this.scene, 'cat-react', 'pet/cat/react', 10, 0); anim(this.scene, 'cat-idle', 'pet/cat/idle', 3, -1);
     this.cat = this.make('pet/cat/sleep', 'cat-sleep');
     this.cat?.setPosition(...this.xy(this.catCell));
-    if (!this.instant()) this.catTimer = this.scene.time.delayedCall(catDelay(Math.random()), () => this.wander());
+    if (!this.calm()) this.catTimer = this.scene.time.delayedCall(catDelay(Math.random()), () => this.wander());
   }
 
   /** Cat strolls to a nearby free cell, then sleeps again. */
   private wander(): void {
     const room = this.room; const cat = this.cat;
-    if (!room || !cat || this.instant()) return;
+    if (!room || !cat || this.calm()) return;
     const size = ROOM_SIZE[room as WorldRoom];
     const to = { x: Math.floor(Math.random() * size.w), y: Math.floor(Math.random() * size.d) };
     const path = pathTo(room, this.catCell, to);
@@ -103,7 +103,7 @@ export class HomeActors {
     if (!this.cat || this.walking) return false;
     const c = toScreen({ x: this.cat.x, y: this.cat.y - 6 });
     if (Math.hypot(c.x - x, c.y - y) > CAT_HIT) return false;
-    if (!this.instant() && this.scene.anims.exists('cat-react')) {
+    if (!this.calm() && this.scene.anims.exists('cat-react')) {
       const cat = this.cat;
       cat.play('cat-react');
       cat.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => cat.play('cat-sleep'));

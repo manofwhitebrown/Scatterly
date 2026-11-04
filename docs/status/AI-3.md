@@ -21,11 +21,14 @@
 
 - Audio hooks: Rush `setIntensity` now ramps over the last 20 s (feelMath.ts; tint red in the last 5 s, pulse FX in the last 10 s); focusing a room calls `feel.roomSwitch` (swoosh + `setRoomAmbience`).
 
+- Reduced-motion audit of Home + HUD (code read, grep of every tween/anim/timer): zoom tween, shimmer, spot bounces, walking, cat wander/react, sky clouds, FX all check calm; fixed two gaps (HUD badge pulse, tab flash). The cat no longer freezes in Rush or with walkAnim off (only calm stops it).
+
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
 - `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.
 
 ## Not verified
+- Reduced-motion audit is by code reading only; no automated test (needs a browser).
 - Avatar/cat never seen: walk path uses legacy `LAYOUTS` obstacles (not the world decor), frame pivots assumed identical across an animation, cat sits at a fixed start cell.
 - Gestures never tried on a touch device (multi-touch pointer2 path unverified).
 - Prop frame placement (pivot/flip) is assumed, never seen.
