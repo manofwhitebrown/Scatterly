@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
-import { interactives, openGame, startMorning, tapMatch, waitScene } from '../e2e/helpers';
+import { dismissHowTo, interactives, openGame, startMorning, tapMatch, waitScene } from '../e2e/helpers';
 import { IMPLEMENTED } from '../../src/puzzles/manifest';
 import { PUZZLE_SCENE } from '../../src/shared/types';
 import type { PuzzleKind } from '../../src/shared/types';
@@ -74,6 +74,7 @@ for (const kind of SHOT_PUZZLES.filter((k) => IMPLEMENTED.includes(k))) {
     await openGame(page);
     await page.evaluate((k) => window.__scatterly!.openPuzzle(k, 2, 401), kind);
     await waitScene(page, PUZZLE_SCENE[kind]);
+    await dismissHowTo(page);
     await page.waitForTimeout(1200);
     await expectScene(page, PUZZLE_SCENE[kind]);
     await snap(page, `puzzle-${kind}`);

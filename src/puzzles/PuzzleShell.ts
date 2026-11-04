@@ -5,6 +5,10 @@ import { isLowFx } from '../core/perf';
 import { flags } from '../core/flags';
 import { playFx } from '../fx';
 import { PuzzleNotes } from './PuzzleNotes';
+import { buildHowToCard } from './PuzzleCards';
+import { hintLabel, hintStep, howToText } from './howto';
+import { commitProfile } from '../core/save';
+import type { PlayerProfile } from '../shared/types';
 import { BAR_TOP, BTN_H, NOTES_LEFT, NOTES_W, PH, PW, PX, PY } from './layout';
 import { sfx } from '../audio/sfx';
 import type { SfxName } from '../audio/sfx';
@@ -52,6 +56,11 @@ export abstract class PuzzleShell extends Phaser.Scene {
   private elapsed = 0;
   private lastTick = 0;
   protected hints = 0;
+  /** Hint presses this run (skip also counts as a hint but does not climb the ladder). */
+  protected hintPresses = 0;
+  /** Ladder rung of the hint being shown: 0 nudge, 1 rule restated, 2 partial reveal. Scenes pass it to PUZZLES[kind].hint once AI-2's `step` lands. */
+  protected hintRung: 0 | 1 | 2 = 0;
+  private hintLabelText: Phaser.GameObjects.Text | null = null;
   private drawer: PuzzleNotes | null = null;
   private hintBox: Phaser.GameObjects.Container | null = null;
   private hintText: Phaser.GameObjects.Text | null = null;
@@ -88,6 +97,9 @@ export abstract class PuzzleShell extends Phaser.Scene {
     this.solved = false;
     this.reported = false;
     this.hints = 0;
+    this.hintPresses = 0;
+    this.hintRung = 0;
+    this.hintLabelText = null;
     this.elapsed = 0;
     this.lastTick = performance.now();
     this.drawer = null;
@@ -119,6 +131,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
     this.drawer.set(this.req.kind === 'code');
     this.buildHintBox();
     this.buildConfirm();
+    this.maybeShowHowTo();
 
     document.addEventListener('visibilitychange', this.onVis);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
@@ -151,9 +164,10 @@ export abstract class PuzzleShell extends Phaser.Scene {
     const w = PW - 160;
     const c = this.add.container(PX + 20, PY + 6).setDepth(50).setVisible(false);
     const bg = this.add.graphics();
-    panelBox(bg, 0, 0, w, 76, 16, PAL.butter, PAL.terracotta, 3);
-    this.hintText = makeText(this, w / 2, 38, '', 28, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: w - 40 });
-    c.add([bg, this.hintText]);
+    panelBox(bg, 0, 0, w, 104, 16, PAL.butter, PAL.terracotta, 3);
+    this.hintLabelText = makeText(this, w / 2, 20, '', 22, PAL.terracotta, { bold: true, ox: 0.5, oy: 0.5, align: 'center' });
+    this.hintText = makeText(this, w / 2, 64, '', 28, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: w - 40 });
+    c.add([bg, this.hintLabelText, this.hintText]);
     this.hintBox = c;
   }
 
@@ -172,11 +186,29 @@ export abstract class PuzzleShell extends Phaser.Scene {
   private hint(): void {
     if (this.solved || this.reported || !this.hintBox || !this.hintText) return;
     this.hints++;
+    this.hintPresses++;
+    this.hintRung = hintStep(this.hintPresses);
     sfx.play('clue');
+    this.hintLabelText?.setText(hintLabel(this.hintPresses));
     this.hintText.setText(this.hintLine());
     this.hintBox.setVisible(true);
     this.hintTimer?.remove(false);
     this.hintTimer = this.time.delayedCall(HINT_SHOW_MS, () => this.hintBox?.setVisible(false));
+  }
+
+  /** First time a kind is played: one short rules card. The puzzle clock starts when it is closed. */
+  private maybeShowHowTo(): void {
+    const profile = this.registry.get('profile') as PlayerProfile | undefined;
+    const kind = this.req.kind;
+    if (!profile || profile.puzzles[kind]?.seen === true) return;
+    buildHowToCard(this, this.defaultTitle(), howToText(kind), () => {
+      this.lastTick = performance.now();
+      this.elapsed = 0;
+      const cur = this.registry.get('profile') as PlayerProfile | undefined;
+      if (!cur) return;
+      const st = cur.puzzles[kind] ?? { solved: 0, skipped: 0, bestMs: null, seen: false };
+      commitProfile(this.game, { ...cur, puzzles: { ...cur.puzzles, [kind]: { ...st, seen: true } } });
+    });
   }
 
   private askSkip(): void {

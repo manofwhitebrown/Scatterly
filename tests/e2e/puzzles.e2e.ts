@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { interactives, openGame, waitScene, watchConsole } from './helpers';
+import { dismissHowTo, interactives, openGame, waitScene, watchConsole } from './helpers';
 import { IMPLEMENTED } from '../../src/puzzles/manifest';
 import { PUZZLE_SCENE } from '../../src/shared/types';
 import type { PuzzleKind } from '../../src/shared/types';
@@ -26,6 +26,7 @@ for (const kind of IMPLEMENTED) {
     for (const d of [1, 2, 3] as const) {
       await page.evaluate(([k, diff]) => window.__scatterly!.openPuzzle(k, diff, 400 + diff), [kind, d] as const);
       await waitScene(page, PUZZLE_SCENE[kind]);
+      await dismissHowTo(page);
       await page.waitForTimeout(700);
       const mine = (await interactives(page)).filter((i) => i.scene === PUZZLE_SCENE[kind] && i.w < W - 20);
       expect(mine.length, `${kind} d${d} has tappable objects`).toBeGreaterThan(3);
@@ -69,6 +70,7 @@ for (const kind of NEW_KINDS) {
     for (const d of [1, 2, 3] as const) {
       await page.evaluate(([k, diff]) => window.__scatterly!.openPuzzle(k, diff, 900 + diff), [kind, d] as const);
       await waitScene(page, PUZZLE_SCENE[kind]);
+      await dismissHowTo(page);
       await page.waitForTimeout(500);
       await page.evaluate(() => window.__scatterly!.puzzleBot()!.autoSolve());
       await page.waitForFunction(() => window.__scatterly?.lastPuzzleResult != null, undefined, { timeout: 15_000 });
@@ -80,3 +82,18 @@ for (const kind of NEW_KINDS) {
     expect(soak.errors).toEqual([]);
   });
 }
+
+test('how-to card shows once per kind, blocks nothing afterwards and saves the seen flag', async ({ page }) => {
+  const soak = watchConsole(page);
+  await openGame(page);
+  const seen = (): Promise<boolean> => page.evaluate(() => (window.__scatterly!.game.registry.get('profile') as { puzzles: Record<string, { seen: boolean } | undefined> }).puzzles.lights?.seen === true);
+  expect(await seen()).toBe(false);
+  await page.evaluate(() => window.__scatterly!.openPuzzle('lights', 1, 77));
+  await waitScene(page, PUZZLE_SCENE.lights);
+  expect(await dismissHowTo(page), 'first play shows the card').toBe(true);
+  expect(await seen()).toBe(true);
+  await page.evaluate(() => window.__scatterly!.openPuzzle('lights', 1, 78));
+  await waitScene(page, PUZZLE_SCENE.lights);
+  expect(await dismissHowTo(page), 'second play shows no card').toBe(false);
+  expect(soak.errors).toEqual([]);
+});

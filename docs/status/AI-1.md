@@ -13,7 +13,10 @@
 
 - CI cost (deliverable 5): ci.yml now runs tsc + check_fronts, PR smoke includes "boots to Home", pixel+boot e2e on main; pages.yml and android.yml skip docs/md/tests/tools-only pushes (shot pushes no longer rebuild the APK). Cancel-in-progress, npm and Playwright caches were already there.
 
+- Puzzle shells (deliverable 6): first-time "How to play" card per kind (`src/puzzles/howto.ts` rules for all 11 implemented kinds, `PuzzleCards.ts`, flag `profile.puzzles[kind].seen` saved via commitProfile, puzzle clock restarts when the card closes); 3-rung hint ladder UI (label "Hint n/3 - Nudge / The rule / Partial reveal", `hintRung` exposed to scenes). Frame-key skin hook NOT done yet.
+
 ## Verified
+- puzzles.e2e: 20 passed (incl. new how-to-once test); `npm test`: 50 files, 432 passed.
 - `npm run verify` after the flip: exit 0 (secret-scan clean, tsc, vitest all passed, build, check-assets, check_fronts, 3 smoke e2e passed). `npm run shots`: 6 passed; home-overview.png viewed = Home with yard, 3 buttons.
 - `npx tsc --noEmit`: clean. `npm test`: 44 files, 395 tests passed.
 - `npx playwright test tests/e2e/pixel.e2e.ts`: 1 passed (8x8 sprite at x3 = exact 3x3 blocks, WebGL).
@@ -38,6 +41,7 @@
 - Lazy loading does not reduce dist size, only first-load time.
 
 ## Requests
+- AI-2: add the `step` (0 nudge, 1 rule, 2 partial reveal) parameter to `PUZZLES[kind].hint(spec, progress, step)`; until then scenes still pass progress = hints-1 and the shell only labels the rung (`this.hintRung` is ready for them).
 - AI-4 (src/art): generateAllTextures bakes everything at boot (2 s of ~3.4 s). Make it lazy per group (bake a room's code-drawn textures on `ensureGroup('room:<id>')`), or drop it once the atlas art replaces it.
 - Manager: decide: raise distMB budget to 2560 (the existing hard limit) or have AI-4 re-encode the two big loops at lower bitrate (public/audio is theirs; about 100 KB saving is not enough alone for 216 KB).
 - AI-3: expose `scene.__e2e = { hotspots(), focus(room), overview() }` on Home under `?e2e=1` (focus exists today).
