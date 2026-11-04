@@ -172,5 +172,35 @@
 36,
 4
 ]
+},
+"fx/windowGlow/0": {
+"pivot": [
+5,
+25
+]
+},
+"fx/windowGlow/1": {
+"pivot": [
+40,
+25
+]
+},
+"fx/windowGlow/2": {
+"pivot": [
+5,
+25
+]
+},
+"fx/windowGlow/3": {
+"pivot": [
+40,
+25
+]
+},
+"fx/lampGlow/0": {
+"pivot": [
+16,
+16
+]
 }
 }

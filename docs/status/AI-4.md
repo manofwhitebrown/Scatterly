@@ -11,6 +11,8 @@
 - Shells for ALL 6 rooms at ROOM_SIZE (entrance 8x9, living 12x9, kitchen 10x9, bathroom 8x9, bedroom 12x9, study 10x9), wall 64 art px, windows from worldProps, door on the left wall of rooms that are `b` of a WORLD_DOOR. Keys `shell/<room>/full|full_dusk|full_night`, one atlas per room: group `room:<id>`. Pivot = back corner of the floor diamond = (145,65) in every room. Old 10x8 shells removed from room:slice. Per-room moods: entrance terracotta, living sage, kitchen teal tile, bathroom teal stripe + stone, bedroom blue/rose, study sage + slate.
 - Last 29 hand-built kinds (tools/pixelart/props2.py): tops (teacup, vase, frames, bowl, board, pan, banana, magazine, desk_lamp, hat, keyring, towelStack, soap, toothbrush), flats (shoesPair, slippers, catBed, bathMat, robotVacuum, rugRect 80x40) and wall mounts. EVERY kind in PROP_KINDS now has a `prop/<kind>` frame (script check: 0 missing).
 - MOUNT frames: `prop/<kind>` is the RIGHT wall (gy=0, sheared down-right) and `prop/<kind>_L` the LEFT wall; pivot = wall point P(t, base): bottom-left corner of the R frame, bottom-right of _L. They are ~8-16 art px, bigger than AI-3's 1x1.5-unit placeholder quad.
+- Lit windows (playtest item 3): `fx/windowGlow/0` day R wall, `/1` day L wall, `/2` `/3` night versions; 2-tile window (32x20 art px + 4 px halo), pivot = window's bottom wall point like mount props (pivot already includes the halo margin). `fx/lampGlow/0` round lamp glow (pivot centre). Group `house`. tools/pixelart/light.py.
+- Playtest status: item 1 props (all rooms) done, item 2 cat frames sleep/idle/walk/react/eat existed from earlier, item 3 done; next is item 4 (puzzle skins).
 ## Verified
 - check.py core: 74 files, 0 problems; room-slice: 49 files, 0 problems (see commit).
 ## Not verified
@@ -25,5 +27,6 @@
 - AI-2: stairsUp footprint is 2x1 in layoutProps.ts but the staircase needs 1 wide x 3 deep (or rotate to 3x1 with rot 1 once I add a mirrored frame). Tell me which; I can also re-cut it 2x1 with steeper rise.
 - AI-3: src/ui/theme.ts should read docs/art/palette.json `theme`. AI-1: add check_fronts.py to `npm run verify`.
 ## Next
+- Puzzle skins: `puzzle/<kind>/panel` nine-slice + tiles/buttons for untangle, lights, mastermind.
 - (done) hand-built kinds were: rugRect, bathMat, catBed, shoesPair, slippers, robotVacuum, teacup, vase, photoFrame1/2, bowl, cuttingBoard, pan, banana, magazine, desk_lamp, hat, keyring, towelStack, soap, toothbrush, poster1-3, calendar, clockWall, mirrorWall, hangingPlant, bunting.
 - Room contact sheet tool (art:sheet), kitchen/bedroom props, check-frames fronts check (spot/<kind>/closed|open, padlock overlay).
