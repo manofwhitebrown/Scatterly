@@ -7,6 +7,10 @@ import type { CameraState, Pt } from './homeWorld';
 import { CSS, isCalm, makeText } from '../ui/theme';
 import { UNIT } from './homeProps';
 import { GAME_H, GAME_W } from '../shared/types';
+import { wasTried } from './caseProgress';
+
+/** Which pieces carry a padlock icon, and whether the easy-mode setting shows them before the first tap. */
+export interface LockRule { gated(id: SpotId): boolean; early(): boolean }
 
 const HIT_R = 56; // game px: 112 px targets, nearest centre wins
 
@@ -26,7 +30,7 @@ export class HomeSpots implements RunView {
   private readonly off: () => void;
   private readonly world: Phaser.GameObjects.Container;
 
-  constructor(private readonly scene: Phaser.Scene, world: Phaser.GameObjects.Container, spots: Spot[], private readonly session: GameSession, private readonly camera: () => CameraState) {
+  constructor(private readonly scene: Phaser.Scene, world: Phaser.GameObjects.Container, spots: Spot[], private readonly session: GameSession, private readonly camera: () => CameraState, private readonly locks?: LockRule) {
     this.world = world;
     this.off = session.on('mark', () => this.syncBadges());
     for (const spot of spots) {
@@ -57,8 +61,22 @@ export class HomeSpots implements RunView {
     face(shade(c, 0.78), [P(0, d, 0), P(w, d, 0), P(w, d, h), P(0, d, h)]);
     face(shade(c, 0.9), [P(w, 0, 0), P(w, d, 0), P(w, d, h), P(w, 0, h)]);
     face(shade(c, 1.12), [P(0, 0, h), P(w, 0, h), P(w, d, h), P(0, d, h)]);
+    if (!open && this.showsLock(id)) {
+      const c = project(slot.wx + gx + w / 2, slot.wy + gy + d / 2, raise + h * UNIT + 10);
+      g.fillStyle(0xf4a93d, 1).fillRect(c.x - 5, c.y - 3, 10, 8).lineStyle(2, 0x16252a, 1).strokeRect(c.x - 5, c.y - 3, 10, 8);
+      g.lineStyle(2, 0xfff3dc, 1).strokeRoundedRect(c.x - 3, c.y - 9, 6, 7, 3);
+    }
     if (open) face(0x20150e, [P(0.2 * w, d, 0.3 * h), P(0.8 * w, d, 0.3 * h), P(0.8 * w, d, 0.7 * h), P(0.2 * w, d, 0.7 * h)]);
   }
+
+  /** A padlock is drawn only once the piece was tapped (or when the easy-mode setting is on). Never reveals which pieces are decoys. */
+  private showsLock(id: SpotId): boolean {
+    const r = this.locks;
+    return !!r && r.gated(id) && (wasTried(this.session, id) || r.early());
+  }
+
+  /** Redraw one piece after its first tap so a padlock can appear. */
+  touch(id: SpotId): void { this.draw(id); }
 
   /** Deduction badges (✕ ruled out, ? hunch): one text per marked piece, kept ~40 game px whatever the zoom. */
   syncBadges(): void {

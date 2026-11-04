@@ -44,4 +44,9 @@ The area around the house is bland and this is a morning game. Add a procedural 
 Then, once AI-4 delivers the exterior kit (`house/*`, `porch/*`, `yard/*` frames, see docs/manager/TO-AI-4.md), place it around the ground-floor edge of the house from `frame(key)`: lawn, path, porch in front of the entrance room's door, fence, trees, bushes, flowers, mailbox. All decorative, non-interactive, baked into the same background texture where possible; if a frame is missing, skip it.
 
 ## Done
-(nothing yet)
+- 0 Theme: all UI colours now come from the `COLOR`/`CSS` tokens in src/ui/theme.ts (teal panels, sun-orange primary, cream text, sky backdrop). Furniture/floor colours untouched. Not yet mirrored from palette.json `theme` (block does not exist yet).
+- 1 Focus: neighbours are darkened (about 25% brightness, opaque) and drawn BEHIND the focused room; the room is fitted and centred with insets. Test: tests/home-geometry.test.ts.
+- 2 Overview: fits with a free bottom band for the 3 buttons; staircase drawn (steps below, stairwell above) and tappable in Focus. Overlap cause is the LAYOUT (see status Requests), not my projection.
+- 3 Padlock rule: icon only after the first tap, HUD "Locks" counts only locks found, setting `showLockIcons` (default off) added to Settings.
+- 5 Sky: src/scenes/homeSky.ts (baked once, parallax 0.3, drifting clouds, tint from palette dayNight). Exterior kit placement waits for AI-4 frames.
+- 4 Screenshots: NOT done (no browser here), see status.

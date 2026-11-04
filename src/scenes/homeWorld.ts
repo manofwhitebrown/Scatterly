@@ -65,14 +65,25 @@ export function houseBounds(): Rect {
   return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
 }
 
-/** Camera that fits `r` inside the view (art px -> game px zoom), with a margin in game px; zoom is never fractional below 1x ART_PX. */
-export function fitCamera(r: Rect, viewW: number, viewH: number, margin = 24): CameraState {
-  const zoom = Math.min((viewW - margin * 2) / r.w, (viewH - margin * 2) / r.h);
-  return { zoom, cx: r.x + r.w / 2, cy: r.y + r.h / 2 };
+export interface Insets { top: number; right: number; bottom: number; left: number }
+const inset = (n: number): Insets => ({ top: n, right: n, bottom: n, left: n });
+
+/** Camera that fits `r` fully inside the view minus `insets` (game px) and centres it in the remaining area. */
+export function fitCamera(r: Rect, viewW: number, viewH: number, margin: number | Insets = 24): CameraState {
+  const m = typeof margin === 'number' ? inset(margin) : margin;
+  const aw = viewW - m.left - m.right; const ah = viewH - m.top - m.bottom;
+  const zoom = Math.min(aw / r.w, ah / r.h);
+  // Screen centre is viewW/2; the room must be centred at the middle of the inner area instead.
+  const dx = (m.left - m.right) / 2; const dy = (m.top - m.bottom) / 2;
+  return { zoom, cx: r.x + r.w / 2 - dx / zoom, cy: r.y + r.h / 2 - dy / zoom };
 }
 
-export const overviewCamera = (viewW: number, viewH: number): CameraState => fitCamera(houseBounds(), viewW, viewH, 16);
-export const focusCamera = (room: RoomId, viewW: number, viewH: number): CameraState => fitCamera(roomBounds(room), viewW, viewH, 24);
+/** Overview keeps a bottom band free for the Play / Journal / Settings buttons. */
+export const OVERVIEW_INSETS: Insets = { top: 20, right: 24, bottom: 164, left: 24 };
+export const FOCUS_INSETS: Insets = { top: 36, right: 36, bottom: 36, left: 36 };
+
+export const overviewCamera = (viewW: number, viewH: number): CameraState => fitCamera(houseBounds(), viewW, viewH, OVERVIEW_INSETS);
+export const focusCamera = (room: RoomId, viewW: number, viewH: number): CameraState => fitCamera(roomBounds(room), viewW, viewH, FOCUS_INSETS);
 
 /** Linear interpolation of two cameras (zoom interpolated in log space so the tween feels even). */
 export function lerpCamera(a: CameraState, b: CameraState, t: number): CameraState {
@@ -95,7 +106,7 @@ export function roomPolygon(room: RoomId): Pt[] {
   return [{ x: L.x, y: L.y - WALL_PX }, { x: B.x, y: B.y - WALL_PX }, { x: R.x, y: R.y - WALL_PX }, R, { x: F.x, y: F.y + SLAB_PX }, { x: L.x, y: L.y + SLAB_PX }];
 }
 
-function inside(poly: Pt[], p: Pt): boolean {
+export function inside(poly: Pt[], p: Pt): boolean {
   let hit = false;
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
     const a = poly[i]; const b = poly[j];

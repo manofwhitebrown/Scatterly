@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { flags } from '../core/flags';
 import type { WorldRoom } from '../content/world';
 import { allSpots } from '../logic';
+import { markTried } from './caseProgress';
 import { GAME_H, GAME_W, SCENE } from '../shared/types';
 import type { RoomId, RoomSceneData, Spot } from '../shared/types';
 import { COLOR, DEPTH, ROOM_LABEL, SAFE, drawPlate, isCalm, makeText } from '../ui/theme';
@@ -11,8 +12,10 @@ import { RoomRun } from './RoomRun';
 import type { RunView } from './RoomRun';
 import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
+import { HomeSky } from './homeSky';
+import { drawStairs, stairsTarget } from './homeStairs';
 import {
-  HOUSE_WORLD, LINKS, roomAt, roomBounds, focusCamera, lerpCamera, overviewCamera, screenToArt,
+  HOUSE_WORLD, LINKS, roomAt, roomBounds, roomPolygon, focusCamera, lerpCamera, overviewCamera, screenToArt,
 } from './homeWorld';
 import type { CameraState } from './homeWorld';
 
@@ -32,7 +35,11 @@ export class HomeScene extends Phaser.Scene {
   __e2e?: HomeHooks;
   private world!: Phaser.GameObjects.Container;
   private shells = new Map<RoomId, Phaser.GameObjects.Graphics>();
+  private dimmers = new Map<RoomId, Phaser.GameObjects.Graphics>();
+  private rooms!: Phaser.GameObjects.Container;
+  private sky: HomeSky | null = null;
   private cam!: CameraState;
+  private readonly baseCam: CameraState = overviewCamera(GAME_W, GAME_H);
   private focusRoom: RoomId | null = null;
   private tween: Phaser.Tweens.Tween | null = null;
   private back: Phaser.GameObjects.Container | null = null;
@@ -55,6 +62,8 @@ export class HomeScene extends Phaser.Scene {
     this.longTimer = null;
     this.longFired = false;
     this.shells.clear();
+    this.dimmers.clear();
+    this.sky = null;
     this.doors = [];
     this.focusRoom = null;
     this.tween = null;
@@ -65,14 +74,21 @@ export class HomeScene extends Phaser.Scene {
 
   create(): void {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
-    this.cameras.main.setBackgroundColor(COLOR.bg);
+    this.cameras.main.setBackgroundColor(COLOR.sky);
+    this.sky = new HomeSky(this, isCalm(this));
     this.world = this.add.container(0, 0);
+    this.rooms = this.add.container(0, 0);
+    this.world.add(this.rooms);
     for (const s of HOUSE_WORLD) {
       const g = this.add.graphics();
       drawRoomShell(g, s.room);
       drawRoomProps(g, s.room as WorldRoom);
-      this.world.add(g);
+      drawStairs(g, s.room as WorldRoom);
+      const dim = this.add.graphics().setVisible(false);
+      dim.fillStyle(COLOR.plateEdge, 0.75).fillPoints(roomPolygon(s.room), true);
+      this.rooms.add([g, dim]);
       this.shells.set(s.room, g);
+      this.dimmers.set(s.room, dim);
     }
     this.apply(overviewCamera(GAME_W, GAME_H));
     this.refreshDim();
@@ -87,7 +103,7 @@ export class HomeScene extends Phaser.Scene {
     const run = new RoomRun(this, data);
     if (!run.prepare()) return false;
     this.run = run;
-    const spots = new HomeSpots(this, this.world, allSpots(run.profile).filter((sp) => run.rooms.includes(sp.room)), run.session, () => this.cam);
+    const spots = new HomeSpots(this, this.world, allSpots(run.profile).filter((sp) => run.rooms.includes(sp.room)), run.session, () => this.cam, { gated: (id) => run.scenario.gates[id] !== undefined, early: () => run.profile.settings.showLockIcons });
     this.spots = spots;
     const view: RunView = {
       playAction: (sp) => spots.playAction(sp), refresh: (id) => spots.refresh(id), pulse: (id) => spots.pulse(id),
@@ -119,6 +135,7 @@ export class HomeScene extends Phaser.Scene {
 
   private apply(c: CameraState): void {
     this.cam = c;
+    this.sky?.sync(c, this.baseCam);
     this.world.setScale(c.zoom).setPosition(GAME_W / 2 - c.cx * c.zoom, GAME_H / 2 - c.cy * c.zoom);
     this.spots?.syncBadges();
   }
@@ -138,9 +155,14 @@ export class HomeScene extends Phaser.Scene {
     if (this.run && this.run.modalOpen()) return;
     if (this.run && this.focusRoom) {
       const spot: Spot | undefined = this.spots?.spotAt({ x: p.upX, y: p.upY });
-      if (spot) { this.run.onSpot(spot); return; }
+      if (spot) { markTried(this.run.session, spot.id); this.spots?.touch(spot.id); this.run.onSpot(spot); return; }
     }
-    const room = roomAt(screenToArt({ x: p.upX, y: p.upY }, this.cam, GAME_W, GAME_H));
+    const art = screenToArt({ x: p.upX, y: p.upY }, this.cam, GAME_W, GAME_H);
+    const room = roomAt(art);
+    if (this.focusRoom) {
+      const up = stairsTarget(this.focusRoom, art);
+      if (up && (!this.run || this.run.rooms.includes(up))) { this.focusOn(up); return; }
+    }
     if (!this.focusRoom) { if (room) this.focusOn(room); return; }
     if (!room) this.focusOn(null);
   }
@@ -186,7 +208,10 @@ export class HomeScene extends Phaser.Scene {
   }
 
   private refreshDim(): void {
-    for (const [room, g] of this.shells) g.setAlpha(!this.focusRoom || room === this.focusRoom ? 1 : 0.3);
+    // Neighbours stay opaque but darkened (~25% brightness) and sit BEHIND the focused room, never over it.
+    for (const [room, dim] of this.dimmers) dim.setVisible(!!this.focusRoom && room !== this.focusRoom);
+    const f = this.focusRoom ? this.shells.get(this.focusRoom) : undefined;
+    if (f) this.rooms.bringToTop(f);
   }
 
   private chip(x: number, y: number, label: string, cb: () => void): Phaser.GameObjects.Container {
@@ -225,9 +250,12 @@ export class HomeScene extends Phaser.Scene {
     this.tween = null;
     this.menu?.destroy();
     this.menu = null;
+    this.sky?.destroy();
+    this.sky = null;
     this.back = null;
     this.doors = [];
     this.shells.clear();
+    this.dimmers.clear();
     this.__e2e = undefined;
   }
 }

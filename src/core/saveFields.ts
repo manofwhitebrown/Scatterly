@@ -15,7 +15,7 @@ const MAX_SNAPSHOT_CHARS = 200_000;
 export const DEFAULT_SETTINGS: ProfileSettings = {
   sfx: true, music: true, vibration: true, lowFx: false, reducedMotion: false,
   quality: 'auto', musicVol: 0.7, sfxVol: 0.8, ambienceVol: 0.6, ambience: 'auto',
-  matchClock: false, walkAnim: true, sessionLength: 'standard',
+  matchClock: false, walkAnim: true, sessionLength: 'standard', showLockIcons: false,
 };
 export const DEFAULT_PET: PlayerProfile['pet'] = { name: 'Biscuit', outfit: null, treats: 0 };
 
@@ -40,6 +40,7 @@ export function sanitizeSettings(raw: unknown): ProfileSettings {
     ambience: text(s.ambience, 40) ?? d.ambience,
     matchClock: bool(s.matchClock, d.matchClock), walkAnim: bool(s.walkAnim, d.walkAnim),
     sessionLength: LENGTHS.find((x) => x === l) ?? d.sessionLength,
+    showLockIcons: bool(s.showLockIcons, d.showLockIcons),
   };
 }
 

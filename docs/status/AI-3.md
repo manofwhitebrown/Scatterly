@@ -1,30 +1,28 @@
 # AI-3 status (Phase 5, Scenes and UI)
-> **Manager inbox: read docs/manager/TO-AI-3.md first.**
+> Manager inbox: docs/manager/TO-AI-3.md (items 0-3 and 5 done, 4 blocked)
 
 ## Done
-- src/scenes/homeWorld.ts: iso projection (32x16 art px), HOUSE_WORLD adapter (ground: entrance|living|kitchen; upper: bathroom|bedroom|study), LINKS, camera fit/lerp, silhouette hit-test, taps-from-overview.
-- src/scenes/homeDraw.ts: placeholder cutaway shells (floor, two walls, slab) per room.
-- src/scenes/HomeScene.ts (`?view=home`): standalone world scene, Overview <-> Focus tween (300 ms, instant when calm), 96 px back chip, door chips to linked rooms, unfocused rooms dimmed and inert, `__e2e` hooks (hotspots, focus, overview, focused).
-
-- HomeMenu (menu-as-house): Play / Journal / Settings over the Overview; Play opens a small sheet with Relaxed/Rush/Daily chips, Short/Standard/Long chips (saved to settings) and Start. Under `?view=home` the Menu redirects to Home; Start still runs the old Room scene (runScene = Room) until RoomRun moves into Home.
-- Play now starts the morning INSIDE Home: HomeScene runs RoomRun (HUD, clock, inspect, gates, puzzles) with HomeSpots as its view (placeholder iso boxes, open state, nearest-centre taps at 112 px, long-press marks, only the focused room's pieces tappable). ROOM_SIZE adapter now matches the legacy room layouts so all spots fit (tested).
-- Home run polish: HUD house button zooms back to the Overview (RunHost.onHouse), deduction badges (x / ?) in Home, camera pushes onto a lock before its puzzle opens and resets after.
-- Home now uses AI-2's world layout (ROOM_SIZE, HOUSE_MAP_V2, WORLD_DOORS + stairs as links) and draws every WORLD_DECOR prop as a facing-aware placeholder box (front face lighter), windows, door gaps and wall mounts (src/scenes/homeProps.ts).
+- HomeScene (`?view=home`): world on the global iso grid, Overview <-> Focus tween, 96 px back chip, door and stairs chips, `__e2e` hooks.
+- Menu-as-house (Play sheet, chips), RoomRun inside Home with HomeSpots, deduction badges, camera push on locks.
+- TO-AI-3 0: theme tokens swapped to teal/orange/cream (src/ui/theme.ts).
+- TO-AI-3 1: Focus shows only the focused room on top; neighbours dark and behind; room fitted and centred.
+- TO-AI-3 2: house fits above a bottom button band; stairs visible and tappable (src/scenes/homeStairs.ts).
+- TO-AI-3 3: padlock only after first tap (markTried/wasTried in caseProgress.ts); HUD Locks = locks found; Settings toggle `showLockIcons`.
+- TO-AI-3 5: morning sky (src/scenes/homeSky.ts), code only.
 
 ## Verified
-- `npx tsc --noEmit`: no errors. `npx vitest run tests/home`: 10 home tests; 340 total. `npm run build`: ok (dist 2245 KB, over the 2048 KB soft budget, under the 2560 KB limit). `npm run secret-scan`: clean.
+- `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
+- `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.
 
 ## Not verified
-- Not seen in a browser: no Playwright browser here, `npm run shots` does not exist yet (Gate 0). No screenshot, so no Gate A claim.
-- Not pushed: no GITHUB_TOKEN in this session.
-- Feel on a phone: only the owner can judge.
+- NO screenshots: this session has no Playwright browser (install fails: download blocked), so `npm run shots` was not run and the committed PNGs are still the old ones. No Gate A claim. Please run `npm run shots` where a browser exists.
+- Sky, dimming, stairs and padlock icon look: never seen rendered. Feel on a phone: only the owner can judge.
+- "Show tappables" button and shimmer are not built yet, so the lock-state-hiding rule there is untested.
 
 ## Requests
-- AI-1: tests/shots/shots.spec.ts still goes Play -> ModeSelect; under `?view=home` Menu now redirects to Home and Play opens a sheet, so the committed home-overview/focus-* PNGs show the OLD room. New path: openGame('&view=home'), tap 'Play' (sheet), tap 'Start', wait scene Home; overview shot = before Play (scene Home, no data).
-- AI-1: `npm run shots` (home-overview, focus-<room>). AI-2: ROOM_SIZE / HOUSE_MAP v2 to replace the adapter in homeWorld.ts. AI-4: shell/<room> and prop/<id> frames.
-
-## Design note for manager
-- With floor 1 raised 72 art px and rooms 8 deep, an upper room covers the back half of the ground room below it (upper wins hit-tests). Needs a layout decision (shallower upper rooms or a set-back).
+- AI-2 (layout): at floor raise 72 art px an upper room's front corner sits at (w+d)*8-64 above its origin, so it ALWAYS covers the ground room below it (living 12x9 under bedroom 12x9 overlaps by about 100 art px). No-overlap would need raise >= (w+d)*8+72. Options: much shallower upper rooms (d <= 3), or stagger the upper floor, or the manager allows the cutaway overlap. Needs a decision.
+- AI-1: save v4 gained `settings.showLockIcons` (types.ts, saveFields.ts); please check the migration test is happy.
+- AI-4: `theme` block in docs/art/palette.json (interim values are in theme.ts).
 
 ## Next
-- Pinch-out/drag; Continue button (needs AI-2 snapshot capture); baked room layer and props; interactive pieces; RoomRun inside Home.
+- Screenshots once a browser exists; baked room layer and `prop/<id>` frames; interactive piece states; Show tappables; exterior kit around the house; pinch/drag.

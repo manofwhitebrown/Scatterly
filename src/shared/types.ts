@@ -123,6 +123,8 @@ export interface ProfileSettings {
   sfx: boolean; music: boolean; vibration: boolean; lowFx: boolean; reducedMotion: boolean;
   quality: Quality; musicVol: number; sfxVol: number; ambienceVol: number; ambience: string;
   matchClock: boolean; walkAnim: boolean; sessionLength: SessionLength;
+  /** Easy mode: draw padlock icons on gated pieces before the first tap (default off). */
+  showLockIcons: boolean;
 }
 /** One beat of the Evening Replay. `icon` is an art manifest key (`icon/<item>` or `icon/<verb>`). */
 export interface ReplayStep {

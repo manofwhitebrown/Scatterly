@@ -1,7 +1,7 @@
 import type { PlayerProfile } from '../shared/types';
 
 export type Settings = PlayerProfile['settings'];
-export type ToggleKey = 'sfx' | 'music' | 'vibration' | 'lowFx' | 'reducedMotion' | 'walkAnim' | 'matchClock';
+export type ToggleKey = 'sfx' | 'music' | 'vibration' | 'lowFx' | 'reducedMotion' | 'walkAnim' | 'matchClock' | 'showLockIcons';
 export type VolumeKey = 'musicVol' | 'sfxVol' | 'ambienceVol';
 
 export const VOLUME_STEPS = [0, 0.25, 0.5, 0.75, 1] as const;
@@ -46,6 +46,7 @@ export const COLUMNS: readonly (readonly Row[])[] = [
     { kind: 'quality', label: 'Quality' },
     { kind: 'length', label: 'Case length' },
     { kind: 'toggle', key: 'matchClock', label: 'Match my clock' },
+    { kind: 'toggle', key: 'showLockIcons', label: 'Show lock icons before tapping' },
   ],
 ];
 

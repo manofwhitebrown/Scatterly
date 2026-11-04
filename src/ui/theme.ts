@@ -7,31 +7,36 @@ import { PIXEL_FONT } from './pixelFont';
 /** Safe margin from every screen edge (px). */
 export const SAFE = 24;
 
+/** Single source of UI colours (manager theme swap: teal panels, sun-orange primary, no brown). */
 export const COLOR = {
-  bg: 0x2a2018,
-  plate: 0x3b2e23,
-  plateLight: 0x56422f,
-  plateEdge: 0x1c130d,
-  cream: 0xf7ecd4,
+  bg: 0x1f3338,
+  plate: 0x2d4a53,
+  plateLight: 0x3f6a72,
+  plateEdge: 0x16252a,
+  cream: 0xfff3dc,
   paper: 0xfbf1d8,
-  paperEdge: 0xd8c291,
-  amber: 0xf2a93b,
-  amberDark: 0xc4781a,
-  red: 0xdb5a4b,
-  redDark: 0x9b3329,
+  paperEdge: 0xcfd9d3,
+  amber: 0xf4a93d,
+  amberDark: 0xd98a20,
+  red: 0xc8604a,
+  redDark: 0x8f3f30,
   green: 0x74c07a,
-  ink: 0x3a2c1f,
-  cork: 0x7b5736,
-  corkDark: 0x5e4129,
+  ink: 0x16252a,
+  cork: 0x3f7f86,
+  corkDark: 0x2a5a62,
+  teal: 0x3f7f86,
+  tealHi: 0x5aa3a5,
+  tealLo: 0x2a5a62,
+  sky: 0xcfe8ee,
 } as const;
 
 export const CSS = {
-  cream: '#f7ecd4',
-  muted: '#cdbc9c',
-  amber: '#f2a93b',
-  red: '#ff7a6b',
+  cream: '#fff3dc',
+  muted: '#cfd9d3',
+  amber: '#f4a93d',
+  red: '#ff9a85',
   green: '#8fd694',
-  ink: '#3a2c1f',
+  ink: '#16252a',
 } as const;
 
 export const FONT = PIXEL_FONT;
