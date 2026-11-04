@@ -18,4 +18,5 @@ Push it after the living room and UI kit v0, before the kitchen and bedroom shel
 - Front faces must follow the FACING rule in the shared brief; record any new models in `fronts.json`.
 
 ## Done
-(nothing yet)
+- Section 0 Theme v2 (b73c862): palette `theme` block, slate/cream UI kit, painted trim/slab/wainscot, lighter wood, ART-BIBLE rule.
+- Exterior kit (d802e23): 27 frames in group `house` (all yard/* and porch/* keys; optional bench/bike/cat not made). Fence pivots = segment start vertex.
