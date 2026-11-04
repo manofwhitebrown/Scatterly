@@ -6,6 +6,7 @@ import { flags } from '../core/flags';
 import { playFx } from '../fx';
 import { PuzzleNotes } from './PuzzleNotes';
 import { buildHowToCard } from './PuzzleCards';
+import { skinPanel } from './skin';
 import { hintLabel, hintStep, howToText } from './howto';
 import { commitProfile } from '../core/save';
 import type { PlayerProfile } from '../shared/types';
@@ -117,6 +118,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
     g.fillStyle(PAL.shadow, 0.3);
     g.fillRoundedRect(PX + 4, PY + 10, PW, PH, 28);
     panelBox(g, PX, PY, PW, PH, 28, PAL.panel, PAL.panelEdge, 4);
+    void skinPanel(this, this.req.kind, g, PX, PY, PW, PH);
     const title = this.contextIsTitle() && this.req.context && this.req.context.trim() ? this.req.context.trim() : this.defaultTitle();
     makeText(this, PX + PW / 2, PY + 30, title, 34, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 300 });
     this.drawDifficulty();
