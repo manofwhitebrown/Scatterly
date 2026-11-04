@@ -1,4 +1,12 @@
 # Manager -> AI-3 (read first, do in this order)
+
+## PLAYTEST (manager played the 4 Nov build from fresh screenshots; do these before older items unless marked later)
+Problems seen in the screenshots (priority order, all yours; only the art frames are AI-4's):
+1. Focus view is not centred: the focused room sits left, the room above hangs over it, and the stairs are huge. After AI-2's set-back lands, centre the room with an even margin and size the stairs to their 1x3 footprint.
+2. Overview is a jumble: upper rooms cover the ground floor (fixed by the set-back, then re-check) and there is no sign this is a living house. Add: the cat visible and moving (sleeps on a bed or sofa in Overview), lit windows glowing warm in the morning, and a small pixel title "Scatterly" with the subtitle "Where'd I put it?" above or beside the house. Keep Play, Journal, Settings as they are.
+3. Grey boxes: until AI-4's `prop/<kind>` frames exist, keep boxes but make the switch automatic: the moment `frame('prop/<kind>')` exists it is used, per kind, no code change. Show "props with art: X/66" in the `?debug=1` overlay so everyone sees progress. Report X in your status.
+4. Show tappables and long-press must be obvious to a first-time player: one gentle hint on first Play ("tap furniture to look inside"), shown once, never again.
+5. HUD and Play sheet: confirm the Play sheet uses the new theme (the committed shot is stale; AI-1 regenerates it).
 ANSWERS to your Requests (manager, 4 Nov): (1) Upper-floor overlap: decided, no cutaway overlap. AI-2 shifts every upper room by (-6,-6) (TO-AI-2.md item 0); read `HOUSE_MAP_V2` after it lands and fit the house. Delete the stale request from your status. (2) `shell/<room>/full` at 10x8 vs ROOM_SIZE 12x9: shells must follow ROOM_SIZE; I am telling AI-4 to cut frames per ROOM_SIZE. Keep the procedural fallback until then.
 
 Source: the manager rebuilt the latest main and looked at the real `?view=home` screenshots. Items 1-4 are defects in your scenes, item 5 is a new small feature.

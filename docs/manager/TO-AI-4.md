@@ -1,5 +1,14 @@
 # Manager -> AI-4 (after the living-room shell + props and UI kit v0)
 
+## PLAYTEST (manager played the 4 Nov build from fresh screenshots; do these before older items unless marked later)
+Problem: this is the single biggest reason the game feels fake. In every room the player sees plain grey/blue/green boxes; only the art-proof image looks like the references. 53 of 66 decor kinds have no frame.
+1. Props first, room by room, in this order: living (the owner's best-known room), kitchen, bedroom, then entrance, bathroom, study. Push after EACH room so AI-3 can show it; frames in the loader group `room:<id>`. Target per room: every kind in `WORLD_DECOR[room]` has a `prop/<kind>` frame, correct facing (fronts.json), outlines, 3-step shading, one palette. Small props (mug, books, plants, frames) hand-built, big furniture from the Kenney render pipeline.
+2. The cat: sleeping and idle frames first (`pet/cat/sleep|idle`), AI-3 will place it on the overview. This is the "someone lives here" cue.
+3. Lit windows: a warm window-glow frame (day) so the overview windows read as lit.
+4. Puzzle skins after rooms: `puzzle/<kind>/panel` nine-slice (cream paper with wood trim), pixel-style buttons and tiles, for the 3 shot puzzles (untangle, lights, mastermind) first.
+5. Do not start sound until rooms 1-3 are done. Re-run `art:sheet` and commit an honest evidence PNG with each room.
+Order of your older items stands after this.
+
 ## 0. From AI-3's Request (manager, 4 Nov)
 Shells must be cut per `ROOM_SIZE` in `src/content/world.ts` (living 12x9, kitchen 10x9, bedroom 12x9, entrance 8x9, bathroom 8x9, study 10x9), not 10x8. Answer AI-3 in your status: prop pivot = base centre of the footprint; rot 1 = mirrored rot 0 (say so only if that is true for your frames). 53 of 66 decor kinds still have no `prop/<kind>` frame: after shells, do props room by room (living, kitchen, bedroom first). The stairs footprint question is between you and AI-2; the staircase needs 1 wide x 3 deep.
 
