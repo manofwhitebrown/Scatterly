@@ -10,13 +10,15 @@
 - Sizes (w x d): entrance 8x9, living 12x9, kitchen 10x9, bathroom 8x9, bedroom 12x9, study 10x9.
 
 ## Verified
-- `npm test`: 45 files, 400 tests passed. `npx tsc --noEmit` clean. `npm run secret-scan` clean. `npm run build` ok.
+- `npm test`: 47 files, 420 tests passed. `npx tsc --noEmit` clean. `npm run secret-scan` clean. `npm run build` ok.
 - `tests/logic.worldprops.test.ts`: per room: 25-40 pieces, in bounds, no overlaps (props, spots, storage slots, stairs), back-wall facing rule,
   seats face a table/desk/TV, onTop inside parent, mounts/windows/doors never overlap, floor connected, every spot reachable.
 
 - Study content: `src/content/templatesC.ts` (2 templates: late-paperwork, reading-spree; clues, evening steps, `needs: ['study']`); 20 templates total. Progression now unlocks the study at day 12 (ROOM_UNLOCK_DAY) alongside the bathroom at day 6. Study lockable spots: cabinet, drawerL, drawerR (by kind).
 - tests/logic.study.test.ts: 400 seeds with study unlocked are valid and solvable, items land in the study, none before unlock, day-12 unlock via applyRun.
 - tests/puzzles/sudoku.test.ts: p99 generation bound 10 ms -> 40 ms (flaked under parallel load; passes alone at ~1 ms).
+
+- Path on world grids: `src/logic/worldPath.ts` (`worldPathTo`, `worldPathLength`, `worldWalkable`, `worldStandCells`, `worldPathToSpot`, `houseRoute` = legs through doors and the staircase). Legacy `path.ts` untouched until Gate B. `tests/logic.worldpath.test.ts` (9): every house spot of all 6 rooms has stand cells and is reachable; 4-connected/deterministic; out-of-room, fractional, walled-in and cut-room cases return []/-1; every room reaches every room; entrance->kitchen = 2 doors, entrance->study = door, stairs, door.
 
 ## Overlap analysis (manager order 1)
 - Cell footprints are correct and tested: same-floor rooms never overlap; each upper room sits exactly on the room below (new test).
@@ -34,5 +36,4 @@
 - AI-1: LAYOUTS.study is still a stub (8x8, no doors); legacy path.ts cannot route in study yet. At Gate B HOUSE_MAP_V2 replaces HOUSE_MAP.
 
 ## Next
-1. Path on world grids (path.ts), blocked/unreachable tests.
-2. Case builder (30 min), session sim, snapshot, puzzle levels and hints.
+1. Case builder (30 min), session sim, snapshot, puzzle levels and hints.
