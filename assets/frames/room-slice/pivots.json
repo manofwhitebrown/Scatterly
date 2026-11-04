@@ -304,5 +304,257 @@
 12,
 13
 ]
+},
+"prop/loungeSofa": {
+"pivot": [
+18,
+10
+]
+},
+"prop/loungeChair": {
+"pivot": [
+18,
+10
+]
+},
+"prop/chairDesk": {
+"pivot": [
+17,
+7
+]
+},
+"prop/chair": {
+"pivot": [
+18,
+8
+]
+},
+"prop/bench": {
+"pivot": [
+18,
+6
+]
+},
+"prop/tableRound": {
+"pivot": [
+26,
+6
+]
+},
+"prop/desk": {
+"pivot": [
+18,
+14
+]
+},
+"prop/sideTable": {
+"pivot": [
+18,
+10
+]
+},
+"prop/sideTableDrawers": {
+"pivot": [
+18,
+10
+]
+},
+"prop/bookcaseClosed": {
+"pivot": [
+18,
+22
+]
+},
+"prop/cabinetTelevision": {
+"pivot": [
+18,
+10
+]
+},
+"prop/speaker": {
+"pivot": [
+18,
+13
+]
+},
+"prop/kitchenCabinet": {
+"pivot": [
+18,
+13
+]
+},
+"prop/kitchenStove": {
+"pivot": [
+18,
+13
+]
+},
+"prop/kitchenFridgeSmall": {
+"pivot": [
+18,
+17
+]
+},
+"prop/kitchenBar": {
+"pivot": [
+18,
+14
+]
+},
+"prop/bathtub": {
+"pivot": [
+18,
+8
+]
+},
+"prop/toilet": {
+"pivot": [
+18,
+7
+]
+},
+"prop/shower": {
+"pivot": [
+18,
+26
+]
+},
+"prop/washer": {
+"pivot": [
+18,
+17
+]
+},
+"prop/dryer": {
+"pivot": [
+18,
+17
+]
+},
+"prop/coatRackStanding": {
+"pivot": [
+11,
+17
+]
+},
+"prop/lampRoundFloor": {
+"pivot": [
+14,
+14
+]
+},
+"prop/pottedPlant": {
+"pivot": [
+12,
+13
+]
+},
+"prop/trashcan": {
+"pivot": [
+13,
+6
+]
+},
+"prop/rugRound": {
+"pivot": [
+25,
+1
+]
+},
+"prop/rugDoormat": {
+"pivot": [
+16,
+5
+]
+},
+"prop/lampRoundTable": {
+"pivot": [
+14,
+2
+]
+},
+"prop/books": {
+"pivot": [
+18,
+5
+]
+},
+"prop/laptop": {
+"pivot": [
+17,
+2
+]
+},
+"prop/computerScreen": {
+"pivot": [
+15,
+1
+]
+},
+"prop/plantSmall1": {
+"pivot": [
+12,
+2
+]
+},
+"prop/plantSmall2": {
+"pivot": [
+12,
+2
+]
+},
+"prop/plantSmall3": {
+"pivot": [
+14,
+2
+]
+},
+"prop/radio": {
+"pivot": [
+18,
+5
+]
+},
+"prop/speakerSmall": {
+"pivot": [
+18,
+6
+]
+},
+"prop/bear": {
+"pivot": [
+18,
+1
+]
+},
+"prop/pillow": {
+"pivot": [
+16,
+2
+]
+},
+"prop/pillowBlue": {
+"pivot": [
+15,
+2
+]
+},
+"prop/toaster": {
+"pivot": [
+18,
+5
+]
+},
+"prop/lampWall": {
+"pivot": [
+18,
+2
+]
+},
+"prop/kitchenCabinetUpper": {
+"pivot": [
+18,
+5
+]
 }
 }

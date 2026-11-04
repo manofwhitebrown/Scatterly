@@ -1,12 +1,418 @@
 {
-  "spot/sofa/closed":      { "model": "loungeSofa",         "foot": [3, 1], "h": 3 },
-  "spot/fridge/closed":    { "model": "kitchenFridge",      "foot": [1, 1], "h": 7 },
-  "spot/bed/closed":       { "model": "bedDouble",          "foot": [3, 2], "h": 2 },
-  "spot/tv/closed":        { "model": "televisionModern",   "foot": [2, 1], "h": 3 },
-  "spot/plant/closed":     { "model": "pottedPlant",        "foot": [1, 1], "h": 4 },
-  "spot/sink/closed":      { "model": "kitchenSink",        "foot": [2, 1], "h": 3 },
-  "prop/tableCoffee":      { "model": "tableCoffee",        "foot": [2, 1], "h": 2 },
-  "prop/lampSquareFloor":  { "model": "lampSquareFloor",    "foot": [1, 1], "h": 5 },
-  "prop/bookcaseOpen":     { "model": "bookcaseOpen",       "foot": [2, 1], "h": 5 },
-  "prop/stoolBar":         { "model": "stoolBar",           "foot": [1, 1], "h": 3 }
+ "spot/sofa/closed": {
+  "model": "loungeSofa",
+  "foot": [
+   3,
+   1
+  ],
+  "h": 3
+ },
+ "spot/fridge/closed": {
+  "model": "kitchenFridge",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 7
+ },
+ "spot/bed/closed": {
+  "model": "bedDouble",
+  "foot": [
+   3,
+   2
+  ],
+  "h": 2
+ },
+ "spot/tv/closed": {
+  "model": "televisionModern",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 3
+ },
+ "spot/plant/closed": {
+  "model": "pottedPlant",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 4
+ },
+ "spot/sink/closed": {
+  "model": "kitchenSink",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 3
+ },
+ "prop/tableCoffee": {
+  "model": "tableCoffee",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 2
+ },
+ "prop/lampSquareFloor": {
+  "model": "lampSquareFloor",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 5
+ },
+ "prop/bookcaseOpen": {
+  "model": "bookcaseOpen",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 5
+ },
+ "prop/stoolBar": {
+  "model": "stoolBar",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "prop/loungeSofa": {
+  "model": "loungeSofa",
+  "foot": [
+   3,
+   1
+  ],
+  "h": 3
+ },
+ "prop/loungeChair": {
+  "model": "loungeChair",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "prop/chairDesk": {
+  "model": "chairDesk",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "prop/chair": {
+  "model": "chair",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "prop/bench": {
+  "model": "bench",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 2
+ },
+ "prop/tableRound": {
+  "model": "tableRound",
+  "foot": [
+   2,
+   2
+  ],
+  "h": 2
+ },
+ "prop/desk": {
+  "model": "desk",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 3
+ },
+ "prop/sideTable": {
+  "model": "sideTable",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 2
+ },
+ "prop/sideTableDrawers": {
+  "model": "sideTableDrawers",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 2
+ },
+ "prop/bookcaseClosed": {
+  "model": "bookcaseClosed",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 5
+ },
+ "prop/cabinetTelevision": {
+  "model": "cabinetTelevision",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 2
+ },
+ "prop/speaker": {
+  "model": "speaker",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "prop/kitchenCabinet": {
+  "model": "kitchenCabinet",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "prop/kitchenStove": {
+  "model": "kitchenStove",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "prop/kitchenFridgeSmall": {
+  "model": "kitchenFridgeSmall",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 4
+ },
+ "prop/kitchenBar": {
+  "model": "kitchenBar",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 3
+ },
+ "prop/bathtub": {
+  "model": "bathtub",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 2
+ },
+ "prop/toilet": {
+  "model": "toilet",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 3
+ },
+ "prop/shower": {
+  "model": "shower",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 6
+ },
+ "prop/washer": {
+  "model": "washer",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 4
+ },
+ "prop/dryer": {
+  "model": "dryer",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 4
+ },
+ "prop/coatRackStanding": {
+  "model": "coatRackStanding",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 5
+ },
+ "prop/lampRoundFloor": {
+  "model": "lampRoundFloor",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 4
+ },
+ "prop/pottedPlant": {
+  "model": "pottedPlant",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 4
+ },
+ "prop/trashcan": {
+  "model": "trashcan",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 2
+ },
+ "prop/rugRound": {
+  "model": "rugRound",
+  "foot": [
+   2,
+   2
+  ],
+  "h": 1
+ },
+ "prop/rugDoormat": {
+  "model": "rugDoormat",
+  "foot": [
+   2,
+   1
+  ],
+  "h": 1
+ },
+ "prop/lampRoundTable": {
+  "model": "lampRoundTable",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/books": {
+  "model": "books",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/laptop": {
+  "model": "laptop",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/computerScreen": {
+  "model": "computerScreen",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/plantSmall1": {
+  "model": "plantSmall1",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/plantSmall2": {
+  "model": "plantSmall2",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/plantSmall3": {
+  "model": "plantSmall3",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/radio": {
+  "model": "radio",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/speakerSmall": {
+  "model": "speakerSmall",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/bear": {
+  "model": "bear",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/pillow": {
+  "model": "pillow",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/pillowBlue": {
+  "model": "pillowBlue",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/toaster": {
+  "model": "toaster",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/lampWall": {
+  "model": "lampWall",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ },
+ "prop/kitchenCabinetUpper": {
+  "model": "kitchenCabinetUpper",
+  "foot": [
+   1,
+   1
+  ],
+  "h": 1
+ }
 }

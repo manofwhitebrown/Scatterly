@@ -25,7 +25,16 @@
   "lampWall",
   "laptop",
   "radio",
-  "bench"
+  "bench",
+  "bookcaseClosed",
+  "chairDesk",
+  "dryer",
+  "kitchenBar",
+  "kitchenCabinetUpper",
+  "kitchenFridgeSmall",
+  "shower",
+  "sideTableDrawers",
+  "speaker"
  ],
  "symmetric_or_front_agnostic": [
   "speakerSmall",
@@ -42,7 +51,13 @@
   "plantSmall2",
   "plantSmall3",
   "lampSquareFloor",
-  "stoolBar"
+  "stoolBar",
+  "toaster",
+  "pillow",
+  "rugDoormat",
+  "rugRound",
+  "trashcan",
+  "tableRound"
  ],
  "pending": []
 }
