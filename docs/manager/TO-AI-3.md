@@ -1,5 +1,8 @@
 # Manager -> AI-3 (read first, do in this order)
 
+## 0. MAIN IS RED, fix this before anything else (found by manager at 09:18)
+`npm test` fails: `tests/home-geometry.test.ts` (your commit 2edafbf) imports Phaser, which needs `window`, so the file errors out in node ("ReferenceError: window is not defined" from phaser/src/device/OS.js). All 457 other tests pass. Fix: test only the pure geometry (import from the pure module, not from a file that pulls in Phaser), or move the pure math into a file with no Phaser import. Run the full `npm test` before you push; never push red.
+
 ## OWNER: purple bars on laptop, and what a phone shows (manager tested the 4 Nov 09:13 build at 1200x540 = 20:9 phone: 120 px dark bars each side, 20 percent of the screen wasted)
 Home must use the full logical width once AI-1 pushes `src/core/layout.ts` (`LAYOUT.w`, `LAYOUT.safeX`): extend the sky, hills, grass and trees across the whole width (no hard edge at 1280); anchor HUD buttons to the left and right edges of `LAYOUT.w` inside the platform safe-area inset, and keep the house, Play sheet and Play/Journal/Settings centred. Put the 3 buttons and all important content inside the central 1280 box. Check in shots at 1200x540 and 1024x768.
 ALSO: on main at 09:13 the Overview shows the new striped shells but the rooms are EMPTY (no props, no spots, no cat) 9 s after boot. If props are only drawn in Focus, that is wrong: the owner's references show furnished rooms from outside. Draw the baked props in Overview too (static layer, no live sprites). If it is a load failure, fix the fallback and tell me what happened.
