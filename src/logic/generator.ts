@@ -135,7 +135,7 @@ function attempt(seed: number, mode: GameMode, w: World, salt: number, enabled: 
   const gateProfile: PlayerProfile = mode === 'daily' ? { ...w.profile, day: 6, puzzles: {} } : w.profile;
   addGatesV3(s, rng, {
     enabled, profile: gateProfile, big, spots: w.spots,
-    ...(spec ? { budget: rng.int(spec.gatesMin, spec.gatesMax), finale: spec.finale, chains: rng.int(spec.chainsMin, spec.chainsMax) } : {}),
+    ...(spec ? { budget: rng.int(spec.gatesMin, spec.gatesMax), finale: spec.finale, chains: rng.int(spec.chainsMin, spec.chainsMax), chainDepth: spec.chainDepth, finaleDepth: spec.finaleDepth } : {}),
   });
   s.parSearches = idealSearchCount(s) + 2;
   // Puzzles take real time: give every gate the player has to open its par time plus slack.

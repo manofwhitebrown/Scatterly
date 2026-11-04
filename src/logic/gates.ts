@@ -38,6 +38,9 @@ export interface GateOptions {
   finale?: boolean;
   /** Case builder: how many gates in total (finale included) become compound. */
   chains?: number;
+  /** Extra stages per compound gate / on the finale (default 1). */
+  chainDepth?: 1 | 2;
+  finaleDepth?: 1 | 2;
 }
 
 /** Kinds that can be a second stage: no payload needed and not the clue-driven code lock. */
@@ -101,6 +104,11 @@ export function gatesFair(s: Scenario): boolean {
   return true;
 }
 
+/** `depth` distinct second-stage kinds, in a random order. */
+function pickStages(rng: Rng, from: readonly PuzzleKind[], depth: number): PuzzleKind[] {
+  return rng.shuffle(from).slice(0, Math.min(depth, from.length));
+}
+
 /** Like codeNeeds, but the facts must come from distinct clues, in two rooms when the case allows (a code you assemble across the house). */
 function finaleNeeds(s: Scenario, spotId: SpotId, d: Difficulty, rng: Rng, roomOf: (id: SpotId) => string | undefined): string[] | null {
   const cost = gateCosts(s);
@@ -134,7 +142,7 @@ function addFinale(s: Scenario, rng: Rng, o: GateOptions): Difficulty | undefine
       const needs = finaleNeeds(s, sp.id, d, rng, (cid) => byId.get(cid)?.room);
       if (!needs) continue;
       const gate: Gate = { kind: 'code', difficulty: d, context: 'A keypad lock. The numbers are on the notes you found.', needs };
-      if (stages.length > 0) gate.chain = [rng.pick(stages)];
+      if (stages.length > 0) gate.chain = pickStages(rng, stages, o.finaleDepth ?? 1);
       s.gates[sp.id] = gate;
       if (gatesFair(s)) return d;
       delete s.gates[sp.id];
@@ -151,7 +159,7 @@ function addChains(s: Scenario, rng: Rng, o: GateOptions, count: number, holders
   cand.sort((a, b) => Number(holders.has(b[0])) - Number(holders.has(a[0])));
   for (const [, g] of cand.slice(0, count)) {
     const options = stages.filter((k) => k !== g.kind);
-    if (options.length > 0) g.chain = [rng.pick(options)];
+    if (options.length > 0) g.chain = pickStages(rng, options, o.chainDepth ?? 1);
   }
 }
 

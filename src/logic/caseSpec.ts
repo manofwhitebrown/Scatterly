@@ -12,6 +12,9 @@ export interface CaseSpec {
   /** Gates that become compound (a second puzzle stage after the first). */
   chainsMin: number;
   chainsMax: number;
+  /** Extra puzzle stages on a compound gate (1-2) and on the finale (1-2). Longer sessions chain deeper. */
+  chainDepth: 1 | 2;
+  finaleDepth: 1 | 2;
   /** The last target sits behind a code lock that needs facts from three clues. */
   finale: boolean;
   /** False for the gentle days, Rush and the Daily: those keep the classic generator. */
@@ -34,7 +37,7 @@ export function caseSpec(day: number, length: SessionLength, mode: GameMode): Ca
   const minutes = caseMinutes(day, length, mode);
   const scaled = mode === 'relaxed' && day >= 3 && minutes >= 15;
   if (!scaled) {
-    return { minutes, targets: 3, gatesMin: 0, gatesMax: 0, chainsMin: 0, chainsMax: 0, finale: false, scaled: false };
+    return { minutes, targets: 3, gatesMin: 0, gatesMax: 0, chainsMin: 0, chainsMax: 0, chainDepth: 1, finaleDepth: 1, finale: false, scaled: false };
   }
   const gatesMax = Math.min(12, Math.round(minutes / 2.5));
   const gatesMin = Math.min(gatesMax, Math.max(4, Math.round(minutes * 0.27)));
@@ -42,5 +45,6 @@ export function caseSpec(day: number, length: SessionLength, mode: GameMode): Ca
   return {
     minutes, targets: minutes >= 30 ? 5 : 4, gatesMin, gatesMax,
     chainsMin: chains[0] as number, chainsMax: chains[1] as number, finale: minutes >= 25, scaled: true,
+    chainDepth: minutes >= 45 ? 2 : 1, finaleDepth: minutes >= 30 ? 2 : 1,
   };
 }
