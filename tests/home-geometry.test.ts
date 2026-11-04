@@ -59,3 +59,15 @@ describe('Morning sky', () => {
     expect(PARALLAX).toBe(0.3);
   });
 });
+
+import { nextShimmer } from '../src/scenes/homeShimmer';
+describe('idle shimmer order', () => {
+  it('cycles through unopened pieces and skips nothing', () => {
+    const ids = ['a', 'b', 'c'] as never[];
+    expect(nextShimmer(ids, null)).toBe('a');
+    expect(nextShimmer(ids, 'a' as never)).toBe('b');
+    expect(nextShimmer(ids, 'c' as never)).toBe('a');
+    expect(nextShimmer([], null)).toBeNull();
+    expect(nextShimmer(['x'] as never[], 'gone' as never)).toBe('x');
+  });
+});

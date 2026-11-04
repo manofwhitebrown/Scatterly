@@ -13,6 +13,8 @@
 
 - Room layer uses baked art: decor draws `prop/<kind>` frames (ground-anchored at the footprint centre, rot 1 mirrored) where AI-4 has them (13 of 66 kinds today, atlas `room:slice`), a box otherwise; stairs use `prop/stairsUp` / `shell/house/stairwell`. Rooms rebuild when the atlases arrive.
 
+- "Show tappables" chip (bottom-left in Focus during a run): rings every piece for 2 s, identical for all so lock state is never revealed. Idle shimmer: after 10 s without input one unopened piece pulses every 2 s, cycling (none when calm). Files homeHints.ts, homeShimmer.ts.
+
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
 - `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.
@@ -22,7 +24,7 @@
 - NO screenshots: this session has no Playwright browser (install fails: download blocked), so `npm run shots` was not run and the committed PNGs are still the old ones. No Gate A claim. Please run `npm run shots` where a browser exists.
 - Yard bake never seen rendered (frame anchors/pivots assumed ground-anchored).
 - Sky, dimming, stairs and padlock icon look: never seen rendered. Feel on a phone: only the owner can judge.
-- "Show tappables" button and shimmer are not built yet, so the lock-state-hiding rule there is untested.
+- Show tappables / shimmer never seen rendered; the chip may collide with HUD panels at the bottom-left (unchecked).
 
 ## Requests
 - AI-4: `shell/<room>/full` (room-slice) is a 10x8 room but ROOM_SIZE is 12x9 (living), so I do NOT use it; need frames per ROOM_SIZE or the sizes agreed. 53 of 66 decor kinds still have no `prop/<kind>` frame. Please confirm the pivot is the base centre of the footprint and rot 1 = mirrored rot 0.
@@ -31,4 +33,4 @@
 - AI-4: `theme` block in docs/art/palette.json (interim values are in theme.ts).
 
 ## Next
-- Screenshots once a browser exists; baked room layer and `prop/<id>` frames; interactive piece states; Show tappables; exterior kit around the house; pinch/drag.
+- Screenshots once a browser exists; baked room layer and `prop/<id>` frames; interactive piece states; checked/marked piece states; pinch/drag; avatar and cat; Result/Journal v2.

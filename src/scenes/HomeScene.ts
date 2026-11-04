@@ -13,6 +13,7 @@ import type { RunView } from './RoomRun';
 import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
 import { ensureGroup } from '../core/assets';
+import { SpotHints } from './homeHints';
 import { HomeSky } from './homeSky';
 import { bakeYard } from './homeYard';
 import { drawStairs, drawStairsArt, stairsTarget } from './homeStairs';
@@ -40,6 +41,7 @@ export class HomeScene extends Phaser.Scene {
   private dimmers = new Map<RoomId, Phaser.GameObjects.Graphics>();
   private rooms!: Phaser.GameObjects.Container;
   private sky: HomeSky | null = null;
+  private hints: SpotHints | null = null;
   private cam!: CameraState;
   private readonly baseCam: CameraState = overviewCamera(GAME_W, GAME_H);
   private focusRoom: RoomId | null = null;
@@ -66,6 +68,7 @@ export class HomeScene extends Phaser.Scene {
     this.shells.clear();
     this.dimmers.clear();
     this.sky = null;
+    this.hints = null;
     this.doors = [];
     this.focusRoom = null;
     this.tween = null;
@@ -125,6 +128,7 @@ export class HomeScene extends Phaser.Scene {
     this.run = run;
     const spots = new HomeSpots(this, this.world, allSpots(run.profile).filter((sp) => run.rooms.includes(sp.room)), run.session, () => this.cam, { gated: (id) => run.scenario.gates[id] !== undefined, early: () => run.profile.settings.showLockIcons });
     this.spots = spots;
+    this.hints = new SpotHints(this, this.world, spots);
     const view: RunView = {
       playAction: (sp) => spots.playAction(sp), refresh: (id) => spots.refresh(id), pulse: (id) => spots.pulse(id),
       center: (id) => spots.center(id), zoomTo: (sp, done) => this.zoomToSpot(sp, done), resetZoom: () => this.resetZoom(),
@@ -161,6 +165,7 @@ export class HomeScene extends Phaser.Scene {
   }
 
   private onDown(p: Phaser.Input.Pointer): void {
+    this.hints?.touch();
     this.longFired = false;
     this.longTimer?.remove();
     const spot = this.run && this.focusRoom ? this.spots?.spotAt({ x: p.x, y: p.y }) : undefined;
@@ -252,6 +257,7 @@ export class HomeScene extends Phaser.Scene {
     const room = this.focusRoom;
     this.back = room ? this.chip(SAFE + BTN / 2 + 24, SAFE + BTN / 2, '< House', () => this.focusOn(null)) : null;
     if (!room) return;
+    if (this.run) this.doors.push(this.chip(SAFE + 130, GAME_H - SAFE - BTN / 2, 'Show tappables', () => this.hints?.outline()));
     const near = LINKS.flatMap(([a, b]) => (a === room ? [b] : b === room ? [a] : [])).filter((r) => !this.run || this.run.rooms.includes(r));
     near.forEach((to, i) => {
       this.doors.push(this.chip(GAME_W - SAFE - 140, SAFE + BTN / 2 + i * (BTN + 12), ROOM_LABEL[to], () => this.focusOn(to)));
@@ -272,6 +278,8 @@ export class HomeScene extends Phaser.Scene {
     this.menu = null;
     this.sky?.destroy();
     this.sky = null;
+    this.hints?.destroy();
+    this.hints = null;
     this.back = null;
     this.doors = [];
     this.shells.clear();

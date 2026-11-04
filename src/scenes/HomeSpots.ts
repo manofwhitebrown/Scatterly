@@ -91,6 +91,16 @@ export class HomeSpots implements RunView {
     }
   }
 
+  /** Pieces of the shown room as art-px centres (for the outline hint). */
+  pieces(): Array<{ id: SpotId; centre: Pt }> {
+    return [...this.nodes.values()].filter((n) => n.spot.room === this.shown).map((n) => ({ id: n.spot.id, centre: n.centre }));
+  }
+
+  /** Unopened pieces of the shown room (shimmer candidates). */
+  unopened(): SpotId[] {
+    return [...this.nodes.values()].filter((n) => n.spot.room === this.shown && !this.session.isOpened(n.spot.id)).map((n) => n.spot.id);
+  }
+
   /** Only the focused room's pieces are visible and tappable. */
   showRoom(room: RoomId | null): void {
     this.shown = room;
