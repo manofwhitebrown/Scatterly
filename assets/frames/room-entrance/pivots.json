@@ -1,0 +1,20 @@
+{
+"shell/entrance/full": {
+"pivot": [
+145,
+65
+]
+},
+"shell/entrance/full_dusk": {
+"pivot": [
+145,
+65
+]
+},
+"shell/entrance/full_night": {
+"pivot": [
+145,
+65
+]
+}
+}

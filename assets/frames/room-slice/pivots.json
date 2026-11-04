@@ -131,60 +131,6 @@
 14
 ]
 },
-"shell/living/full": {
-"pivot": [
-129,
-41
-]
-},
-"shell/kitchen/full": {
-"pivot": [
-129,
-41
-]
-},
-"shell/bedroom/full": {
-"pivot": [
-129,
-41
-]
-},
-"shell/living/full_dusk": {
-"pivot": [
-129,
-41
-]
-},
-"shell/living/full_night": {
-"pivot": [
-129,
-41
-]
-},
-"shell/kitchen/full_dusk": {
-"pivot": [
-129,
-41
-]
-},
-"shell/kitchen/full_night": {
-"pivot": [
-129,
-41
-]
-},
-"shell/bedroom/full_dusk": {
-"pivot": [
-129,
-41
-]
-},
-"shell/bedroom/full_night": {
-"pivot": [
-129,
-41
-]
-},
 "spot/basket/closed": {
 "pivot": [
 8,

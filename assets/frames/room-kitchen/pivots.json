@@ -1,0 +1,20 @@
+{
+"shell/kitchen/full": {
+"pivot": [
+145,
+65
+]
+},
+"shell/kitchen/full_dusk": {
+"pivot": [
+145,
+65
+]
+},
+"shell/kitchen/full_night": {
+"pivot": [
+145,
+65
+]
+}
+}

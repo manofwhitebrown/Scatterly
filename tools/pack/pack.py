@@ -6,6 +6,7 @@ import json, os, re, sys
 from PIL import Image
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 GROUPS = {'core': 'core', 'room-slice': 'room:slice', 'house': 'house'}
+for _r in ('entrance', 'living', 'kitchen', 'bathroom', 'bedroom', 'study'): GROUPS['room-' + _r] = 'room:' + _r   # one shell atlas per room
 MS = {'walk': 100, 'idle': 400, 'sleep': 500, 'react': 150, 'eat': 200, 'reach': 120}
 def pack(d, group):
     src = os.path.join(ROOT, 'assets', 'frames', d); pv = {}

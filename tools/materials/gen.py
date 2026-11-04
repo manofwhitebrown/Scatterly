@@ -127,23 +127,31 @@ def wall_dotted(ramp, dot):
         if (u % 12 == 5 and v % 10 == 3) or (u % 12 == 11 and v % 10 == 8): return R(dot, 3)
         return R(ramp, 3) if (u // 6) % 2 else R(ramp, 2)
     return f
-WAINS = {'living': 'sage', 'kitchen': 'teal', 'bedroom': 'rose', 'bathroom': 'sky'}  # painted wainscot, no dark wood
+WAINS = {'living': 'sage', 'kitchen': 'teal', 'bedroom': 'rose', 'bathroom': 'sky', 'entrance': 'terracotta', 'study': 'slate'}  # painted wainscot, no dark wood
 def room_cfg(room):
     r = PAL['rooms'][room]
     if room == 'kitchen': fl = floor_checker('sage', 'plaster'); wp = wall_tiled('butter', 'plaster')
     elif room == 'bedroom': fl = floor_plank('woodWarm'); wp = wall_dotted('sky', 'rose')
-    elif room == 'bathroom': fl = floor_stone('plaster'); wp = wall_plain('teal')
+    elif room == 'bathroom': fl = floor_stone('plaster'); wp = wall_striped('teal', 'plaster')
+    elif room == 'study': fl = floor_plank('woodDark'); wp = wall_striped('sage', 'plaster')
     else: fl = floor_plank(r['floor'] if r['floor'].startswith('wood') else 'woodWarm'); wp = wall_striped('plaster', r['accent'])
     return {'floor_fn': fl, 'wall_fn': wp, 'wains_fn': wainscot(WAINS.get(room, 'sage')), 'trim_fn': trim_rail('plaster')}
 
-LAYOUT = {  # mirrors src/content/layout.ts (windows [(wall, at, w)], doors [(wall, at)])
-    'living':  (10, 8, [('left', 1, 2), ('right', 5, 2)], [('left', 3), ('left', 6), ('right', 7)]),
-    'kitchen': (9, 8, [('left', 1, 2), ('right', 5, 2)], [('left', 3)]),
-    'bedroom': (9, 8, [('left', 4, 2), ('right', 7, 1)], [('left', 2), ('right', 8)])}
+LAYOUT = {  # mirrors src/content/world.ts ROOM_SIZE (cols=w along gx, rows=d along gy), worldProps windows (L=left wall gx=0, R=right wall gy=0)
+    # and WORLD_DOORS (the door of the right-hand room b sits on its left wall at y=at; the a side is the open cutaway edge)
+    'entrance': (8, 9, [('left', 1, 2)], []),
+    'living':   (12, 9, [('right', 5, 2), ('left', 6, 2)], [('left', 2)]),
+    'kitchen':  (10, 9, [('left', 2, 2), ('right', 2, 2)], [('left', 4)]),
+    'bathroom': (8, 9, [('right', 6, 2), ('left', 2, 2)], []),
+    'bedroom':  (12, 9, [('right', 7, 2), ('left', 6, 2)], [('left', 4)]),
+    'study':    (10, 9, [('right', 4, 2), ('left', 6, 2)], [('left', 4)])}
+WALL_UNITS = 16   # 64 art px, the fixed wall height
 if __name__ == '__main__':
     out = sys.argv[1]; os.makedirs(out, exist_ok=True)
     for room, (c, r, wins, drs) in LAYOUT.items():
+        d = os.path.join(out, 'room-' + room); os.makedirs(d, exist_ok=True); piv = {}
         for tod, suffix in (('day', 'full'), ('dusk', 'full_dusk'), ('night', 'full_night')):
-            im, pv = shell(room, c, r, 10, room_cfg(room), wins, drs, tod)
-            Image.fromarray(im).save(os.path.join(out, f'shell__{room}__{suffix}.png'))
+            im, pv = shell(room, c, r, WALL_UNITS, room_cfg(room), wins, drs, tod)
+            Image.fromarray(im).save(os.path.join(d, f'shell__{room}__{suffix}.png')); piv[f'shell/{room}/{suffix}'] = {'pivot': [int(pv[0]), int(pv[1])]}
+        json.dump(piv, open(os.path.join(d, 'pivots.json'), 'w'), indent=0)
         print(room, im.shape[1], im.shape[0], pv)

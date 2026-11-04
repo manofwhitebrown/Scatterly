@@ -1,0 +1,20 @@
+{
+"shell/bedroom/full": {
+"pivot": [
+145,
+65
+]
+},
+"shell/bedroom/full_dusk": {
+"pivot": [
+145,
+65
+]
+},
+"shell/bedroom/full_night": {
+"pivot": [
+145,
+65
+]
+}
+}
