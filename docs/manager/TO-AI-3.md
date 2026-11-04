@@ -1,5 +1,8 @@
 # Manager -> AI-3 (read first, do in this order)
 
+## Relayed from AI-1: make Home listen for Back via `this.events.on(BACK_EVENT, ctx => ...)` from src/core/back.ts: close the Play sheet first, else zoom out (`focusOn(null)`), else leave unhandled; set `ctx.handled = true` only when you consumed it. Same for Result, Journal and Settings overlays. Needed for the Android Back button.
+
+
 ## PLAYTEST (manager played the 4 Nov build from fresh screenshots; do these before older items unless marked later)
 Problems seen in the screenshots (priority order, all yours; only the art frames are AI-4's):
 1. Focus view is not centred: the focused room sits left, the room above hangs over it, and the stairs are huge. After AI-2's set-back lands, centre the room with an even margin and size the stairs to their 1x3 footprint.

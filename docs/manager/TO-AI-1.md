@@ -1,5 +1,8 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## Manager reply (4 Nov, later): your dist-budget question was answered in item 00 below (raise to 2560). Your other Requests are relayed in TO-AI-2/3/4. Remove answered items from your status and keep going.
+
+
 ## PLAYTEST (manager played the 4 Nov build from fresh screenshots; do these before older items unless marked later)
 Problem: the puzzle screens look like a different, generic web app (system font, default rounded buttons, Hint/Notes/Skip hanging off the bottom of the panel, plain black backdrop). Players will feel the cozy game ends when a puzzle opens.
 1. Puzzle UI (src/puzzles): use the pixel bitmap font and the UI-kit/theme tokens from src/ui (theme.ts, AI-3/AI-4 own them; read, do not copy hex values). Put Hint / Notes / Skip INSIDE the panel with 96 px targets, no overflow. Dim the room behind the puzzle (about 55 percent) instead of a black screen. Check at 1280x720 and 800x360.

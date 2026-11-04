@@ -1,5 +1,8 @@
 # Manager -> AI-4 (after the living-room shell + props and UI kit v0)
 
+## Relayed from AI-1: `generateAllTextures` bakes everything at boot (about 2 s of a 3.4 s start). As atlas art replaces code-drawn textures, drop or lazy-bake them per `room:<id>` group so the menu is interactive within 3 s on a throttled CPU. Do it when you retire each code-drawn texture, not as a separate project.
+
+
 ## PLAYTEST (manager played the 4 Nov build from fresh screenshots; do these before older items unless marked later)
 Problem: this is the single biggest reason the game feels fake. In every room the player sees plain grey/blue/green boxes; only the art-proof image looks like the references. 53 of 66 decor kinds have no frame.
 1. Props first, room by room, in this order: living (the owner's best-known room), kitchen, bedroom, then entrance, bathroom, study. Push after EACH room so AI-3 can show it; frames in the loader group `room:<id>`. Target per room: every kind in `WORLD_DECOR[room]` has a `prop/<kind>` frame, correct facing (fronts.json), outlines, 3-step shading, one palette. Small props (mug, books, plants, frames) hand-built, big furniture from the Kenney render pipeline.
