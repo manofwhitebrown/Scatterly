@@ -8,6 +8,7 @@ import { CSS, isCalm, makeText } from '../ui/theme';
 import { UNIT } from './homeProps';
 import { GAME_H, GAME_W } from '../shared/types';
 import { wasTried } from './caseProgress';
+import { frame } from '../art/manifest';
 
 /** Which pieces carry a padlock icon, and whether the easy-mode setting shows them before the first tap. */
 export interface LockRule { gated(id: SpotId): boolean; early(): boolean }
@@ -20,7 +21,7 @@ const shade = (c: number, k: number): number => {
 };
 const BASE: Partial<Record<string, number>> = { fridge: 0xe8e4da, sofa: 0x7d9b7a, bed: 0xc9a0a8, tv: 0x2f2f38, plant: 0x5e9a5a, rug: 0xb7674b, sink: 0xbfd0d4 };
 
-interface Node { spot: Spot; g: Phaser.GameObjects.Graphics; centre: Pt; badge?: Phaser.GameObjects.Text }
+interface Node { spot: Spot; g: Phaser.GameObjects.Graphics; centre: Pt; img?: Phaser.GameObjects.Image; badge?: Phaser.GameObjects.Text }
 const GLYPH = { ruledOut: '✕', hunch: '?' } as const;
 
 /** Placeholder tappable pieces for the Home world (iso boxes) and the RunView the run controller drives. Hit-testing is by nearest centre. */
@@ -57,16 +58,30 @@ export class HomeSpots implements RunView {
     const c = open ? shade(base, 0.7) : base;
     const P = (x: number, y: number, z: number): Pt => project(slot.wx + gx + x, slot.wy + gy + y, raise + z * UNIT);
     const g = n.g.clear();
+    const art = frame(`spot/${n.spot.kind}/${open ? 'open' : 'closed'}`);
+    n.img?.setVisible(false);
+    if (art) {
+      // Baked piece art replaces the box: ground-anchored at the footprint centre; the padlock still draws on top.
+      const at = project(slot.wx + gx + w / 2, slot.wy + gy + d / 2, raise);
+      if (!n.img) { n.img = this.scene.add.image(0, 0, art.atlas, art.frame); this.world.addAt(n.img, this.world.getIndex(n.g)); }
+      n.img.setTexture(art.atlas, art.frame).setOrigin(art.pivotX / art.w, art.pivotY / art.h).setPosition(at.x, at.y).setVisible(n.spot.room === this.shown);
+      this.lock(g, id, slot, n.spot.iso, raise);
+      return;
+    }
     const face = (col: number, pts: Pt[]): void => { g.fillStyle(col, 1).fillPoints(pts, true); g.lineStyle(1, 0x2a1d14, 0.9).strokePoints(pts, true); };
     face(shade(c, 0.78), [P(0, d, 0), P(w, d, 0), P(w, d, h), P(0, d, h)]);
     face(shade(c, 0.9), [P(w, 0, 0), P(w, d, 0), P(w, d, h), P(w, 0, h)]);
     face(shade(c, 1.12), [P(0, 0, h), P(w, 0, h), P(w, d, h), P(0, d, h)]);
-    if (!open && this.showsLock(id)) {
-      const c = project(slot.wx + gx + w / 2, slot.wy + gy + d / 2, raise + h * UNIT + 10);
-      g.fillStyle(0xf4a93d, 1).fillRect(c.x - 5, c.y - 3, 10, 8).lineStyle(2, 0x16252a, 1).strokeRect(c.x - 5, c.y - 3, 10, 8);
-      g.lineStyle(2, 0xfff3dc, 1).strokeRoundedRect(c.x - 3, c.y - 9, 6, 7, 3);
-    }
+    this.lock(g, id, slot, n.spot.iso, raise);
     if (open) face(0x20150e, [P(0.2 * w, d, 0.3 * h), P(0.8 * w, d, 0.3 * h), P(0.8 * w, d, 0.7 * h), P(0.2 * w, d, 0.7 * h)]);
+  }
+
+  private lock(g: Phaser.GameObjects.Graphics, id: SpotId, slot: { wx: number; wy: number }, iso: Spot['iso'], raise: number): void {
+    if (this.session.isOpened(id) || !this.showsLock(id)) return;
+    const { gx, gy, w, d, h } = iso;
+    const c = project(slot.wx + gx + w / 2, slot.wy + gy + d / 2, raise + h * UNIT + 10);
+    g.fillStyle(0xf4a93d, 1).fillRect(c.x - 5, c.y - 3, 10, 8).lineStyle(2, 0x16252a, 1).strokeRect(c.x - 5, c.y - 3, 10, 8);
+    g.lineStyle(2, 0xfff3dc, 1).strokeRoundedRect(c.x - 3, c.y - 9, 6, 7, 3);
   }
 
   /** A padlock is drawn only once the piece was tapped (or when the easy-mode setting is on). Never reveals which pieces are decoys. */
@@ -104,7 +119,7 @@ export class HomeSpots implements RunView {
   /** Only the focused room's pieces are visible and tappable. */
   showRoom(room: RoomId | null): void {
     this.shown = room;
-    for (const n of this.nodes.values()) n.g.setVisible(n.spot.room === room);
+    for (const n of this.nodes.values()) { n.g.setVisible(n.spot.room === room); n.img?.setVisible(n.spot.room === room); }
     this.syncBadges();
   }
 
@@ -133,14 +148,18 @@ export class HomeSpots implements RunView {
     const n = this.nodes.get(spot.id);
     if (!n || isCalm(this.scene)) return;
     this.scene.tweens.add({ targets: n.g, y: -3, duration: 70, yoyo: true, onComplete: () => n.g.setY(0) });
+    if (n.img) { const y0 = n.img.y; this.scene.tweens.add({ targets: n.img, y: y0 - 3, duration: 70, yoyo: true, onComplete: () => n.img?.setY(y0) }); }
   }
 
   refresh(id: SpotId): void { this.draw(id); }
 
+  /** Redraw every piece (art atlases arrived after the pieces were built). */
+  redrawAll(): void { for (const id of this.nodes.keys()) this.draw(id); }
+
   pulse(id: SpotId): void {
     const n = this.nodes.get(id);
     if (!n || isCalm(this.scene)) return;
-    this.scene.tweens.add({ targets: n.g, alpha: 0.5, duration: 120, yoyo: true, repeat: 1, onComplete: () => n.g.setAlpha(1) });
+    this.scene.tweens.add({ targets: n.img ? [n.g, n.img] : n.g, alpha: 0.5, duration: 120, yoyo: true, repeat: 1, onComplete: () => { n.g.setAlpha(1); n.img?.setAlpha(1); } });
   }
 
   artCentre(id: SpotId): Pt | null { return this.nodes.get(id)?.centre ?? null; }

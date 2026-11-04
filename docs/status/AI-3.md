@@ -25,6 +25,8 @@
 
 - Android Back (AI-1 relay): Home, Journal, Settings and Result listen for `BACK_EVENT`. Home order: Play sheet, open overlay (inspect, clue board, pause), swallow while a card/puzzle is up, Focus to Overview, pause during a run; otherwise unhandled (exit guard). homeBack.ts + tests/home-back.test.ts.
 
+- URGENT orders: pieces use `spot/<kind>/<closed|open>` frames automatically (box fallback, padlock still drawn on top; props under a piece with art are hidden); room shells use `shell/<room>/full` (back-corner pivot) with the procedural shell as fallback; all 6 `room:<id>` groups load. Decor taps bounce + tick + FX, and 3 decor taps with no piece between show the outline once (homeDecor.ts). First-ever morning shows one toast "Tap furniture to look inside" (localStorage, once). `?debug=1` shows `props with art X/N   spots with art Y/M` (homeArtStats.ts).
+
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
 - `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.

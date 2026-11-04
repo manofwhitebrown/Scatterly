@@ -27,3 +27,24 @@ describe('theme tokens mirror docs/art/palette.json theme block', () => {
     expect(COLOR.red).toBe(hex(t.btnDanger)); expect(COLOR.cream).toBe(hex(t.text)); expect(CSS.cream).toBe(t.text); expect(CSS.muted).toBe(t.textDim);
   });
 });
+
+import { HOUSE } from '../src/content/house';
+import { artStats, needsHint } from '../src/scenes/homeArtStats';
+import { coveredBySpot } from '../src/scenes/homeProps';
+describe('art stats and decor hint', () => {
+  it('counts kinds with frames per key family', () => {
+    const none = artStats(() => false);
+    expect(none.propsWith).toBe(0); expect(none.propsTotal).toBeGreaterThan(30); expect(none.spotsTotal).toBeGreaterThan(10);
+    const all = artStats(() => true);
+    expect(all.propsWith).toBe(all.propsTotal); expect(all.spotsWith).toBe(all.spotsTotal);
+  });
+  it('shows the outline hint after 3 decor taps, once', () => {
+    expect(needsHint(2, false)).toBe(false); expect(needsHint(3, false)).toBe(true); expect(needsHint(9, true)).toBe(false);
+  });
+  it('a prop under a piece with art is hidden, with no art it stays', () => {
+    const s = (HOUSE.find((x) => x.room === 'living'))!;
+    const f = { gx: s.iso.gx, gy: s.iso.gy, w: 1, d: 1 };
+    expect(coveredBySpot('living', f, () => true)).toBe(true);
+    expect(coveredBySpot('living', f, () => false)).toBe(false);
+  });
+});

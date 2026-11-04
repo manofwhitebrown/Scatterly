@@ -12,8 +12,13 @@ import { RoomRun } from './RoomRun';
 import type { RunView } from './RoomRun';
 import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
+import { DecorFeel } from './homeDecor';
+import { artStats, artStatsText } from './homeArtStats';
+import { hasFrame } from '../core/assets';
+import { WORLD_ROOMS } from '../content/world';
 import { ensureGroup } from '../core/assets';
 import { PINCH_OUT, clampCamera, dist, panCamera, pinchCamera } from './homeGesture';
+import { frame } from '../art/manifest';
 import { homeBack, listenBack } from './homeBack';
 import { HomeActors } from './homeActors';
 import { SpotHints } from './homeHints';
@@ -21,7 +26,7 @@ import { HomeSky } from './homeSky';
 import { bakeYard } from './homeYard';
 import { drawStairs, drawStairsArt, stairsTarget } from './homeStairs';
 import {
-  HOUSE_WORLD, LINKS, roomAt, roomBounds, roomPolygon, focusCamera, lerpCamera, overviewCamera, screenToArt,
+  FLOOR1_RAISE, HOUSE_WORLD, LINKS, project, roomAt, roomBounds, roomPolygon, focusCamera, lerpCamera, overviewCamera, screenToArt,
 } from './homeWorld';
 import type { CameraState } from './homeWorld';
 
@@ -46,6 +51,8 @@ export class HomeScene extends Phaser.Scene {
   private sky: HomeSky | null = null;
   private hints: SpotHints | null = null;
   private actors: HomeActors | null = null;
+  private decor: DecorFeel | null = null;
+  private debugText: Phaser.GameObjects.Text | null = null;
   private pinch: { d0: number; cam: CameraState } | null = null;
   private panning = false;
   private cam!: CameraState;
@@ -76,6 +83,9 @@ export class HomeScene extends Phaser.Scene {
     this.sky = null;
     this.hints = null;
     this.actors = null;
+    this.decor?.destroy();
+    this.decor = null;
+    this.debugText = null;
     this.doors = [];
     this.focusRoom = null;
     this.tween = null;
@@ -92,7 +102,7 @@ export class HomeScene extends Phaser.Scene {
     this.world = this.add.container(0, 0);
     this.rooms = this.add.container(0, 0);
     this.world.add(this.rooms);
-    void Promise.all([ensureGroup(this, 'room:slice'), ensureGroup(this, 'house')]).then(() => { if (this.sys.isActive() && this.rooms.active) this.rebuildRooms(); });
+    void Promise.all([ensureGroup(this, 'room:slice'), ensureGroup(this, 'house'), ...WORLD_ROOMS.map((r) => ensureGroup(this, `room:${r}`))]).then(() => { if (this.sys.isActive() && this.rooms.active) this.rebuildRooms(); });
     void ensureGroup(this, 'house').then(() => { if (this.sys.isActive() && this.rooms.active) this.world.addAt(bakeYard(this), 0); });
     for (const s of HOUSE_WORLD) {
       const g = this.add.container(0, 0);
@@ -102,6 +112,9 @@ export class HomeScene extends Phaser.Scene {
       this.rooms.add([g, dim]);
       this.shells.set(s.room, g);
       this.dimmers.set(s.room, dim);
+    }
+    if (new URLSearchParams(window.location.search).get('debug') === '1') {
+      this.debugText = makeText(this, 12, 8, artStatsText(artStats(hasFrame)), { fontSize: '20px' }).setOrigin(0, 0).setDepth(DEPTH.toast + 5).setScrollFactor(0);
     }
     this.apply(overviewCamera(GAME_W, GAME_H));
     this.refreshDim();
@@ -116,10 +129,18 @@ export class HomeScene extends Phaser.Scene {
   /** (Re)builds one room's static layer: shell, then decor in painter order (baked `prop/<kind>` art where a frame exists, a box otherwise). */
   private buildRoom(c: Phaser.GameObjects.Container, room: RoomId): void {
     c.removeAll(true);
-    const g = this.add.graphics();
-    drawRoomShell(g, room);
-    c.add(g);
-    drawRoomProps(this, c, room as WorldRoom);
+    const shell = frame(`shell/${room}/full`);
+    const slot = HOUSE_WORLD.find((s) => s.room === room);
+    if (shell && slot) {
+      // Baked shell (walls, floor, windows, door) at ROOM_SIZE; pivot is the back corner of the floor diamond.
+      const at = project(slot.wx, slot.wy, slot.floor * FLOOR1_RAISE);
+      c.add(this.add.image(at.x, at.y, shell.atlas, shell.frame).setOrigin(shell.pivotX / shell.w, shell.pivotY / shell.h));
+    } else {
+      const g = this.add.graphics();
+      drawRoomShell(g, room);
+      c.add(g);
+    }
+    this.decor?.setTargets(room, drawRoomProps(this, c, room as WorldRoom));
     if (drawStairsArt(this, c, room as WorldRoom)) return;
     const st = this.add.graphics();
     drawStairs(st, room as WorldRoom);
@@ -129,6 +150,8 @@ export class HomeScene extends Phaser.Scene {
   /** Called when the room art atlas arrives: swaps placeholder boxes for frames. */
   private rebuildRooms(): void {
     for (const [room, c] of this.shells) this.buildRoom(c, room);
+    this.spots?.redrawAll();
+    this.debugText?.setText(artStatsText(artStats(hasFrame)));
   }
 
   /** A morning inside the house: RoomRun owns the rules, HomeSpots is its view. */
@@ -139,6 +162,8 @@ export class HomeScene extends Phaser.Scene {
     const spots = new HomeSpots(this, this.world, allSpots(run.profile).filter((sp) => run.rooms.includes(sp.room)), run.session, () => this.cam, { gated: (id) => run.scenario.gates[id] !== undefined, early: () => run.profile.settings.showLockIcons });
     this.spots = spots;
     this.hints = new SpotHints(this, this.world, spots);
+    this.decor = new DecorFeel(this, () => this.hints?.outline(), (a) => this.toScreen(a));
+    for (const [r, c] of this.shells) this.buildRoom(c, r);
     this.actors = new HomeActors(this, this.world, () => isCalm(this) || run.mode === 'rush' || !run.profile.settings.walkAnim, 'living', () => isCalm(this));
     const view: RunView = {
       playAction: (sp) => spots.playAction(sp), refresh: (id) => spots.refresh(id), pulse: (id) => spots.pulse(id),
@@ -225,6 +250,7 @@ export class HomeScene extends Phaser.Scene {
       if (!spot && this.actors?.tapCat(p.upX, p.upY, (a) => this.toScreen(a))) return;
       if (spot) {
         const run = this.run;
+        this.decor?.piece();
         markTried(run.session, spot.id); this.spots?.touch(spot.id);
         if (this.actors) this.actors.walkTo(spot, () => run.onSpot(spot)); else run.onSpot(spot);
         return;
@@ -235,6 +261,7 @@ export class HomeScene extends Phaser.Scene {
     if (this.focusRoom) {
       const up = stairsTarget(this.focusRoom, art);
       if (up && (!this.run || this.run.rooms.includes(up))) { this.focusOn(up); return; }
+      if (this.run) this.decor?.tap(this.focusRoom, art);
     }
     if (!this.focusRoom) { if (room) this.focusOn(room); return; }
     if (!room) this.focusOn(null);
@@ -252,6 +279,7 @@ export class HomeScene extends Phaser.Scene {
     this.menu?.setShown(!room);
     this.spots?.showRoom(room);
     this.actors?.setRoom(room);
+    if (room && this.run) this.decor?.firstHint();
     if (room) { this.run?.setCurrent(room); this.run?.feel.roomSwitch(room); }
     this.tweenTo(to);
   }
