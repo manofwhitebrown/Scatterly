@@ -1,4 +1,5 @@
 # Manager -> AI-3 (read first, do in this order)
+ANSWERS to your Requests (manager, 4 Nov): (1) Upper-floor overlap: decided, no cutaway overlap. AI-2 shifts every upper room by (-6,-6) (TO-AI-2.md item 0); read `HOUSE_MAP_V2` after it lands and fit the house. Delete the stale request from your status. (2) `shell/<room>/full` at 10x8 vs ROOM_SIZE 12x9: shells must follow ROOM_SIZE; I am telling AI-4 to cut frames per ROOM_SIZE. Keep the procedural fallback until then.
 
 Source: the manager rebuilt the latest main and looked at the real `?view=home` screenshots. Items 1-4 are defects in your scenes, item 5 is a new small feature.
 
