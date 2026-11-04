@@ -14,19 +14,22 @@ describe('pixel helpers', () => {
 });
 
 describe('flags', () => {
-  it('parses view=home and artdebug without changing the default', () => {
-    expect(parseFlags('').home).toBe(false);
+  it('Home is the default view; ?view=legacy and ?view=iso opt out', () => {
+    expect(parseFlags('').home).toBe(true);
     expect(parseFlags('?view=home').home).toBe(true);
     expect(parseFlags('?view=home').iso).toBe(false);
+    expect(parseFlags('?view=legacy')).toMatchObject({ home: false, legacy: true, iso: false });
+    expect(parseFlags('?view=iso')).toMatchObject({ home: false, legacy: false, iso: true });
     expect(parseFlags('?artdebug=1').artdebug).toBe(true);
   });
 });
 
 describe('boot path', () => {
-  it('?view=home boots Home, everything else keeps the Menu', () => {
+  it('boots Home by default; only ?view=legacy and ?view=iso keep the old Menu', () => {
+    expect(firstScene(parseFlags(''))).toBe('Home');
     expect(firstScene(parseFlags('?view=home'))).toBe('Home');
-    expect(firstScene(parseFlags('?e2e=1&view=home'))).toBe('Home');
-    expect(firstScene(parseFlags(''))).toBe('Menu');
+    expect(firstScene(parseFlags('?e2e=1&debug=1'))).toBe('Home');
+    expect(firstScene(parseFlags('?view=legacy'))).toBe('Menu');
     expect(firstScene(parseFlags('?view=iso'))).toBe('Menu');
   });
 });

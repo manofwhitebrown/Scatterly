@@ -1,7 +1,17 @@
 import { expect, test } from '@playwright/test';
-import { dismissCards, interactives, metrics, openGame, playPerfect, scenes, startMorning, tapMatch, tapWhenReady, waitScene, watchConsole } from './helpers';
+import { dismissCards, interactives, metrics, openGame, openHome, playPerfect, scenes, startMorning, tapMatch, tapWhenReady, waitScene, watchConsole } from './helpers';
 
-test('boots to Menu with no console noise and hit targets are large enough (G6)', async ({ page }) => {
+test('boots to Home by default (plain URL) with no old Menu and no console noise', async ({ page }) => {
+  const soak = watchConsole(page);
+  await openHome(page);
+  await page.waitForTimeout(1500);
+  const active = await scenes(page);
+  expect(active).toContain('Home');
+  expect(active).not.toContain('Menu');
+  expect(soak.errors).toEqual([]);
+});
+
+test('boots to Menu (?view=legacy) with no console noise and hit targets are large enough (G6)', async ({ page }) => {
   const soak = watchConsole(page);
   await openGame(page);
   const small = (await interactives(page)).filter((i) => i.scene === 'Menu' && (i.w < 96 || i.h < 96));

@@ -15,7 +15,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create(): void {
-    if (flags().home && go(this, SCENE.Home)) return; // `?view=home`: the house is the first screen
+    if (flags().home && go(this, SCENE.Home)) return; // the house is the first screen unless `?view=legacy`
     enterFade(this);
     const profile = getProfile(this);
     buildHouseTiles(this, profile.unlockedRooms, 0.5); // the dollhouse, dimmed, behind the menu

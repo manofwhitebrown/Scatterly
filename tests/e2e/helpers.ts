@@ -21,10 +21,19 @@ export function watchConsole(page: Page): Soak {
   return soak;
 }
 
+/** Opens the OLD flow (Menu -> mode select -> Room): the e2e bots still drive it through `?view=legacy` until Gate B. */
 export async function openGame(page: Page, query = ''): Promise<number> {
   const t0 = Date.now();
-  await page.goto(`/?e2e=1${query}`);
+  await page.goto(`/?e2e=1${query.includes('view=') ? '' : '&view=legacy'}${query}`);
   await page.waitForFunction(() => window.__scatterly?.activeScenes().includes('Menu') === true, undefined, { timeout: 60_000 });
+  return Date.now() - t0;
+}
+
+/** Opens the plain URL, the default view: Home must be the active scene. Returns ms until Home is active. */
+export async function openHome(page: Page, query = ''): Promise<number> {
+  const t0 = Date.now();
+  await page.goto(`/?e2e=1${query}`);
+  await page.waitForFunction(() => window.__scatterly?.activeScenes().includes('Home') === true, undefined, { timeout: 60_000 });
   return Date.now() - t0;
 }
 

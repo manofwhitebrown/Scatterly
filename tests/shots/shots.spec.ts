@@ -40,15 +40,15 @@ async function dismissAny(page: Page): Promise<void> {
 
 test.beforeAll(() => mkdirSync(OUT, { recursive: true }));
 
-test('menu (old default view)', async ({ page }) => {
+test('menu (old Menu, ?view=legacy)', async ({ page }) => {
   await openGame(page);
   await page.waitForTimeout(1500);
   await expectScene(page, 'Menu');
   await snap(page, 'menu');
 });
 
-test('home overview and focus rooms (?view=home boots Home directly)', async ({ page }) => {
-  await page.goto('/?e2e=1&view=home');
+test('home overview and focus rooms (the default URL boots Home)', async ({ page }) => {
+  await page.goto('/?e2e=1');
   await waitScene(page, 'Home', 60_000);
   await page.waitForTimeout(2000);
   await expectScene(page, 'Home');

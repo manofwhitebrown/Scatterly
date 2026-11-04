@@ -57,8 +57,9 @@ describe('contract v4', () => {
     expect(tex.isoShell('kitchen')).toBe('iso_shell_kitchen');
     expect(tex.isoProp('lamp')).toBe('iso_prop_lamp');
   });
-  it('?view=iso selects the new view, default is the old one', () => {
+  it('?view=iso selects the iso room view; Home is the default view', () => {
     expect(parseFlags('').iso).toBe(false);
+    expect(parseFlags('').home).toBe(true);
     expect(parseFlags('?view=iso').iso).toBe(true);
     expect(parseFlags('?view=flat').iso).toBe(false);
     expect(parseFlags('?view=iso&debug=1&e2e=1')).toMatchObject({ iso: true, home: false, debug: true, e2e: true });

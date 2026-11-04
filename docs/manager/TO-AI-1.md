@@ -7,4 +7,5 @@
 5. Then continue your brief: puzzle shell skin hook and hint ladder UI, Gate B cleanup when the manager says so, Gate C APK.
 
 ## Done
+- Item 0 (4 Nov, AI-1): Home is the default (`flags.ts`: home true unless `?view=legacy` or `?view=iso`); e2e `openGame` uses `?view=legacy`, new `openHome` + smoke test "boots to Home"; verify exit 0 (3 smoke passed). Shots updated next.
 - Items 1 and 2: verified by the manager on 4 Nov (all shots regenerated from latest main, each PNG shows its named scene). Items 3 and 4 still open (dist 2264 KB over the 2048 budget; pixel-crispness defect).
