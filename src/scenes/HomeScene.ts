@@ -14,6 +14,7 @@ import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
 import { ensureGroup } from '../core/assets';
 import { PINCH_OUT, clampCamera, dist, panCamera, pinchCamera } from './homeGesture';
+import { HomeActors } from './homeActors';
 import { SpotHints } from './homeHints';
 import { HomeSky } from './homeSky';
 import { bakeYard } from './homeYard';
@@ -43,6 +44,7 @@ export class HomeScene extends Phaser.Scene {
   private rooms!: Phaser.GameObjects.Container;
   private sky: HomeSky | null = null;
   private hints: SpotHints | null = null;
+  private actors: HomeActors | null = null;
   private pinch: { d0: number; cam: CameraState } | null = null;
   private panning = false;
   private cam!: CameraState;
@@ -72,6 +74,7 @@ export class HomeScene extends Phaser.Scene {
     this.dimmers.clear();
     this.sky = null;
     this.hints = null;
+    this.actors = null;
     this.doors = [];
     this.focusRoom = null;
     this.tween = null;
@@ -134,6 +137,7 @@ export class HomeScene extends Phaser.Scene {
     const spots = new HomeSpots(this, this.world, allSpots(run.profile).filter((sp) => run.rooms.includes(sp.room)), run.session, () => this.cam, { gated: (id) => run.scenario.gates[id] !== undefined, early: () => run.profile.settings.showLockIcons });
     this.spots = spots;
     this.hints = new SpotHints(this, this.world, spots);
+    this.actors = new HomeActors(this, this.world, () => isCalm(this) || run.mode === 'rush' || !run.profile.settings.walkAnim, 'living');
     const view: RunView = {
       playAction: (sp) => spots.playAction(sp), refresh: (id) => spots.refresh(id), pulse: (id) => spots.pulse(id),
       center: (id) => spots.center(id), zoomTo: (sp, done) => this.zoomToSpot(sp, done), resetZoom: () => this.resetZoom(),
@@ -144,6 +148,7 @@ export class HomeScene extends Phaser.Scene {
     this.refreshDim();
     this.buildChrome();
     spots.showRoom(run.start);
+    this.actors?.setRoom(run.start);
     run.setCurrent(run.start);
     run.begin();
     return true;
@@ -197,6 +202,10 @@ export class HomeScene extends Phaser.Scene {
     this.apply(clampCamera(panCamera(this.cam, p.x - p.prevPosition.x, p.y - p.prevPosition.y)));
   }
 
+  private toScreen(a: { x: number; y: number }): { x: number; y: number } {
+    return { x: (a.x - this.cam.cx) * this.cam.zoom + GAME_W / 2, y: (a.y - this.cam.cy) * this.cam.zoom + GAME_H / 2 };
+  }
+
   private menuOpen(): boolean { return this.menu?.sheetOpen() ?? false; }
 
   private onTap(p: Phaser.Input.Pointer): void {
@@ -210,7 +219,14 @@ export class HomeScene extends Phaser.Scene {
     if (this.run && this.run.modalOpen()) return;
     if (this.run && this.focusRoom) {
       const spot: Spot | undefined = this.spots?.spotAt({ x: p.upX, y: p.upY });
-      if (spot) { markTried(this.run.session, spot.id); this.spots?.touch(spot.id); this.run.onSpot(spot); return; }
+      if (this.actors?.busy) return;
+      if (!spot && this.actors?.tapCat(p.upX, p.upY, (a) => this.toScreen(a))) return;
+      if (spot) {
+        const run = this.run;
+        markTried(run.session, spot.id); this.spots?.touch(spot.id);
+        if (this.actors) this.actors.walkTo(spot, () => run.onSpot(spot)); else run.onSpot(spot);
+        return;
+      }
     }
     const art = screenToArt({ x: p.upX, y: p.upY }, this.cam, GAME_W, GAME_H);
     const room = roomAt(art);
@@ -233,6 +249,7 @@ export class HomeScene extends Phaser.Scene {
     this.buildChrome();
     this.menu?.setShown(!room);
     this.spots?.showRoom(room);
+    this.actors?.setRoom(room);
     if (room) this.run?.setCurrent(room);
     this.tweenTo(to);
   }
@@ -311,6 +328,8 @@ export class HomeScene extends Phaser.Scene {
     this.sky = null;
     this.hints?.destroy();
     this.hints = null;
+    this.actors?.destroy();
+    this.actors = null;
     this.back = null;
     this.doors = [];
     this.shells.clear();

@@ -17,11 +17,14 @@
 
 - Gestures (homeGesture.ts): Overview drag-pan and two-finger pinch zoom (0.85x-2x of fitted, centre clamped to the house); pinch-out in Focus returns to the Overview. A drag never counts as a tap.
 
+- Avatar (homeActors.ts): walks `pathTo` to a cell beside the tapped container, at most 600 ms, instant when calm, Rush, walkAnim off or no frames; the action runs on arrival. Cat (lives in the living room): sleeps, wanders every 8-14 s, reacts to a tap at no cost. Frames from the core atlas (avatar se/sw idle/walk/reach, pet/cat).
+
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
 - `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.
 
 ## Not verified
+- Avatar/cat never seen: walk path uses legacy `LAYOUTS` obstacles (not the world decor), frame pivots assumed identical across an animation, cat sits at a fixed start cell.
 - Gestures never tried on a touch device (multi-touch pointer2 path unverified).
 - Prop frame placement (pivot/flip) is assumed, never seen.
 - NO screenshots: this session has no Playwright browser (install fails: download blocked), so `npm run shots` was not run and the committed PNGs are still the old ones. No Gate A claim. Please run `npm run shots` where a browser exists.
@@ -36,4 +39,4 @@
 - AI-4: `theme` block in docs/art/palette.json (interim values are in theme.ts).
 
 ## Next
-- Screenshots once a browser exists; baked room layer and `prop/<id>` frames; interactive piece states; checked/marked piece states; avatar and cat; Result/Journal v2.
+- Screenshots once a browser exists; baked room layer and `prop/<id>` frames; interactive piece states; checked/marked piece states; Result/Journal v2.

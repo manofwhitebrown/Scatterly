@@ -86,3 +86,18 @@ describe('gestures', () => {
     expect(far.cx).toBeLessThan(houseBounds().x + houseBounds().w + 61);
   });
 });
+
+import { catDelay, entryCell, facingOf, walkMs } from '../src/scenes/homeWalk';
+describe('avatar and cat timing', () => {
+  it('walks at most 600 ms and instantly when calm/Rush/off', () => {
+    expect(walkMs(20, false)).toBe(600); expect(walkMs(3, false)).toBe(220);
+    expect(walkMs(20, true)).toBe(0); expect(walkMs(1, false)).toBe(0);
+  });
+  it('faces the way it moves and keeps facing when still', () => {
+    expect(facingOf(5)).toBe('se'); expect(facingOf(-5)).toBe('sw'); expect(facingOf(0, 'sw')).toBe('sw');
+  });
+  it('enters at front-centre and the cat wanders every 8-14 s', () => {
+    expect(entryCell(12, 9)).toEqual({ x: 6, y: 7 });
+    expect(catDelay(0)).toBe(8000); expect(catDelay(1)).toBe(14000); expect(catDelay(5)).toBe(14000);
+  });
+});
