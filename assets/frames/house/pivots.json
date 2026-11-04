@@ -160,5 +160,17 @@
 16,
 23
 ]
+},
+"prop/stairsUp": {
+"pivot": [
+52,
+76
+]
+},
+"shell/house/stairwell": {
+"pivot": [
+36,
+4
+]
 }
 }
