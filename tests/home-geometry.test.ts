@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { STAIRS } from '../src/content/world';
 import { HOUSE_WORLD, OVERVIEW_INSETS, FOCUS_INSETS, focusCamera, houseBounds, overviewCamera, roomBounds, roomPolygon } from '../src/scenes/homeWorld';
 import type { CameraState, Rect } from '../src/scenes/homeWorld';
-import { stairsPolygon, stairsTarget } from '../src/scenes/homeStairs';
-import { PARALLAX, SKY_BANDS, hillY } from '../src/scenes/homeSky';
+import { stairsPolygon, stairsTarget } from '../src/scenes/homeGeometry';
+import { PARALLAX, SKY_BANDS, hillY } from '../src/scenes/homeGeometry';
 
 const W = 1280; const H = 720;
 const onScreen = (r: Rect, c: CameraState): Rect => ({ x: (r.x - c.cx) * c.zoom + W / 2, y: (r.y - c.cy) * c.zoom + H / 2, w: r.w * c.zoom, h: r.h * c.zoom });
@@ -119,7 +119,7 @@ describe('Rush urgency window', () => {
   });
 });
 
-import { glowKey } from '../src/scenes/homeGlow';
+import { glowKey } from '../src/scenes/homeGeometry';
 describe('window glow keys', () => {
   it('day R/L = 0/1, night R/L = 2/3', () => {
     expect([glowKey('R', false), glowKey('L', false), glowKey('R', true), glowKey('L', true)]).toEqual(['fx/windowGlow/0', 'fx/windowGlow/1', 'fx/windowGlow/2', 'fx/windowGlow/3']);

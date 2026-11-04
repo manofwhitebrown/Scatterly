@@ -1,29 +1,9 @@
 import Phaser from 'phaser';
-import pal from '../../docs/art/palette.json';
 import { GAME_H, GAME_W } from '../shared/types';
-
-const hex = (s: string): number => parseInt(s.slice(1), 16);
-const R = pal.ramps;
-
-/** Sky bands top to bottom (blue to peach at the horizon), all from the 64-colour palette. */
-export const SKY_BANDS: readonly number[] = [R.sky[2], R.sky[3], R.sky[4], R.butter[4], R.rose[4], R.terracotta[4]].map(hex);
-export const SKY_TIMES = { morning: hex(pal.dayNight.morning), noon: hex(pal.dayNight.noon), dusk: hex(pal.dayNight.dusk), night: hex(pal.dayNight.night) } as const;
-export type SkyTime = keyof typeof SKY_TIMES;
-
-export const SKY_W = 1800;
-export const SKY_H = 1000;
-export const PARALLAX = 0.3;
-const HORIZON = 620;
-const B = 6; // one backdrop pixel = 6 game px (2 art px), so it reads as chunky pixel art
-const CLOUDS = 6;
-
-/** Ground-line height of a hill layer at column x (deterministic, smooth, no random). */
-export function hillY(x: number, layer: 0 | 1): number {
-  const a = layer === 0 ? 70 : 46;
-  const f = layer === 0 ? 0.0042 : 0.0071;
-  const ph = layer === 0 ? 1.3 : 4.1;
-  return Math.round((HORIZON + 40 - a - Math.sin(x * f + ph) * a * 0.55 - Math.sin(x * f * 2.3 + ph) * a * 0.22) / B) * B;
-}
+import { B, CLOUDS, HORIZON, PARALLAX, R, SKY_BANDS, SKY_H, SKY_TIMES, SKY_W, hex, hillY } from './homeGeometry';
+export { PARALLAX, SKY_BANDS, SKY_H, SKY_TIMES, SKY_W, hillY };
+import type { SkyTime } from './homeGeometry';
+export type { SkyTime };
 
 function bakeSky(scene: Phaser.Scene): Phaser.GameObjects.RenderTexture {
   const g = scene.make.graphics({ x: 0, y: 0 }, false);

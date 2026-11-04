@@ -2,13 +2,13 @@ import Phaser from 'phaser';
 import { PROP_KINDS, footprint } from '../content/worldKinds';
 import { WORLD_DECOR, doorSpans, worldProps } from '../content/worldProps';
 import type { WorldRoom } from '../content/world';
-import { FLOOR1_RAISE, HOUSE_WORLD, project } from './homeWorld';
+import { FLOOR1_RAISE, HOUSE_WORLD, UNIT, project } from './homeWorld';
 import type { Pt } from './homeWorld';
 import { frame } from '../art/manifest';
 import { HOUSE } from '../content/house';
 import { hasFrame } from '../core/assets';
 
-export const UNIT = 6; // art px per layout height unit
+export { UNIT } from './homeWorld';
 const PALETTE = [0xb08a5c, 0x9c7a52, 0xc2a070, 0x8f6f4c, 0xa9b08a, 0xc99a8a, 0x8aa5b0, 0xd6c08a];
 
 const shade = (c: number, k: number): number => {

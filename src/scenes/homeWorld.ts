@@ -11,6 +11,8 @@ export const TILE_W = 32;
 export const TILE_H = 16;
 export const WALL_PX = 64;
 export const SLAB_PX = 8;
+/** Art px per layout height unit. */
+export const UNIT = 6;
 export const FLOOR1_RAISE = 72;
 export const ART_PX = 3;
 

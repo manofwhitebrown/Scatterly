@@ -2,11 +2,9 @@ import Phaser from 'phaser';
 import { frame } from '../art/manifest';
 import { WORLD_DECOR } from '../content/worldProps';
 import type { WorldRoom } from '../content/world';
-import { FLOOR1_RAISE, HOUSE_WORLD, project } from './homeWorld';
-import { UNIT } from './homeProps';
-
-/** Frame key for a window glow: 0 = day right wall, 1 = day left wall; 2 and 3 are the night versions. */
-export const glowKey = (wall: 'L' | 'R', night: boolean): string => `fx/windowGlow/${(night ? 2 : 0) + (wall === 'R' ? 0 : 1)}`;
+import { FLOOR1_RAISE, HOUSE_WORLD, UNIT, project } from './homeWorld';
+import { glowKey } from './homeGeometry';
+export { glowKey };
 
 /** Warm light on every window of a room (morning by default). Skipped when the glow frames are not loaded. Returns the count added. */
 export function addWindowGlow(scene: Phaser.Scene, c: Phaser.GameObjects.Container, room: WorldRoom, night = false): number {
