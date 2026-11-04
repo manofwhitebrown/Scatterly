@@ -502,5 +502,227 @@
 18,
 5
 ]
+},
+"prop/teacup": {
+"pivot": [
+5,
+7
+]
+},
+"prop/vase": {
+"pivot": [
+4,
+9
+]
+},
+"prop/photoFrame1": {
+"pivot": [
+5,
+8
+]
+},
+"prop/photoFrame2": {
+"pivot": [
+6,
+7
+]
+},
+"prop/bowl": {
+"pivot": [
+6,
+7
+]
+},
+"prop/cuttingBoard": {
+"pivot": [
+6,
+6
+]
+},
+"prop/pan": {
+"pivot": [
+7,
+6
+]
+},
+"prop/banana": {
+"pivot": [
+5,
+6
+]
+},
+"prop/magazine": {
+"pivot": [
+5,
+7
+]
+},
+"prop/desk_lamp": {
+"pivot": [
+5,
+8
+]
+},
+"prop/hat": {
+"pivot": [
+5,
+6
+]
+},
+"prop/keyring": {
+"pivot": [
+4,
+7
+]
+},
+"prop/towelStack": {
+"pivot": [
+5,
+7
+]
+},
+"prop/soap": {
+"pivot": [
+3,
+4
+]
+},
+"prop/toothbrush": {
+"pivot": [
+5,
+5
+]
+},
+"prop/shoesPair": {
+"pivot": [
+5,
+3
+]
+},
+"prop/slippers": {
+"pivot": [
+5,
+3
+]
+},
+"prop/catBed": {
+"pivot": [
+15,
+8
+]
+},
+"prop/bathMat": {
+"pivot": [
+14,
+8
+]
+},
+"prop/robotVacuum": {
+"pivot": [
+9,
+6
+]
+},
+"prop/rugRect": {
+"pivot": [
+42,
+22
+]
+},
+"prop/poster1": {
+"pivot": [
+2,
+10
+]
+},
+"prop/poster1_L": {
+"pivot": [
+11,
+10
+]
+},
+"prop/poster2": {
+"pivot": [
+2,
+9
+]
+},
+"prop/poster2_L": {
+"pivot": [
+11,
+9
+]
+},
+"prop/poster3": {
+"pivot": [
+2,
+10
+]
+},
+"prop/poster3_L": {
+"pivot": [
+11,
+10
+]
+},
+"prop/calendar": {
+"pivot": [
+2,
+11
+]
+},
+"prop/calendar_L": {
+"pivot": [
+9,
+11
+]
+},
+"prop/mirrorWall": {
+"pivot": [
+2,
+11
+]
+},
+"prop/mirrorWall_L": {
+"pivot": [
+9,
+11
+]
+},
+"prop/hangingPlant": {
+"pivot": [
+2,
+11
+]
+},
+"prop/hangingPlant_L": {
+"pivot": [
+11,
+11
+]
+},
+"prop/bunting": {
+"pivot": [
+2,
+6
+]
+},
+"prop/bunting_L": {
+"pivot": [
+37,
+6
+]
+},
+"prop/clockWall": {
+"pivot": [
+2,
+14
+]
+},
+"prop/clockWall_L": {
+"pivot": [
+13,
+14
+]
 }
 }
