@@ -20,7 +20,8 @@
     "verify": "node scripts/secret-scan.mjs && tsc --noEmit && vitest run && npm run build && node scripts/check-assets.mjs && python3 tools/check-frames/check_fronts.py && playwright test -g \"boots to Home|boots to Menu|an uncaught error\"",
     "shots": "npm run build && playwright test -c playwright.shots.config.ts",
     "pack-atlas": "node scripts/pack-atlas.mjs",
-    "check-fronts": "python3 tools/check-frames/check_fronts.py"
+    "check-fronts": "python3 tools/check-frames/check_fronts.py",
+    "art:sheet": "bash tools/artsheet/run.sh"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",

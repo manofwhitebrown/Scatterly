@@ -14,6 +14,7 @@
 - Lit windows (playtest item 3): `fx/windowGlow/0` day R wall, `/1` day L wall, `/2` `/3` night versions; 2-tile window (32x20 art px + 4 px halo), pivot = window's bottom wall point like mount props (pivot already includes the halo margin). `fx/lampGlow/0` round lamp glow (pivot centre). Group `house`. tools/pixelart/light.py.
 - Playtest status: item 1 props (all rooms) done, item 2 cat frames sleep/idle/walk/react/eat existed from earlier, item 3 done; next is item 4 (puzzle skins).
 - Puzzle skins (playtest item 4), 3 kinds: `puzzle/<kind>/panel` nine-slice 32x32, slice 8, cream paper in honey-wood trim, accent line sky/butter/rose (untangle/lights/mastermind); atlases puzzle-untangle|lights|mastermind. I added the 3 kinds to `SKINNED_KINDS` (src/puzzles/skinKinds.ts) in the same push, as that file's own comment and tests/puzzle-skin.test.ts require. Extras shipped but NOT wired yet: lights `tile_on|off`, mastermind `peg_red|yellow|green|blue|pink|teal|empty`, untangle `bead_0-3|bead_hot`. tools/pixelart/puzzles.py.
+- `npm run art:sheet` (tools/artsheet/: export.ts via vite-node + sheet.py): composes all 6 rooms from public/atlas, no browser; evidence docs/art/evidence/art-sheet.png + art-sheet.md (honest weakness list). Result: 0 missing frames; rooms look sparse (18-29 props) and small-scaled next to the references.
 ## Verified
 - check.py core: 74 files, 0 problems; room-slice: 49 files, 0 problems (see commit).
 ## Not verified
@@ -23,12 +24,14 @@
 - Exterior is simple: flat lawn tiles, small door (12x19 art px), awning is a single striped slope, glow is dithered.
 - A few picture frames and the coat rack still use dark honey-brown outlines; kitchen/bedroom shells only recoloured, not redesigned.
 ## Requests
+- AI-2: art-sheet shows bare front halves and only 6-10 wall mounts per room; the references have 25-40 props and curtains/shelves. More, bigger pieces per room would help more than any art tweak.
+- AI-3: Kenney wall mounts (lampWall, kitchenCabinetUpper) have only `prop/<kind>` (3D render, rot 0); for the left wall mirror it (as art-sheet does).
 - AI-1 (src/puzzles): swap code-drawn lights tiles, mastermind pegs and untangle beads for `puzzle/<kind>/tile_*|peg_*|bead_*` frames (sizes 16 / 12 / 12 art px, pivot centre); only `panel` is consumed today. Please confirm the panel skin renders in a browser (never run before).
 - AI-3: draw mounts with `prop/<kind>` (wall R) or `prop/<kind>_L` (wall L) anchored at P(t,0,base) / P(0,t,base); frames are not mirrored by flipX.
 - AI-3: shells are in `room:<id>` groups now (ensureGroup('room:living') etc.); props stay in `room:slice`. Pivot of every shell = floor back corner (145,65). Stairs: staircase prop is 1x3 (climbing -gy); STAIRS footprint 2x3 -> frame is centred on it (AI-3's homeStairs does that).
 - AI-2: stairsUp footprint is 2x1 in layoutProps.ts but the staircase needs 1 wide x 3 deep (or rotate to 3x1 with rot 1 once I add a mirrored frame). Tell me which; I can also re-cut it 2x1 with steeper rise.
 - AI-3: src/ui/theme.ts should read docs/art/palette.json `theme`. AI-1: add check_fronts.py to `npm run verify`.
 ## Next
-- Remaining 8 puzzle kinds' panels, then `art:sheet` + evidence PNG, UI font, day/night overlay.
+- Remaining 8 puzzle kinds' panels, UI font, day/night overlay, contact shadows under props, curtains/shelves for walls.
 - (done) hand-built kinds were: rugRect, bathMat, catBed, shoesPair, slippers, robotVacuum, teacup, vase, photoFrame1/2, bowl, cuttingBoard, pan, banana, magazine, desk_lamp, hat, keyring, towelStack, soap, toothbrush, poster1-3, calendar, clockWall, mirrorWall, hangingPlant, bunting.
 - Room contact sheet tool (art:sheet), kitchen/bedroom props, check-frames fronts check (spot/<kind>/closed|open, padlock overlay).
