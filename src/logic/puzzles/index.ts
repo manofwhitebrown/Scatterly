@@ -15,6 +15,7 @@ import { type BalanceSpec, balancePuzzle } from './balance';
 import { type DialSpec, dialPuzzle } from './dial';
 import { type TangramSpec, tangramPuzzle } from './tangram';
 import type { PuzzleDef } from './types';
+import { withLadder } from './ladder';
 
 /** kind -> { spec, answer } for the generators implemented in the logic layer. */
 export interface PuzzleTypes {
@@ -37,11 +38,22 @@ export interface PuzzleTypes {
 }
 export type LogicPuzzleKind = keyof PuzzleTypes;
 
-export const PUZZLES: { [K in LogicPuzzleKind]: PuzzleDef<PuzzleTypes[K]['spec'], PuzzleTypes[K]['answer']> } = {
+const RAW: { [K in LogicPuzzleKind]: PuzzleDef<PuzzleTypes[K]['spec'], PuzzleTypes[K]['answer']> } = {
   code: codePuzzle, target: targetPuzzle, sequence: sequencePuzzle, lights: lightsPuzzle,
   slide: slidePuzzle, pipes: pipesPuzzle, mastermind: mastermindPuzzle, memory: memoryPuzzle,
   untangle: untanglePuzzle, sort: sortPuzzle, word: wordPuzzle, sudoku: sudokuPuzzle, kenken: kenkenPuzzle, balance: balancePuzzle, dial: dialPuzzle, tangram: tangramPuzzle,
 };
+
+/** Every kind served with the 3-rung hint ladder (see ladder.ts). */
+export const PUZZLES: typeof RAW = {
+  code: withLadder('code', RAW.code), target: withLadder('target', RAW.target), sequence: withLadder('sequence', RAW.sequence),
+  lights: withLadder('lights', RAW.lights), slide: withLadder('slide', RAW.slide), pipes: withLadder('pipes', RAW.pipes),
+  mastermind: withLadder('mastermind', RAW.mastermind), memory: withLadder('memory', RAW.memory), untangle: withLadder('untangle', RAW.untangle),
+  sort: withLadder('sort', RAW.sort), word: withLadder('word', RAW.word), sudoku: withLadder('sudoku', RAW.sudoku),
+  kenken: withLadder('kenken', RAW.kenken), balance: withLadder('balance', RAW.balance), dial: withLadder('dial', RAW.dial), tangram: withLadder('tangram', RAW.tangram),
+};
+export { ahaLine } from './ladder';
+export type { HintStep } from './ladder';
 export { feedback } from './mastermind';
 export { crossings } from './untangle';
 export { codeFeasible } from './codeLock';

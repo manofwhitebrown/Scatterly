@@ -13,8 +13,8 @@ export interface PuzzleDef<S, A> {
   check(spec: S, answer: A): boolean;
   /** Reference solution (used by tests and the e2e bot). */
   solve(spec: S): A;
-  /** progress = number of hints already shown for this puzzle (0 = first hint). */
-  hint(spec: S, progress?: number): string;
+  /** progress = number of hints already shown (0 = first). step: 0 nudge, 1 rule restated, 2 partial reveal; omitted = reveal. */
+  hint(spec: S, progress?: number, step?: 0 | 1 | 2): string;
   parSeconds(difficulty: Difficulty): number;
 }
 

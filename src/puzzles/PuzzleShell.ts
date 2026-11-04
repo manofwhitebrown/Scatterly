@@ -10,6 +10,7 @@ import { skinPanel } from './skin';
 import { BACK_EVENT } from '../core/back';
 import type { BackCtx } from '../core/back';
 import { hintLabel, hintStep, howToText } from './howto';
+import type { HintStep } from './howto';
 import { commitProfile } from '../core/save';
 import type { PlayerProfile } from '../shared/types';
 import { BAR_TOP, BTN_H, NOTES_LEFT, NOTES_W, PH, PW, PX, PY } from './layout';
@@ -80,6 +81,10 @@ export abstract class PuzzleShell extends Phaser.Scene {
     return true;
   }
   /** Scenes return PUZZLES[kind].hint(spec, progress); the base gives a generic nudge. */
+  /** Arguments for PUZZLES[kind].hint: the rung picks the text; reveals advance one item per press after the last rung. */
+  protected hintArgs(): [number, HintStep] {
+    return [Math.max(0, this.hintPresses - 3), this.hintRung];
+  }
   protected hintLine(): string {
     return 'Look for a pattern, then try one small change.';
   }

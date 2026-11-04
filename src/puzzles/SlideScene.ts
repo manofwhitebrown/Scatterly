@@ -52,7 +52,7 @@ export class SlideScene extends PuzzleShell {
   }
 
   protected hintLine(): string {
-    return this.spec ? PUZZLES.slide.hint(this.spec, Math.max(0, this.hints - 1)) : super.hintLine();
+    return this.spec ? PUZZLES.slide.hint(this.spec, ...this.hintArgs()) : super.hintLine();
   }
 
   protected e2eSolve(): void {
