@@ -15,7 +15,7 @@ const MS = { walk: 100, idle: 400, sleep: 500, react: 150, eat: 200, reach: 120 
 /** 'room-slice' -> 'room:slice', 'puzzle-lights' -> 'puzzle:lights', 'core' -> 'core'. */
 export const groupOf = (dir) => dir.replace(/^(room|puzzle)-/, '$1:');
 
-export function packDir(dir) {
+export function packDir(dir, outDir = join(ROOT, 'public', 'atlas')) {
   const src = join(ROOT, 'assets', 'frames', dir);
   const pv = existsSync(join(src, 'pivots.json')) ? JSON.parse(readFileSync(join(src, 'pivots.json'), 'utf8')) : {};
   const items = readdirSync(src)
@@ -52,7 +52,7 @@ export function packDir(dir) {
     }
   }
   const frameTags = Object.keys(tags).sort().map((k) => ({ name: k, from: tags[k].from, to: tags[k].to, ms: MS[k.split('/').pop()] ?? 150 }));
-  const out = join(ROOT, 'public', 'atlas');
+  const out = outDir;
   mkdirSync(out, { recursive: true });
   writeFileSync(join(out, `${dir}.png`), PNG.sync.write(atlas));
   writeFileSync(join(out, `${dir}.json`), JSON.stringify({ meta: { image: `${dir}.png`, group: groupOf(dir), size: { w: WIDTH, h: H }, scale: 1, frameTags }, frames }));

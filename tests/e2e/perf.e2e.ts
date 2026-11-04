@@ -21,6 +21,7 @@ test('G4 leaks: 50x Room restart returns counts to baseline; G2 perf recorded wi
 
   for (let i = 0; i < 50; i++) {
     if (i % 10 === 0) console.log(`restart ${i}/50`);
+    await dismissCards(page); // an intro card can still be fading in and would swallow the pause tap
     await tapWhenReady(page, 'II', 0, 20_000);
     await tapWhenReady(page, 'Restart');
     await waitScene(page, 'Room');
