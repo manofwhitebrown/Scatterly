@@ -12,7 +12,9 @@ import { RoomRun } from './RoomRun';
 import type { RunView } from './RoomRun';
 import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
+import { ensureGroup } from '../core/assets';
 import { HomeSky } from './homeSky';
+import { bakeYard } from './homeYard';
 import { drawStairs, stairsTarget } from './homeStairs';
 import {
   HOUSE_WORLD, LINKS, roomAt, roomBounds, roomPolygon, focusCamera, lerpCamera, overviewCamera, screenToArt,
@@ -79,6 +81,7 @@ export class HomeScene extends Phaser.Scene {
     this.world = this.add.container(0, 0);
     this.rooms = this.add.container(0, 0);
     this.world.add(this.rooms);
+    void ensureGroup(this, 'house').then(() => { if (this.sys.isActive() && this.rooms.active) this.world.addAt(bakeYard(this), 0); });
     for (const s of HOUSE_WORLD) {
       const g = this.add.graphics();
       drawRoomShell(g, s.room);

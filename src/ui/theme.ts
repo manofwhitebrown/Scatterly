@@ -32,7 +32,7 @@ export const COLOR = {
 
 export const CSS = {
   cream: '#fff3dc',
-  muted: '#cfd9d3',
+  muted: '#b3c9c6',
   amber: '#f4a93d',
   red: '#ff9a85',
   green: '#8fd694',

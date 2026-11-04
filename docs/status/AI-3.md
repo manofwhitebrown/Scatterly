@@ -8,7 +8,8 @@
 - TO-AI-3 1: Focus shows only the focused room on top; neighbours dark and behind; room fitted and centred.
 - TO-AI-3 2: house fits above a bottom button band; stairs visible and tappable (src/scenes/homeStairs.ts).
 - TO-AI-3 3: padlock only after first tap (markTried/wasTried in caseProgress.ts); HUD Locks = locks found; Settings toggle `showLockIcons`.
-- TO-AI-3 5: morning sky (src/scenes/homeSky.ts), code only.
+- TO-AI-3 5: morning sky (src/scenes/homeSky.ts), code only; exterior kit baked behind the house from `house` atlas frames (homeYardPlan.ts plan, homeYard.ts bake): lawn, path, porch, fence+gate, trees, bushes, flowers, mailbox; missing frames skipped.
+- Theme mirrored from palette.json `theme` by tests/home-yard.test.ts (dim text now #b3c9c6).
 
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
@@ -16,6 +17,7 @@
 
 ## Not verified
 - NO screenshots: this session has no Playwright browser (install fails: download blocked), so `npm run shots` was not run and the committed PNGs are still the old ones. No Gate A claim. Please run `npm run shots` where a browser exists.
+- Yard bake never seen rendered (frame anchors/pivots assumed ground-anchored).
 - Sky, dimming, stairs and padlock icon look: never seen rendered. Feel on a phone: only the owner can judge.
 - "Show tappables" button and shimmer are not built yet, so the lock-state-hiding rule there is untested.
 
