@@ -4,9 +4,9 @@ import { openGame } from './helpers';
 
 /** An 8x8 two-colour checker drawn at x3 must land as exact 3x3 blocks (no smoothing, no sub-pixel blur). Reads the real composited page pixels. */
 test('pixel crispness: an 8x8 sprite at x3 renders as exact blocks', async ({ page }) => {
-  // OPEN DEFECT (see docs/status/AI-1.md): in software GL the sprite comes out 26x25 px, not 24x24. Run with PIXEL_STRICT=1 to enforce.
-  test.skip(!process.env.PIXEL_STRICT, 'known defect: set PIXEL_STRICT=1 to enforce');
   await openGame(page);
+  // Canvas fallback (no WebGL) resamples differently from a phone GPU: never let this test pass or fail on it silently.
+  expect(await page.evaluate(() => window.__scatterly!.game.renderer.type), 'renderer must be WebGL (Phaser.WEBGL = 2)').toBe(2);
   const box = await page.evaluate(() => {
     const game = window.__scatterly!.game;
     const scene = game.scene.getScenes(true)[0]!;
@@ -19,7 +19,9 @@ test('pixel crispness: an 8x8 sprite at x3 renders as exact blocks', async ({ pa
     return { x: r.left + 300 * (r.width / 1280), y: r.top + 300 * (r.height / 720), scale: r.width / 1280 };
   });
   expect(box.scale, 'canvas must be shown at 1:1 for this check').toBe(1);
-  await page.waitForTimeout(500);
+  // The scene fades in from black at boot: wait until it is finished, otherwise the colours are mid-fade.
+  await page.waitForFunction(() => window.__scatterly!.game.scene.getScenes(true).every((s) => !s.cameras.main.fadeEffect.isRunning), undefined, { timeout: 10_000 });
+  await page.waitForTimeout(200);
   if (process.env.PIXDUMP) {
     const big = PNG.sync.read(await page.screenshot({ clip: { x: box.x - 4, y: box.y - 4, width: 36, height: 36 } }));
     for (let y = 0; y < 36; y++) console.log(Array.from({ length: 36 }, (_, x) => { const i = (y * 36 + x) * 4; return big.data[i] === 255 ? 'R' : big.data[i + 1] === 255 && big.data[i] === 0 ? 'G' : '.'; }).join(''));

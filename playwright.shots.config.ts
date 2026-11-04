@@ -15,7 +15,7 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
     launchOptions: {
       ...(exe ? { executablePath: exe } : {}),
-      args: ['--use-gl=angle', '--use-angle=swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'],
+      args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'],
     },
   },
   webServer: {
