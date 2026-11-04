@@ -1,0 +1,56 @@
+{
+"puzzle/mastermind/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/mastermind/peg_red": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/mastermind/peg_yellow": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/mastermind/peg_green": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/mastermind/peg_blue": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/mastermind/peg_pink": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/mastermind/peg_teal": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/mastermind/peg_empty": {
+"pivot": [
+7,
+7
+]
+}
+}

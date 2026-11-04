@@ -1,0 +1,44 @@
+{
+"puzzle/untangle/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/untangle/bead_0": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/untangle/bead_1": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/untangle/bead_2": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/untangle/bead_3": {
+"pivot": [
+7,
+7
+]
+},
+"puzzle/untangle/bead_hot": {
+"pivot": [
+7,
+7
+]
+}
+}

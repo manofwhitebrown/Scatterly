@@ -37,6 +37,7 @@ Push it after the living room and UI kit v0, before the kitchen and bedroom shel
 - Front faces must follow the FACING rule in the shared brief; record any new models in `fronts.json`.
 
 ## Done
+- PLAYTEST 4 (3 shot puzzles): `puzzle/untangle|lights|mastermind/panel` + tiles/pegs/beads; kinds added to SKINNED_KINDS.
 - PLAYTEST 1-3: all registry kinds have `prop/<kind>` frames (fd30bd1), cat sleep/idle exist, window glow `fx/windowGlow/0-3` + `fx/lampGlow/0` (group house). Mounts have `_L` variants.
 - Shells for all 6 rooms at ROOM_SIZE, groups `room:<id>` (afd2694); stairs + stairwell (810bf70); spot frames (9e1cfb3).
 - Section 0 Theme v2 (b73c862): palette `theme` block, slate/cream UI kit, painted trim/slab/wainscot, lighter wood, ART-BIBLE rule.

@@ -1,0 +1,26 @@
+{
+"puzzle/lights/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/lights/tile_on": {
+"pivot": [
+9,
+9
+]
+},
+"puzzle/lights/tile_off": {
+"pivot": [
+9,
+9
+]
+}
+}
