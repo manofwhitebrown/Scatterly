@@ -100,7 +100,12 @@ export function idealSearchCount(s: Scenario): number {
 
 const MAX_TEXT = 90;
 
-export function validateScenario(s: Scenario, profile?: PlayerProfile): string[] {
+/** Case-builder limits; the classic caps apply when omitted. */
+export interface ValidateOptions { maxGates?: number; maxChained?: number }
+/** Second-stage kinds a compound gate may use (kept in step with CHAIN_STAGES in gates.ts). */
+const CHAIN_OK: readonly string[] = ['sequence', 'lights', 'slide', 'pipes', 'mastermind', 'memory', 'target'];
+
+export function validateScenario(s: Scenario, profile?: PlayerProfile, opts: ValidateOptions = {}): string[] {
   const errs: string[] = [];
   const spots = scenarioSpots(s);
   const get = (id: SpotId): Spot | undefined => anySpot(id);
@@ -168,7 +173,8 @@ export function validateScenario(s: Scenario, profile?: PlayerProfile): string[]
 
   // Gates.
   const gateIds = Object.keys(s.gates);
-  if (gateIds.length > (profile ? Math.max(gateBudget(profile.day), 6) : 6)) errs.push('too many gates');
+  if (gateIds.length > (opts.maxGates ?? (profile ? Math.max(gateBudget(profile.day), 6) : 6))) errs.push('too many gates');
+  if (Object.values(s.gates).filter((g) => g.chain).length > (opts.maxChained ?? 3)) errs.push('too many compound gates');
   let d3 = 0;
   for (const id of gateIds) {
     const sp = get(id);
@@ -177,6 +183,10 @@ export function validateScenario(s: Scenario, profile?: PlayerProfile): string[]
     if (!sp.lockable) errs.push(`gate on non-lockable spot ${id}`);
     if (!(PUZZLE_KINDS as readonly string[]).includes(g.kind)) errs.push(`gate ${id} has unknown kind`);
     if (g.difficulty === 3) d3++;
+    if (g.chain) {
+      if (g.chain.length < 1 || g.chain.length > 2) errs.push(`gate ${id} chain length ${g.chain.length}`);
+      for (const k of g.chain) if (!CHAIN_OK.includes(k) || k === g.kind) errs.push(`gate ${id} bad chain stage ${k}`);
+    }
     if (g.kind !== 'code' && g.needs) errs.push(`gate ${id} has needs but is not a code lock`);
     if (g.kind === 'code') {
       const facts = [];

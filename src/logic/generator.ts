@@ -3,8 +3,10 @@ import { ENABLED } from '../content/puzzleRoster';
 import { TEMPLATES } from '../content/templates';
 import type { SlotDef, Template } from '../content/templates';
 import type {
-  Difficulty, GameMode, ItemId, PlayerProfile, PuzzleKind, RoomId, Scenario, Spot, SpotId,
+  Difficulty, GameMode, ItemId, PlayerProfile, PuzzleKind, RoomId, Scenario, SessionLength, Spot, SpotId,
 } from '../shared/types';
+import { caseSpec } from './caseSpec';
+import type { CaseSpec } from './caseSpec';
 import { buildClues } from './clues';
 import { expand, simulateEvening } from './evening';
 import type { SlotMap } from './evening';
@@ -70,10 +72,11 @@ function pickDifficulty(day: number, rng: Rng): Difficulty {
 
 interface Resolved { slots: SlotMap; habit: Map<ItemId, SpotId> }
 
-function resolveSlots(t: Template, w: World, rng: Rng): Resolved | null {
+function resolveSlots(t: Template, w: World, rng: Rng, spread = false): Resolved | null {
   const slots: SlotMap = {};
   const habit = new Map<ItemId, SpotId>();
   const used = new Set<SpotId>();
+  const usedRooms = new Set<RoomId>([t.start]);
   const owned = new Set(STORAGE_SPOTS.filter((s) => w.profile.owned.some((o) => `${s.room}.${o}` === s.id)).map((s) => s.id));
   for (const [name, def] of Object.entries(t.slots) as Array<[string, SlotDef]>) {
     const need = def.items ?? [];
@@ -93,24 +96,29 @@ function resolveSlots(t: Template, w: World, rng: Rng): Resolved | null {
     if (!chosen) {
       const cands = expandPool(def.pool, w).filter(fits);
       if (cands.length === 0) return null;
-      chosen = rng.pick(cands);
+      // Case builder: spread item slots over rooms the evening has not used yet.
+      const fresh = spread && need.length > 0 ? cands.filter((c) => !usedRooms.has(c.room)) : [];
+      chosen = rng.pick(fresh.length > 0 ? fresh : cands);
     }
     used.add(chosen.id);
+    if (need.length > 0) usedRooms.add(chosen.room);
     slots[name] = chosen.id;
   }
   return { slots, habit };
 }
 
-function attempt(seed: number, mode: GameMode, w: World, salt: number, enabled: readonly PuzzleKind[]): Scenario {
+function attempt(seed: number, mode: GameMode, w: World, salt: number, enabled: readonly PuzzleKind[], spec?: CaseSpec): Scenario {
   const rng = new Rng(deriveSeed(seed, salt * 101 + MODE_SALT[mode]));
-  const difficulty: Difficulty = mode === 'daily' ? 2 : pickDifficulty(w.profile.day, rng);
-  const eligible = TEMPLATES.filter((t) => t.base <= difficulty && w.unlocked.has(t.start)
+  const picked: Difficulty = mode === 'daily' ? 2 : pickDifficulty(w.profile.day, rng);
+  // A scaled case needs a template with at least four targets, which starts at base 2.
+  const difficulty: Difficulty = spec ? (Math.max(picked, 2) as Difficulty) : picked;
+  const eligible = TEMPLATES.filter((t) => t.base <= difficulty && (!spec || t.targets.length >= 4) && w.unlocked.has(t.start)
     && (t.needs ?? []).every((r) => w.unlocked.has(r)));
   const t = rng.weighted(eligible.map((x) => [x, x.base === difficulty ? 3 : x.base === difficulty - 1 ? 2 : 1] as const));
   const more = difficulty === 1 ? 0 : rng.chance(0.5) ? 1 : 0;
-  const count = Math.min(t.targets.length, 2 + (difficulty === 3 ? 1 : 0) + more);
+  const count = Math.min(t.targets.length, spec ? spec.targets : 2 + (difficulty === 3 ? 1 : 0) + more);
   const targets = t.targets.slice(0, count);
-  const resolved = resolveSlots(t, w, rng);
+  const resolved = resolveSlots(t, w, rng, !!spec);
   if (!resolved) throw new Error('slots unresolved');
   const { steps, placement } = simulateEvening(t, resolved.slots, rng);
   const habit = new Map<ItemId, SpotId>();
@@ -122,10 +130,13 @@ function attempt(seed: number, mode: GameMode, w: World, salt: number, enabled: 
     startRoom: t.start, evening: steps, targets, placement, clues, gates: {},
     timeLimitSec: Math.max(60, Math.round((25 * targets.length + 20 * difficulty) / 5) * 5), parSearches: 0,
   };
-  const big = mode !== 'daily' && w.profile.day >= 12 && rng.chance(0.12);
+  const big = !spec && mode !== 'daily' && w.profile.day >= 12 && rng.chance(0.12);
   // The daily must be the same for everyone: gates ignore the player's day and puzzle history.
   const gateProfile: PlayerProfile = mode === 'daily' ? { ...w.profile, day: 6, puzzles: {} } : w.profile;
-  addGatesV3(s, rng, { enabled, profile: gateProfile, big, spots: w.spots });
+  addGatesV3(s, rng, {
+    enabled, profile: gateProfile, big, spots: w.spots,
+    ...(spec ? { budget: rng.int(spec.gatesMin, spec.gatesMax), finale: spec.finale, chains: rng.int(spec.chainsMin, spec.chainsMax) } : {}),
+  });
   s.parSearches = idealSearchCount(s) + 2;
   // Puzzles take real time: give every gate the player has to open its par time plus slack.
   s.timeLimitSec += Math.round((solveScenario(s).seconds * PUZZLE_TIME_SLACK) / 5) * 5;
@@ -194,6 +205,8 @@ export function guidedScenario(seed: number, mode: GameMode, enabled: readonly P
 }
 
 export interface GenerateOptions {
+  /** Case builder: session length (defaults to the profile's setting). */
+  length?: SessionLength;
   /** Override the enabled puzzle kinds (tests, balance sims). Defaults to ENABLED. */
   enabled?: readonly PuzzleKind[];
 }
@@ -215,4 +228,49 @@ export function generateScenario(seed: number, mode: GameMode, profile: PlayerPr
     }
   }
   return fallbackScenario(seed, mode);
+}
+
+/** Rooms the player has to visit: the start room plus every room holding a target or a clue. */
+export function roomsTouched(s: Scenario): number {
+  const rooms = new Set<RoomId>([s.startRoom]);
+  for (const id of [...Object.values(s.placement), ...s.clues.map((c) => c.spotId)]) {
+    const sp = id ? anySpot(id) : undefined;
+    if (sp) rooms.add(sp.room);
+  }
+  return rooms.size;
+}
+
+const MIN_ROOMS = 4;
+
+/** The compound finale: a code lock that needs facts from several clues, then a second puzzle stage. */
+export function hasFinale(s: Scenario): boolean {
+  return Object.values(s.gates).some((g) => g.kind === 'code' && (g.chain?.length ?? 0) > 0 && (g.needs?.length ?? 0) >= 2);
+}
+const caseScore = (s: Scenario, spec: CaseSpec): number =>
+  Math.min(roomsTouched(s), MIN_ROOMS) + (!spec.finale || hasFinale(s) ? MIN_ROOMS : 0);
+
+/**
+ * Case builder: a full-length case (padlocks, decoys, compound gates and a finale) sized by day ramp and session length.
+ * Gentle days, Rush and the Daily keep the classic generator, so this is a drop-in for generateScenario.
+ * Deterministic per (seed, mode, profile, length). Never throws.
+ */
+export function generateCase(seed: number, mode: GameMode, profile: PlayerProfile, opts: GenerateOptions = {}): Scenario {
+  const enabled = opts.enabled ?? ENABLED;
+  const spec = caseSpec(profile.day, opts.length ?? profile.settings.sessionLength, mode);
+  if (!spec.scaled) return generateScenario(seed, mode, profile, opts);
+  const w = makeWorld(profile);
+  let best: Scenario | undefined;
+  for (let salt = 0; salt < MAX_ATTEMPTS; salt++) {
+    try {
+      const s = attempt(seed, mode, w, salt, enabled, spec);
+      const limits = { maxGates: spec.gatesMax, maxChained: spec.chainsMax };
+      if (validateScenario(s, profile, limits).length > 0 || !solveScenario(s).ok) continue;
+      const score = caseScore(s, spec);
+      if (score === MIN_ROOMS * 2) return s;
+      if (!best || score > caseScore(best, spec)) best = s;
+    } catch {
+      // try the next derived seed
+    }
+  }
+  return best ?? generateScenario(seed, mode, profile, opts);
 }

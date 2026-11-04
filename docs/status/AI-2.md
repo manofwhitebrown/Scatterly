@@ -20,6 +20,9 @@
 
 - Path on world grids: `src/logic/worldPath.ts` (`worldPathTo`, `worldPathLength`, `worldWalkable`, `worldStandCells`, `worldPathToSpot`, `houseRoute` = legs through doors and the staircase). Legacy `path.ts` untouched until Gate B. `tests/logic.worldpath.test.ts` (9): every house spot of all 6 rooms has stand cells and is reachable; 4-connected/deterministic; out-of-room, fractional, walled-in and cut-room cases return []/-1; every room reaches every room; entrance->kitchen = 2 doors, entrance->study = door, stairs, door.
 
+- Case builder (order 4): `generateCase(seed, mode, profile, {length?})` in generator.ts, spec in `src/logic/caseSpec.ts` (day ramp 8/15/20/25/30 min, short x0.5, long x1.5, days 1-2 ignore length). Days 1-2, Rush, Daily delegate to `generateScenario` unchanged (tested equal). From day 3: 4-5 targets over >=4 rooms (`roomsTouched`), 8-12 locks at 30 min (4-6 at 15), 2-3 compound gates (`Gate.chain`, payload-free second stage), finale = code lock from distinct clues (d3 triple from day 8, else d2) + a second stage (`hasFinale`). Validator: `ValidateOptions{maxGates,maxChained}` + chain rules; solver adds chain par seconds. tests/logic.case.test.ts (12 tests, ~1 s): 120 seeds day 5 valid+solvable, counts, finale >=97%, determinism.
+- Measured (100 seeds): day5 standard gates 8-12, chains 2-3, finale 80%->retried to >=97%, decoys 62-82% of locks (only ~5-7 lockable spots can hold a target or clue).
+
 ## Overlap analysis (manager order 1)
 - Cell footprints are correct and tested: same-floor rooms never overlap; each upper room sits exactly on the room below (new test).
 - The on-screen overlap is projection, not layout: floor 1 is raised 72 art px = 9 tiles of (gx+gy). An upper tile with global sum U hides the ground tile with sum U-9, so the back half of each 9-deep ground room is covered.
@@ -35,5 +38,8 @@
 - AI-4: every kind in `PROP_KINDS` (worldKinds.ts) appears in ASSET-LIST.md (checked by script). Footprints/heights there are my layout estimates: tell me if a model needs another size.
 - AI-1: LAYOUTS.study is still a stub (8x8, no doors); legacy path.ts cannot route in study yet. At Gate B HOUSE_MAP_V2 replaces HOUSE_MAP.
 
+- AI-1/AI-3 (Gate B): switch Relaxed to `generateCase` (same signature plus `length`; pass nothing, it reads `settings.sessionLength`). Compound gates (`Gate.chain`, 1 extra stage, kinds sequence/lights/slide/pipes/mastermind/memory/target) need the puzzle scene to run the stages in order; until then do not call generateCase from main.
+- Limits found: only `interview-prep` has 5 targets, so no 6-target cases (item ids are 8); decoys are a majority (see Measured).
+
 ## Next
-1. Case builder (30 min), session sim, snapshot, puzzle levels and hints.
+1. Session sim (median 25-35 min from day 5), snapshot round trip, puzzle levels 1-5 + hint ladder.

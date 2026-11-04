@@ -82,7 +82,9 @@ export function solveScenario(s: Scenario): SolveResult {
     opened.add(sp.id);
     searches++;
     const g = s.gates[sp.id];
-    if (g) seconds += g.kind in PUZZLES ? PUZZLES[g.kind as keyof typeof PUZZLES].parSeconds(g.difficulty) : 30;
+    if (g) {
+      for (const k of [g.kind, ...(g.chain ?? [])]) seconds += k in PUZZLES ? PUZZLES[k as keyof typeof PUZZLES].parSeconds(g.difficulty) : 30;
+    }
     for (const c of s.clues) if (c.spotId === sp.id && !discovered.includes(c)) discovered.push(c);
     for (const t of s.targets) if (s.placement[t] === sp.id) found.add(t);
   }

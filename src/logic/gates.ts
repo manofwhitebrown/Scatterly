@@ -32,7 +32,18 @@ export interface GateOptions {
   big: boolean;
   /** Spots in play (unlocked rooms + owned storage). */
   spots: readonly Spot[];
+  /** Case builder: padlock budget (decoys included) instead of the day schedule. */
+  budget?: number;
+  /** Case builder: the last reachable target gets a compound finale gate (code lock from several clues, then a second stage). */
+  finale?: boolean;
+  /** Case builder: how many gates in total (finale included) become compound. */
+  chains?: number;
 }
+
+/** Kinds that can be a second stage: no payload needed and not the clue-driven code lock. */
+export const CHAIN_STAGES: readonly PuzzleKind[] = ['sequence', 'lights', 'slide', 'pipes', 'mastermind', 'memory', 'target'];
+const chainStages = (o: GateOptions): PuzzleKind[] =>
+  CHAIN_STAGES.filter((k) => o.enabled.includes(k) && k in PUZZLES && PUZZLES[k as keyof typeof PUZZLES].unlockDay <= o.profile.day);
 
 function kindWeight(kind: PuzzleKind, profile: PlayerProfile): number {
   const boost = kind === 'code' ? 3 : 1; // the signature mechanic: favour it whenever the clues allow
@@ -90,13 +101,67 @@ export function gatesFair(s: Scenario): boolean {
   return true;
 }
 
+/** Like codeNeeds, but the facts must come from distinct clues, in two rooms when the case allows (a code you assemble across the house). */
+function finaleNeeds(s: Scenario, spotId: SpotId, d: Difficulty, rng: Rng, roomOf: (id: SpotId) => string | undefined): string[] | null {
+  const cost = gateCosts(s);
+  const pool: Array<{ clueId: string; fact: Fact; room: string | undefined }> = [];
+  for (const c of s.clues) {
+    if (c.spotId === spotId || s.gates[c.spotId] || cost.get(c.spotId) !== 0) continue;
+    for (const f of c.facts ?? []) pool.push({ clueId: c.id, fact: f, room: roomOf(c.spotId) });
+  }
+  const want = d === 3 ? 3 : 2;
+  for (let t = 0; t < 30; t++) {
+    const picks = rng.shuffle(pool).slice(0, want);
+    if (picks.length < want || new Set(picks.map((p) => p.fact.key)).size !== want) continue;
+    if (new Set(picks.map((p) => p.clueId)).size !== want) continue;
+    if (t < 20 && new Set(picks.map((p) => p.room)).size < 2) continue; // prefer facts from two rooms
+    if (!codeFeasible(picks.map((p) => p.fact), d)) continue;
+    return picks.map((p) => p.clueId);
+  }
+  return null;
+}
+
+/** Places the compound finale on the last target whose holder is a lockable container (a difficulty-3 code lock when allowed, else difficulty 2). Returns the difficulty used. */
+function addFinale(s: Scenario, rng: Rng, o: GateOptions): Difficulty | undefined {
+  const tiers: Difficulty[] = o.profile.day >= 8 && s.difficulty === 3 ? [3, 2] : [2];
+  const byId = new Map(o.spots.map((sp) => [sp.id, sp] as const));
+  const stages = chainStages(o);
+  for (const d of tiers) {
+    for (const t of [...s.targets].reverse()) {
+      const id = s.placement[t];
+      const sp = id ? byId.get(id) : undefined;
+      if (!sp || !sp.lockable || s.gates[sp.id]) continue;
+      const needs = finaleNeeds(s, sp.id, d, rng, (cid) => byId.get(cid)?.room);
+      if (!needs) continue;
+      const gate: Gate = { kind: 'code', difficulty: d, context: 'A keypad lock. The numbers are on the notes you found.', needs };
+      if (stages.length > 0) gate.chain = [rng.pick(stages)];
+      s.gates[sp.id] = gate;
+      if (gatesFair(s)) return d;
+      delete s.gates[sp.id];
+    }
+  }
+  return undefined;
+}
+
+/** Turns `count` more gates into compound ones (a second stage), path gates first. */
+function addChains(s: Scenario, rng: Rng, o: GateOptions, count: number, holders: ReadonlySet<SpotId>): void {
+  const stages = chainStages(o);
+  if (stages.length === 0 || count <= 0) return;
+  const cand = rng.shuffle(Object.entries(s.gates).filter(([, g]) => g.kind !== 'code' && !g.chain));
+  cand.sort((a, b) => Number(holders.has(b[0])) - Number(holders.has(a[0])));
+  for (const [, g] of cand.slice(0, count)) {
+    const options = stages.filter((k) => k !== g.kind);
+    if (options.length > 0) g.chain = [rng.pick(options)];
+  }
+}
+
 /**
  * v3 gates: lockable containers only, budget by day, about half on the path and half decoys,
  * kind variety, at most one difficulty-3 gate (from day 8), code locks wired to clue facts via `needs`.
  */
 export function addGatesV3(s: Scenario, rng: Rng, o: GateOptions): void {
   const day = o.profile.day;
-  const budget = gateBudget(day, o.big);
+  const budget = o.budget ?? gateBudget(day, o.big);
   const kinds = o.enabled.filter((k) => k in PUZZLES && PUZZLES[k as keyof typeof PUZZLES].unlockDay <= day);
   if (kinds.length === 0) return;
   const holders = new Set<SpotId>();
@@ -113,9 +178,11 @@ export function addGatesV3(s: Scenario, rng: Rng, o: GateOptions): void {
     if (b) order.push(b);
   }
   const used = new Set<PuzzleKind>();
-  let d3Left = day >= 8 && s.difficulty === 3 ? 1 : 0;
+  const finaleDiff = o.finale ? addFinale(s, rng, o) : undefined;
+  let d3Left = day >= 8 && s.difficulty === 3 && finaleDiff !== 3 ? 1 : 0;
   for (const sp of order) {
     if (Object.keys(s.gates).length >= budget) break;
+    if (s.gates[sp.id]) continue; // the finale already sits here
     const gateDiff: Difficulty = d3Left > 0 ? 3 : (Math.min(s.difficulty, 2) as Difficulty);
     let fit = kinds.filter((k) => !FLAVOUR[k] || FLAVOUR[k]?.includes(sp.kind));
     const fresh = fit.filter((k) => !used.has(k));
@@ -135,4 +202,6 @@ export function addGatesV3(s: Scenario, rng: Rng, o: GateOptions): void {
       weighted.splice(weighted.findIndex((w) => w[0] === kind), 1);
     }
   }
+  const finaleChained = Object.values(s.gates).filter((g) => g.kind === 'code' && g.chain).length;
+  addChains(s, rng, o, (o.chains ?? 0) - finaleChained, holders);
 }

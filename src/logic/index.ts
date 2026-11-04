@@ -1,7 +1,11 @@
 export { GameSession } from './session';
 export { nextMark } from './marks';
 export type { SpotMark, MarkMap } from './marks';
-export { generateScenario, dailySeed } from './generator';
+export { generateScenario, generateCase, dailySeed } from './generator';
+export { caseSpec, caseMinutes } from './caseSpec';
+export type { CaseSpec } from './caseSpec';
+export { worldPathTo, worldPathLength, worldStandCells, worldPathToSpot, houseRoute } from './worldPath';
+export type { RouteLeg } from './worldPath';
 export { applyRun, allSpots, listDecor, buyDecor, homeSpotCandidates, setHomeSpot } from './progression';
 export { HOUSE } from '../content/house';
 export { DECOR } from '../content/decor';
