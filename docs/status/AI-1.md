@@ -11,6 +11,8 @@
 - `tests/e2e/boot.e2e.ts`: records Menu-active time at 1x and 4x CPU throttle (regression ceiling only).
 - perf.e2e 50x restart soak fixed (an intro card swallowed the pause tap): now passes.
 
+- CI cost (deliverable 5): ci.yml now runs tsc + check_fronts, PR smoke includes "boots to Home", pixel+boot e2e on main; pages.yml and android.yml skip docs/md/tests/tools-only pushes (shot pushes no longer rebuild the APK). Cancel-in-progress, npm and Playwright caches were already there.
+
 ## Verified
 - `npm run verify` after the flip: exit 0 (secret-scan clean, tsc, vitest all passed, build, check-assets, check_fronts, 3 smoke e2e passed). `npm run shots`: 6 passed; home-overview.png viewed = Home with yard, 3 buttons.
 - `npx tsc --noEmit`: clean. `npm test`: 44 files, 395 tests passed.
@@ -22,6 +24,7 @@
 - Boot, software GL: Menu active 3713 ms at 1x, 8801 ms at 4x (js 449 KB gz). Of the 3446 ms to reach the end of texture baking, generateAllTextures takes 2021 ms (59%).
 
 ## Not verified
+- Workflow YAML parses (python yaml) but the changed workflows have not run on GitHub yet; the first push after this is their test. `npm run verify` timing not measured (the earlier run was well under 6 min wall).
 - The brief's 3 s at 4x on a phone: NOT met in this sandbox (software GL cannot separate GPU from CPU cost). Needs a real device.
 - Committed atlases differ byte-wise from `node scripts/pack-atlas.mjs` output (probably tools/pack/pack.py encoder); not repacked, frames unaffected.
 - Full `npm run verify` timing and the GitHub CI run after this push.
