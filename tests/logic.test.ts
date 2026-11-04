@@ -26,7 +26,7 @@ const day10: PlayerProfile = {
   homeSpots: { keys: 'entrance.keyHook', wallet: 'entrance.walletBowl', shoes: 'entrance.shoeBench' },
 };
 const rich: PlayerProfile = {
-  ...fresh(), day: 20, coins: 999, unlockedRooms: [...LEGACY_ROOMS], owned: DECOR.map((d) => d.id),
+  ...fresh(), day: 20, coins: 999, unlockedRooms: [...LEGACY_ROOMS, 'study'], owned: DECOR.map((d) => d.id),
   homeSpots: { keys: 'entrance.keyHook', wallet: 'entrance.walletBowl', phone: 'bedroom.dock', bag: 'entrance.bagHook', shoes: 'entrance.shoeBench' },
 };
 const MODES: GameMode[] = ['rush', 'relaxed', 'daily'];

@@ -3,6 +3,7 @@ import { HOUSE, MAX_SPOTS_PER_ROOM } from '../content/house';
 import type {
   DecorDef, DecorView, ItemId, PlayerProfile, PuzzleStat, RunResult, Spot, SpotId,
 } from '../shared/types';
+import { ROOM_UNLOCK_DAY } from '../shared/types';
 import { earnedAchievements } from './achievements';
 
 /** HOUSE plus every owned storage decor (which becomes a real spot). */
@@ -79,9 +80,10 @@ export function applyRun(profile: PlayerProfile, r: RunResult, today: string = l
     lastDailyDate = today;
   }
   const prev = profile.bestStars[r.scenarioId] ?? 0;
-  const unlockedRooms = day >= 6 && !profile.unlockedRooms.includes('bathroom')
-    ? [...profile.unlockedRooms, 'bathroom' as const]
-    : profile.unlockedRooms.slice();
+  const unlockedRooms = profile.unlockedRooms.slice();
+  for (const room of ['bathroom', 'study'] as const) {
+    if (day >= ROOM_UNLOCK_DAY[room] && !unlockedRooms.includes(room)) unlockedRooms.push(room);
+  }
   // Per-kind mastery from the puzzle log. A skipped puzzle never counts as solved.
   const puzzles: Record<string, PuzzleStat> = {};
   for (const [k, v] of Object.entries(profile.puzzles)) puzzles[k] = { ...v };
