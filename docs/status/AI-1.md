@@ -1,6 +1,7 @@
 # AI-1 status: Platform, Assets, Integrator (Phase 5)
 
 ## Done
+- TO-AI-1 #0: Home is the DEFAULT view (plain URL). `?view=legacy` / `?view=iso` keep the old screens until Gate B. flags.ts, runScene, MenuScene comment, tests/pixel+contract, e2e helpers (`openGame` = legacy, new `openHome`), smoke test "boots to Home", shots (menu = legacy; home-overview = plain URL). Pages and APK now show the house.
 - Gate 0: `npm run shots` (playwright.shots.config.ts + tests/shots/shots.spec.ts); each capture asserts its scene first (Home via ?view=home).
 - TO-AI-1 #1: shots regenerated on real WebGL; home-overview shows the Home scene (stub boxes, 3 buttons).
 - TO-AI-1 #2: `check_fronts.py` is in `npm run verify` (already in package.json).
@@ -11,6 +12,7 @@
 - perf.e2e 50x restart soak fixed (an intro card swallowed the pause tap): now passes.
 
 ## Verified
+- `npm run verify` after the flip: exit 0 (secret-scan clean, tsc, vitest all passed, build, check-assets, check_fronts, 3 smoke e2e passed). `npm run shots`: 6 passed; home-overview.png viewed = Home with yard, 3 buttons.
 - `npx tsc --noEmit`: clean. `npm test`: 44 files, 395 tests passed.
 - `npx playwright test tests/e2e/pixel.e2e.ts`: 1 passed (8x8 sprite at x3 = exact 3x3 blocks, WebGL).
 - `npm run shots`: 6 passed, 22 PNGs rewritten in docs/shots.
