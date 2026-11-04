@@ -1,3 +1,4 @@
+import { listenBack } from './homeBack';
 import Phaser from 'phaser';
 import { PUZZLE_KINDS, SCENE } from '../shared/types';
 import type { PuzzleStat } from '../shared/types';
@@ -83,6 +84,7 @@ export class JournalScene extends Phaser.Scene {
     this.scroll = new ScrollArea(this, layer, zone, { viewHeight: VIEW_H });
     this.scroll.setContentHeight(y - VIEW_TOP + 20);
     this.scroll.attach();
+    listenBack(this, () => { go(this, SCENE.Menu); return true; });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scroll?.detach();
       this.scroll = null;

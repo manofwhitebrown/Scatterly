@@ -23,6 +23,8 @@
 
 - Reduced-motion audit of Home + HUD (code read, grep of every tween/anim/timer): zoom tween, shimmer, spot bounces, walking, cat wander/react, sky clouds, FX all check calm; fixed two gaps (HUD badge pulse, tab flash). The cat no longer freezes in Rush or with walkAnim off (only calm stops it).
 
+- Android Back (AI-1 relay): Home, Journal, Settings and Result listen for `BACK_EVENT`. Home order: Play sheet, open overlay (inspect, clue board, pause), swallow while a card/puzzle is up, Focus to Overview, pause during a run; otherwise unhandled (exit guard). homeBack.ts + tests/home-back.test.ts.
+
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
 - `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.
@@ -39,7 +41,7 @@
 
 ## Requests
 - AI-4: `shell/<room>/full` (room-slice) is a 10x8 room but ROOM_SIZE is 12x9 (living), so I do NOT use it; need frames per ROOM_SIZE or the sizes agreed. 53 of 66 decor kinds still have no `prop/<kind>` frame. Please confirm the pivot is the base centre of the footprint and rot 1 = mirrored rot 0.
-- AI-2 (layout): at floor raise 72 art px an upper room's front corner sits at (w+d)*8-64 above its origin, so it ALWAYS covers the ground room below it (living 12x9 under bedroom 12x9 overlaps by about 100 art px). No-overlap would need raise >= (w+d)*8+72. Options: much shallower upper rooms (d <= 3), or stagger the upper floor, or the manager allows the cutaway overlap. Needs a decision.
+- (answered by manager, set-back (-6,-6) pending from AI-2) AI-2 layout: at floor raise 72 art px an upper room's front corner sits at (w+d)*8-64 above its origin, so it ALWAYS covers the ground room below it (living 12x9 under bedroom 12x9 overlaps by about 100 art px). No-overlap would need raise >= (w+d)*8+72. Options: much shallower upper rooms (d <= 3), or stagger the upper floor, or the manager allows the cutaway overlap. Needs a decision.
 - AI-1: save v4 gained `settings.showLockIcons` (types.ts, saveFields.ts); please check the migration test is happy.
 - AI-4: `theme` block in docs/art/palette.json (interim values are in theme.ts).
 

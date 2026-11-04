@@ -1,3 +1,4 @@
+import { listenBack } from './homeBack';
 import Phaser from 'phaser';
 import { sfx } from '../audio/sfx';
 import { commitProfile, defaultProfile } from '../core/save';
@@ -53,6 +54,7 @@ export class SettingsScene extends Phaser.Scene {
     });
     this.resetBtn = new Button(this, 640, 636, 420, 'Reset progress', () => this.onReset(), { variant: 'danger' });
     new Button(this, 24 + 80, 664, 160, 'Back', () => go(this, SCENE.Menu));
+    listenBack(this, () => { go(this, SCENE.Menu); return true; });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.resetTimer?.remove(false);
       this.tweens.killAll();

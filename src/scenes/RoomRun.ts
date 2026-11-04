@@ -63,10 +63,10 @@ export class RoomRun {
   private clock!: RoomClock;
   private toast!: Toast;
   private dim!: Dim;
-  private inspect!: InspectPanel;
-  private board!: ClueBoard;
+  inspect!: InspectPanel;
+  board!: ClueBoard;
   private card!: ModalCard;
-  private flow!: RoomFlow;
+  flow!: RoomFlow;
   private gate!: RoomGate;
   private spotRoom = new Map<SpotId, RoomId>();
   private fly!: RoomFlyouts;

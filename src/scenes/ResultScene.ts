@@ -1,3 +1,4 @@
+import { listenBack } from './homeBack';
 import Phaser from 'phaser';
 import { sfx } from '../audio/sfx';
 import { GAME_H, GAME_W, SCENE, tex } from '../shared/types';
@@ -75,6 +76,7 @@ export class ResultScene extends Phaser.Scene {
     this.scroll.attach();
     // Tap anywhere to jump to the end of the story (the buttons still work: they navigate away anyway).
     if (!calm) this.input.once('pointerdown', () => this.showAll());
+    listenBack(this, () => { go(this, SCENE.Menu); return true; });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scroll?.detach();
       this.scroll = null;

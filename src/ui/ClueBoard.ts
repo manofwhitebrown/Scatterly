@@ -139,7 +139,7 @@ export class ClueBoard {
     this.root.destroy(true);
   }
 
-  private close(): void {
+  close(): void {
     if (!this.root.visible) return;
     this.hide();
     sfx.play('close');

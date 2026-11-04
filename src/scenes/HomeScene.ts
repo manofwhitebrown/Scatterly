@@ -14,6 +14,7 @@ import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
 import { ensureGroup } from '../core/assets';
 import { PINCH_OUT, clampCamera, dist, panCamera, pinchCamera } from './homeGesture';
+import { homeBack, listenBack } from './homeBack';
 import { HomeActors } from './homeActors';
 import { SpotHints } from './homeHints';
 import { HomeSky } from './homeSky';
@@ -85,6 +86,7 @@ export class HomeScene extends Phaser.Scene {
 
   create(): void {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this);
+    listenBack(this, () => homeBack({ sheetOpen: this.menuOpen(), focused: !!this.focusRoom, run: this.run ?? null }, { closeSheet: () => this.menu?.closeSheet(), zoomOut: () => this.focusOn(null) }));
     this.cameras.main.setBackgroundColor(COLOR.sky);
     this.sky = new HomeSky(this, isCalm(this));
     this.world = this.add.container(0, 0);
