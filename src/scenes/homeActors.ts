@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { frame } from '../art/manifest';
+import { HOUSE } from '../content/house';
 import { pathTo, standCells } from '../logic/path';
 import type { Cell } from '../logic/path';
 import type { RoomId, Spot } from '../shared/types';
@@ -10,6 +11,12 @@ import { catDelay, entryCell, facingOf, walkMs } from './homeWalk';
 
 type Dir = 'se' | 'sw';
 const CAT_HIT = 56; // game px
+
+/** The cat starts asleep on the sofa (living room) or at a fixed cell elsewhere. */
+function sofaCell(room: RoomId): Cell {
+  const s = HOUSE.find((x) => x.room === room && x.kind === 'sofa');
+  return s ? { x: s.iso.gx, y: s.iso.gy } : { x: 2, y: 2 };
+}
 
 /** Frame list `prefix/0..n` from the manifest (stops at the first missing frame). */
 function frames(prefix: string): Array<{ key: string; frame: string }> {
@@ -45,7 +52,9 @@ export class HomeActors {
   private walking = false;
   private catTimer: Phaser.Time.TimerEvent | null = null;
 
-  constructor(private readonly scene: Phaser.Scene, private readonly world: Phaser.GameObjects.Container, private readonly instant: () => boolean, private readonly catRoom: RoomId, private readonly calm: () => boolean = instant) {}
+  constructor(private readonly scene: Phaser.Scene, private readonly world: Phaser.GameObjects.Container, private readonly instant: () => boolean, private readonly catRoom: RoomId, private readonly calm: () => boolean = instant) {
+    this.catCell = sofaCell(catRoom);
+  }
 
   private make(prefix: string, idleAnim: string): Phaser.GameObjects.Sprite | null {
     const f = frame(`${prefix}/0`);
@@ -60,6 +69,7 @@ export class HomeActors {
     this.avatar?.destroy(); this.cat?.destroy(); this.catTimer?.remove(false);
     this.avatar = null; this.cat = null; this.catTimer = null; this.walking = false;
     this.room = room;
+    if (!room || room === this.catRoom) this.spawnCat(); // the cat is on screen in the Overview and in its own room
     if (!room) return;
     const size = ROOM_SIZE[room as WorldRoom];
     this.cell = entryCell(size.w, size.d);
@@ -68,23 +78,23 @@ export class HomeActors {
     anim(this.scene, 'av-se-reach', 'avatar/se/reach', 10, 0); anim(this.scene, 'av-sw-reach', 'avatar/sw/reach', 10, 0);
     this.avatar = this.make('avatar/se/idle', 'av-se-idle');
     this.avatar?.setPosition(...this.xy(this.cell));
-    if (room === this.catRoom) this.spawnCat();
   }
 
-  private xy(c: Cell): [number, number] { const p = cellPt(this.room as RoomId, c); return [p.x, p.y]; }
+  private xy(c: Cell): [number, number] { const p = cellPt(this.room ?? this.catRoom, c); return [p.x, p.y]; }
+  private catXY(): [number, number] { const p = cellPt(this.catRoom, this.catCell); return [p.x, p.y]; }
 
   private spawnCat(): void {
     anim(this.scene, 'cat-sleep', 'pet/cat/sleep', 2, -1); anim(this.scene, 'cat-walk', 'pet/cat/walk', 10, -1);
     anim(this.scene, 'cat-react', 'pet/cat/react', 10, 0); anim(this.scene, 'cat-idle', 'pet/cat/idle', 3, -1);
     this.cat = this.make('pet/cat/sleep', 'cat-sleep');
-    this.cat?.setPosition(...this.xy(this.catCell));
+    this.cat?.setPosition(...this.catXY());
     if (!this.calm()) this.catTimer = this.scene.time.delayedCall(catDelay(Math.random()), () => this.wander());
   }
 
   /** Cat strolls to a nearby free cell, then sleeps again. */
   private wander(): void {
-    const room = this.room; const cat = this.cat;
-    if (!room || !cat || this.calm()) return;
+    const room = this.catRoom; const cat = this.cat;
+    if (!cat || this.calm()) return;
     const size = ROOM_SIZE[room as WorldRoom];
     const to = { x: Math.floor(Math.random() * size.w), y: Math.floor(Math.random() * size.d) };
     const path = pathTo(room, this.catCell, to);

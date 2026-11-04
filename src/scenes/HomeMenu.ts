@@ -23,6 +23,9 @@ export class HomeMenu {
       new Button(scene, xs[1], y, bw, 'Journal', () => go(scene, SCENE.Journal), { height: BH }),
       new Button(scene, xs[2], y, bw, 'Settings', () => go(scene, SCENE.Settings), { height: BH }),
     );
+    const title = makeText(scene, SAFE + 8, SAFE - 4, 'Scatterly', { fontSize: '64px', fontStyle: 'bold', stroke: '#16252a', strokeThickness: 8 }).setOrigin(0, 0);
+    const sub = makeText(scene, SAFE + 12, SAFE + 62, "Where'd I put it?", { fontSize: '28px', stroke: '#16252a', strokeThickness: 5 }).setOrigin(0, 0);
+    this.items.push(title, sub);
     for (const it of this.items) (it as Phaser.GameObjects.Container).setDepth(DEPTH.hud);
   }
 

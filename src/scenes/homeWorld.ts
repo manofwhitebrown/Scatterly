@@ -79,10 +79,19 @@ export function fitCamera(r: Rect, viewW: number, viewH: number, margin: number 
 }
 
 /** Overview keeps a bottom band free for the Play / Journal / Settings buttons. */
-export const OVERVIEW_INSETS: Insets = { top: 20, right: 24, bottom: 164, left: 24 };
+export const OVERVIEW_INSETS: Insets = { top: 16, right: 24, bottom: 150, left: 24 };
+
+/** Overview zoom snaps DOWN to a multiple of 0.5 once it is 1x or more, so art px stay crisp (1 art px = 1 game px at the default 1280x720). */
+export const snapZoom = (z: number): number => (z >= 1 ? Math.floor(z * 2) / 2 : z);
 export const FOCUS_INSETS: Insets = { top: 36, right: 36, bottom: 36, left: 36 };
 
-export const overviewCamera = (viewW: number, viewH: number): CameraState => fitCamera(houseBounds(), viewW, viewH, OVERVIEW_INSETS);
+export function overviewCamera(viewW: number, viewH: number): CameraState {
+  const c = fitCamera(houseBounds(), viewW, viewH, OVERVIEW_INSETS);
+  const b = houseBounds(); const z = snapZoom(c.zoom);
+  // Re-centre in the inner area at the snapped zoom (the camera centre is the world point at the screen centre).
+  const dx = (OVERVIEW_INSETS.left - OVERVIEW_INSETS.right) / 2; const dy = (OVERVIEW_INSETS.top - OVERVIEW_INSETS.bottom) / 2;
+  return { zoom: z, cx: b.x + b.w / 2 - dx / z, cy: b.y + b.h / 2 - dy / z };
+}
 export const focusCamera = (room: RoomId, viewW: number, viewH: number): CameraState => fitCamera(roomBounds(room), viewW, viewH, FOCUS_INSETS);
 
 /** Linear interpolation of two cameras (zoom interpolated in log space so the tween feels even). */

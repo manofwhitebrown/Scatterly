@@ -27,6 +27,8 @@
 
 - URGENT orders: pieces use `spot/<kind>/<closed|open>` frames automatically (box fallback, padlock still drawn on top; props under a piece with art are hidden); room shells use `shell/<room>/full` (back-corner pivot) with the procedural shell as fallback; all 6 `room:<id>` groups load. Decor taps bounce + tick + FX, and 3 decor taps with no piece between show the outline once (homeDecor.ts). First-ever morning shows one toast "Tap furniture to look inside" (localStorage, once). `?debug=1` shows `props with art X/N   spots with art Y/M` (homeArtStats.ts).
 
+- Playtest items: Overview fits the set-back house at exactly 1.0x (house 624x552 art px; zoom snaps down to a multiple of 0.5; bottom band 150 px); Focus is x2.7-2.9 (not integer x3, the room is wider than 1280/3, say if you want it cropped instead); title "Scatterly" + "Where'd I put it?" top-left of the Overview; the cat is visible in the Overview (asleep on the sofa, wanders every 8-14 s); morning window glow (`fx/windowGlow`) on every window. Props with art 66/66, spots with art 19/19 (frames present; look unverified).
+
 ## Verified
 - `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
 - `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.

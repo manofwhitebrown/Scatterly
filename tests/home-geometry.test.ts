@@ -32,6 +32,14 @@ describe('Overview fits the whole house and keeps the button band free', () => {
   });
 });
 
+describe('Overview crispness', () => {
+  it('is 1x at 1280x720 (the whole set-back house fits) and still fits the viewport', () => {
+    const c = overviewCamera(W, H);
+    expect(c.zoom).toBe(1);
+    expect(Number.isInteger(c.zoom * 2)).toBe(true);
+  });
+});
+
 describe('Stairs', () => {
   it('are a tappable shape in both connected rooms and lead to the other floor', () => {
     const low = stairsPolygon(STAIRS.lower)!; const up = stairsPolygon(STAIRS.upper)!;
@@ -42,12 +50,11 @@ describe('Stairs', () => {
   });
 });
 
-describe('Layout finding (for the manager): upper rooms cover ground rooms', () => {
-  it('an upper room always overlaps the ground room below it at raise 72 (documented, see status Requests)', () => {
-    const a = roomPolygon('living'); const b = roomPolygon('bedroom');
-    const ys = (p: Array<{ y: number }>): [number, number] => [Math.min(...p.map((q) => q.y)), Math.max(...p.map((q) => q.y))];
-    const [a0, a1] = ys(a); const [b0, b1] = ys(b);
-    expect(Math.min(a1, b1) - Math.max(a0, b0)).toBeGreaterThan(0);
+describe('Set-back layout', () => {
+  it('an upper room sits above the ground-floor room, not over its floor', () => {
+    const upperBottom = Math.max(...roomPolygon('bedroom').map((q) => q.y));
+    const floorBack = roomBounds('living').y + 64; // the ground room's back-corner floor point
+    expect(upperBottom).toBeLessThanOrEqual(floorBack + 8);
   });
 });
 
@@ -109,5 +116,12 @@ describe('Rush urgency window', () => {
     expect(urgencyAt(20)!.intensity).toBeCloseTo(0.6); expect(urgencyAt(20)!.pulse).toBe(false);
     expect(urgencyAt(1)!.intensity).toBe(1);
     expect(urgencyAt(10)!.pulse).toBe(true); expect(urgencyAt(5)!.red).toBe(true); expect(urgencyAt(6)!.red).toBe(false);
+  });
+});
+
+import { glowKey } from '../src/scenes/homeGlow';
+describe('window glow keys', () => {
+  it('day R/L = 0/1, night R/L = 2/3', () => {
+    expect([glowKey('R', false), glowKey('L', false), glowKey('R', true), glowKey('L', true)]).toEqual(['fx/windowGlow/0', 'fx/windowGlow/1', 'fx/windowGlow/2', 'fx/windowGlow/3']);
   });
 });
