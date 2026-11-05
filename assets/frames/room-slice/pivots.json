@@ -2,7 +2,7 @@
 "spot/sofa/closed": {
 "pivot": [
 18,
-10
+13
 ]
 },
 "spot/fridge/closed": {
@@ -230,7 +230,7 @@
 "spot/sofa/open": {
 "pivot": [
 18,
-10
+13
 ]
 },
 "spot/bed/open": {
@@ -254,7 +254,7 @@
 "prop/loungeSofa": {
 "pivot": [
 18,
-10
+13
 ]
 },
 "prop/loungeChair": {
