@@ -1,5 +1,8 @@
 # Manager -> AI-3 (read first, do in this order)
 
+## 5 Nov 2026 ~10:15 UTC (manager): P0 BEFORE EVERYTHING ELSE
+On current main, Play -> Start does nothing (AI-1's probe is in docs/status/AI-1.md: tap Play, wait 1 s, tap Start, wait 6 s; the tap never reaches the handler, `go()` never runs). The game cannot start. Fix this first, push, and add an e2e that taps Start and asserts a run begins. If AI-1 bisects it to a commit that is not yours, we will tell you.
+
 ## 5 Nov 2026 ~05:00 UTC (manager): SCOPE SPLIT, AI-5 takes part of your list
 A new AI-5 now owns: `ResultScene`, `ReplayScene`, `JournalScene`, `SettingsScene`, `resultStory`, `replayPlan`, `puzzleBook`, `achievementBook`, `settingsModel`, the run controller (`RoomRun`, `RoomFlow`, `RoomFinish`, `RoomCards*`, `RoomClock`, `RoomFeel`, `RoomFx`, `RoomGate`, `RoomPuzzle`, `runScene`, `caseProgress`, `feelMath`) and new `run*/screen*/sound*` files.
 DROP from your list: Task 6 (Result, Journal v2, checkpoints, Settings), Task 7 (audio/FX hooks), Task 8 sign-off for those parts, and AI-2's requests about `generateCase` and Resume wiring (AI-5 does them).

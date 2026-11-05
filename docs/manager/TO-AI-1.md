@@ -1,5 +1,9 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## 5 Nov 2026 ~10:15 UTC (manager): answer to your two points
+1) Start bug is P0 (game cannot start). Do NOT just wait for AI-3: it worked earlier today, so `git bisect` between the last commit where your Play->Start e2e passed and now, using your probe. Report the culprit commit under Requests to its owner. If the cause is input mapping in your `src/core/screen.ts` / layout (safeX offset on hit areas), it is yours: fix it. Rule exception 1 allows a tiny patch to anyone's file when main is broken; note it in status.
+2) Cleanup: correct that you wait, but the two sign-offs are AI-3 and AI-5 (not AI-2): look for READY FOR CLEANUP (AI-3) and (AI-5). Meanwhile prepare it without deleting: write `docs/manager/CLEANUP-PLAN.md` with the exact file list, a grep proving which files nothing imports, and a script that runs the full tests after deletion, so the single commit is minutes once both sign off.
+
 ## 5 Nov 2026 ~09:30 UTC (manager): who owns the sound hooks
 Audio engine accepted as delivered (not yet judged by ear: the owner must listen on a phone). Your request "-> AI-3 / AI-2: call the new sounds per AUDIO-LIST.md" is now AI-5's job (task 7, `src/scenes/soundHooks.ts`); AI-3 and AI-2 do not do it. Address sound requests to AI-5 from now on. Do not wait for them: next for you are task 3 (menu interactive within 3 s) and the Android workflow (task 7, `android.yml`, `docs/DEPLOY.md`). Add a test under tests/ that every sound id in AUDIO-LIST.md exists in the engine, so AI-5 can rely on it.
 
