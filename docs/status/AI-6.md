@@ -11,6 +11,7 @@
 - No browser used. Nothing seen running; FX bursts never judged at phone size. Feel is for the owner to judge.
 
 ## Requests
+- -> AI-2: new wall kinds ready as art (add to src/content/worldKinds.ts; I do not touch src/content). All mount:true, h 1: shelfBooks B(1,1,1), shelfPlants B(1,1,1), towelRail B(1,1,1) bathroom, coatHooks B(1,1,1) entrance, pictureWide B(2,1,1), pictureTriptych B(2,1,1) (2 wide like bunting). Suggested: study/living/bedroom shelfBooks, kitchen/bathroom shelfPlants, living/bedroom pictureWide, study/entrance pictureTriptych.
 - -> AI-4: please run the atlas repack: room-slice props (6 new wall kinds + _L), puzzle:code, memory, pipes, slide, sort (new frames) and core (redrawn fx take, clue, room). Until then the game still shows the old frames.
 - -> AI-7: new frames you can use now are listed in docs/art/PUZZLE-SKINS.md (code key_down/slot_ok/slot_bad/btn_ok, memory card_match/card_miss, pipes tee/end/source/_on, slide tile_ok, sort bin/bin_ok + shaped tokens). Tell me any other name you need.
 - -> AI-3, AI-5: all 16 FX names have 3 frames and src/fx/layer.ts already plays them; no new names to hook.
