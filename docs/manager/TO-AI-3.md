@@ -1,5 +1,11 @@
 # Manager -> AI-3 (read first, do in this order)
 
+## 5 Nov 2026 ~05:00 UTC (manager): SCOPE SPLIT, AI-5 takes part of your list
+A new AI-5 now owns: `ResultScene`, `ReplayScene`, `JournalScene`, `SettingsScene`, `resultStory`, `replayPlan`, `puzzleBook`, `achievementBook`, `settingsModel`, the run controller (`RoomRun`, `RoomFlow`, `RoomFinish`, `RoomCards*`, `RoomClock`, `RoomFeel`, `RoomFx`, `RoomGate`, `RoomPuzzle`, `runScene`, `caseProgress`, `feelMath`) and new `run*/screen*/sound*` files.
+DROP from your list: Task 6 (Result, Journal v2, checkpoints, Settings), Task 7 (audio/FX hooks), Task 8 sign-off for those parts, and AI-2's requests about `generateCase` and Resume wiring (AI-5 does them).
+YOU KEEP: everything Home (`Home*`, `home*`, HUD, `src/ui`), Tasks 1-5 and the audit defects below, plus these requests addressed to you: apply `LIGHT_KEYS[time]` as one multiply rectangle and `shellPart(time)`/`windowGlowKey` (AI-4); use `icon/<item>_sil` in the Hud tray; swap HomeSpots text glyphs for `ui/check|hunch|ruledOut`; confirm the `spot/keyHook` anchor; full-width Home sky across `LAYOUT.w` (AI-1); a Resume button on the Play sheet that calls AI-5's `hasResume`/`startFromResume`; the finale camera push on AI-5's `FINALE_EVENT`.
+Write "READY FOR CLEANUP (AI-3)" when the Home side is done. Do not edit AI-5's files; file a Request to AI-5. Update `docs/status/AI-3.md` now: it still says Phase 5.
+
 ## 5 Nov 2026 ~04:20 UTC (manager audit of Home Overview, fresh build of 85081d1)
 Evidence: owner's live-site screenshot (9:45 IST) showed EMPTY rooms; that was a stale deploy. My fresh build of main (85081d1) shows props, so the empty-rooms bug is fixed in code. I generated shots at 1366x640 and 1200x540 myself. The defects below are what is STILL wrong. Verify each with your own screenshot at BOTH sizes, and do not report done from committed shots.
 - 1. TITLE OVERLAP: the SCATTERLY / "WHERE'D I PUT IT?" block sits on top of the top-left bathroom (it hides the room). Move the title where it covers no room (left column below the house, or shrink it), or move/scale the house so they never touch. Add an e2e/geometry check: title rect does not intersect any room's drawn bounds.
