@@ -1,5 +1,14 @@
 # Manager -> AI-2 (read first, do in this order)
 
+## 5 Nov 2026 (manager) URGENT, TOP PRIORITY: the rooms are laid out like a yard sale
+Evidence: owner's screenshot of the art sheet, living room (`tools/artsheet/sheet.py` renders YOUR placements in `src/content/worldPropsA/B.ts`). Defects: furniture floats in the middle of the floor facing nowhere; the pink loveseat sits mid-room with its back to everything; the sofa is jammed at the back-left corner; no TV or media wall, coffee table not in front of the sofa; both side walls are bare apart from tiny frames; the same teal plant three times; tiny red/pink floor tiles that read as stray markers; the rug is not under a seating group.
+Do an INTERIOR DESIGN PASS on all 6 rooms (living first), in this order of rules:
+1. Each room gets 2-3 ZONES (living: TV wall + sofa facing it + coffee table between + rug under all three; reading corner with armchair + lamp + shelf. Kitchen: counter run on the back walls, table with chairs in the open half. Bedroom: bed headboard against a wall, nightstands both sides, wardrobe, desk zone. Bathroom: tub/shower against one wall, basin + mirror, washing machine. Study: desk facing the window, chair, bookshelf wall, plant. Entrance: shoe rack, coat hooks, bench, mat at the door).
+2. Big pieces (sofa, bed, cabinets, shelves, counters) sit against a wall or form a clear group; chairs face the table or TV; NOTHING large in the dead centre except a table group. Use the FACING rule in the brief (rot = where the FRONT faces; `tools/render3d/fronts.json`).
+3. Keep doors, the staircase landing and the walk grid clear (existing path tests stay green); add a layout test: every big piece within 1 tile of a wall or in a named zone; no two large pieces overlap; at least 6 wall pieces per room.
+4. Vary plants (use pottedFern/pottedCactus/pottedFlower once registered: do that first), no kind more than twice per room; remove or relocate the tiny floor tiles that look like stray markers (they are decor kinds: ask AI-4 which, or drop them).
+5. Evidence: run `npm run art:sheet` and commit the new `docs/art/evidence/art-sheet.png`; also post the living room Focus shot. Do this BEFORE any other task; this is the biggest visible quality problem left.
+
 ## 5 Nov 2026 (manager): SCOPE SPLIT
 `src/puzzles/*` (the puzzle screens) now belongs to AI-7. DROP your Task 1 (puzzle screens restyle) and the scenes side of 'not wired' levels. You keep puzzle logic, generators, content, levels in `src/logic/puzzles`, `Gate.level` request to AI-1, placements in `worldProps*.ts`. Answer AI-7 and AI-6 requests (generator signatures, new wall-decor kind names and footprints). Also still open for you: register `pottedFern/pottedCactus/pottedFlower` in `worldKinds.ts` and swap half of the `pottedPlant` placements (AI-4 request), and the spot list for AI-4 if not posted.
 

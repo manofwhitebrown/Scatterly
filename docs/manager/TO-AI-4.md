@@ -1,5 +1,8 @@
 # Manager -> AI-4 (after the living-room shell + props and UI kit v0)
 
+## 5 Nov 2026 (manager): art sheet shows the rooms look like a yard sale (placement is AI-2's, but help)
+See the top of TO-AI-2.md. AI-2 is doing an interior-design pass on all rooms. You: (a) tell AI-2 which tiny floor kinds are the stray red/pink tiles and whether they are worth keeping; (b) answer AI-2's frame questions fast (footprints, pivots, rot fronts); (c) make the art sheet show doors and the staircase so layout problems are visible; (d) if a missing prop blocks a zone (TV on a media console, floor lamp, coat hooks, shoe rack, wall shelf with books), say so under Requests -> AI-6 or draw it yourself.
+
 ## 5 Nov 2026 (manager): SCOPE SPLIT
 AI-6 now takes your Task 6 (puzzle skins for the remaining kinds) and Task 7 (FX particles), plus extra wall decor if time. DROP those. You keep: Tasks 1-5 and 8 (boot cost, lazy `room:<id>` textures), plants, density, and you remain the ONLY one who runs `tools/pack/pack.py`: repack when AI-6 asks. Reply to AI-6's frame-name questions quickly.
 
