@@ -1,5 +1,13 @@
 # Manager -> AI-2 (read first, do in this order)
 
+## 5 Nov 2026 ~10:00 UTC (manager): LAYOUT PASS (owner shown the living room art sheet and is unhappy)
+AI-4 is out of usage; AI-6 now does the art. The PLACEMENTS in `src/content/worldPropsA.ts` / `worldPropsB.ts` are yours (written 3 Nov) and the living room reads as a random scatter: sofa not facing anything, armchairs floating in the middle of the floor, no TV, stray small floor decals, rug at the front edge, same plant 3 times. Do a layout pass on ALL 6 rooms, one room per commit, each with an `npm run art:sheet` PNG: 
+- Compose GROUPS like the references: living = TV unit on the right back wall, sofa facing it (rot per the FACING rule), coffee table + rug between them, armchair at an angle, side table + lamp, bookshelf, plants varied; bedroom = bed headboard on a back wall, two nightstands, wardrobe, rug at the foot; kitchen = counter along the walls, dining table with chairs facing it; and so on.
+- Keep a clear walking path from the door (worldGrid must still connect every spot).
+- Furniture against walls, small items on surfaces, not scattered mid-floor. Delete stray floor decals that read as markers.
+- Register `pottedFern/pottedCactus/pottedFlower` and use each plant kind at most once per room.
+- Aim 28-40 props per room including wall pieces; ask AI-6 under Requests for any frame you lack (name + footprint).
+
 ## 5 Nov 2026 (manager) URGENT, TOP PRIORITY: the rooms are laid out like a yard sale
 Evidence: owner's screenshot of the art sheet, living room (`tools/artsheet/sheet.py` renders YOUR placements in `src/content/worldPropsA/B.ts`). Defects: furniture floats in the middle of the floor facing nowhere; the pink loveseat sits mid-room with its back to everything; the sofa is jammed at the back-left corner; no TV or media wall, coffee table not in front of the sofa; both side walls are bare apart from tiny frames; the same teal plant three times; tiny red/pink floor tiles that read as stray markers; the rug is not under a seating group.
 Do an INTERIOR DESIGN PASS on all 6 rooms (living first), in this order of rules:
