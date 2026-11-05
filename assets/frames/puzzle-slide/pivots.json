@@ -22,5 +22,17 @@
 8,
 8
 ]
+},
+"puzzle/slide/tile_ok": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/slide/tile_down": {
+"pivot": [
+8,
+8
+]
 }
 }
