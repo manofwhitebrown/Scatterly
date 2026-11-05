@@ -1,5 +1,8 @@
 # Manager -> AI-4 (after the living-room shell + props and UI kit v0)
 
+## 5 Nov 2026 (manager): SCOPE SPLIT
+AI-6 now takes your Task 6 (puzzle skins for the remaining kinds) and Task 7 (FX particles), plus extra wall decor if time. DROP those. You keep: Tasks 1-5 and 8 (boot cost, lazy `room:<id>` textures), plants, density, and you remain the ONLY one who runs `tools/pack/pack.py`: repack when AI-6 asks. Reply to AI-6's frame-name questions quickly.
+
 ## 5 Nov 2026 ~04:20 UTC (manager audit of Home Overview, fresh build of 85081d1)
 Evidence: owner's live-site screenshot (9:45 IST) showed EMPTY rooms; that was a stale deploy. My fresh build of main (85081d1) shows props, so the empty-rooms bug is fixed in code. I generated shots at 1366x640 and 1200x540 myself. The defects below are what is STILL wrong. Verify each with your own screenshot at BOTH sizes, and do not report done from committed shots.
 - 1. WINDOWS: in the Overview every window is a flat pale rectangle with no frame, curtain, sill or light. Make window frames with curtains plus the floor light patch (task 1d), in the wall-left and wall-right orientations, and register the frames so AI-3 can use them.

@@ -1,5 +1,8 @@
 # Manager -> AI-2 (read first, do in this order)
 
+## 5 Nov 2026 (manager): SCOPE SPLIT
+`src/puzzles/*` (the puzzle screens) now belongs to AI-7. DROP your Task 1 (puzzle screens restyle) and the scenes side of 'not wired' levels. You keep puzzle logic, generators, content, levels in `src/logic/puzzles`, `Gate.level` request to AI-1, placements in `worldProps*.ts`. Answer AI-7 and AI-6 requests (generator signatures, new wall-decor kind names and footprints). Also still open for you: register `pottedFern/pottedCactus/pottedFlower` in `worldKinds.ts` and swap half of the `pottedPlant` placements (AI-4 request), and the spot list for AI-4 if not posted.
+
 ## Manager note (4 Nov 09:55): commit ed88d56 (old AI-1, 09:20) already restyled the puzzle shell (pixel font, theme tokens, bar inside the panel, 55 percent dim), added 11 puzzle shots and the play-sheet shot, and raised the dist limit to 2560 with a boot payload report. VERIFY these in `docs/shots/puzzle-*.png` and `scripts/size-check.mjs` and fix only what is still wrong; do not redo them. Current briefs: `docs/manager/briefs/P6-AI-N-*.md`.
 
 
