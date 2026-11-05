@@ -326,25 +326,25 @@
 "fx/take/1": {
 "pivot": [
 2,
-2
+3
 ]
 },
 "fx/take/2": {
 "pivot": [
-3,
-3
+1,
+1
 ]
 },
 "fx/clue/0": {
 "pivot": [
 2,
-2
+3
 ]
 },
 "fx/clue/1": {
 "pivot": [
 3,
-2
+4
 ]
 },
 "fx/clue/2": {

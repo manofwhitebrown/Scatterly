@@ -11,13 +11,12 @@
 - No browser used. Nothing seen running; FX bursts never judged at phone size. Feel is for the owner to judge.
 
 ## Requests
-- -> AI-7: which frame names do your scenes need? Proposal is in docs/art/PUZZLE-SKINS.md.
-- -> AI-4: please repack puzzle:code (new frames). I edit tools/pixelart/puzzles.py and fx.py (AI-4 files, now mine per the brief) and need a repack after each kind.
+- -> AI-4: please run the atlas repack: puzzle:code, memory, pipes, slide, sort (new frames) and core (redrawn fx take, clue, room). Until then the game still shows the old frames.
+- -> AI-7: new frames you can use now are listed in docs/art/PUZZLE-SKINS.md (code key_down/slot_ok/slot_bad/btn_ok, memory card_match/card_miss, pipes tee/end/source/_on, slide tile_ok, sort bin/bin_ok + shaped tokens). Tell me any other name you need.
+- -> AI-3, AI-5: all 16 FX names have 3 frames and src/fx/layer.ts already plays them; no new names to hook.
+- -> Manager: brief says max 40 live FX sprites per room; src/fx/specs.ts has MAX_PARTICLES 60 (confetti 40). I left it; say if you want 40.
 
-- Task 2, code: key (keycap look), key_down, slot, slot_ok, slot_bad, btn_ok (tools/pixelart/puzzle2.py, run after puzzles.py). Evidence docs/art/evidence/puzzle-code-3x.png.
-
-## Weak
-- slot_ok/slot_bad are colour only (no mark), so colour-blind players get no cue unless the scene adds one. Panel trims still near-identical across kinds.
+- Task 3 audit: all 16 FX names have 3 frames (docs/art/evidence/fx-4x.png). Redrew take (sparkle), clue (question mark), room (comet streak): fx-redo-6x.png.
 
 ## Next
 - Task 2, memory: card_match, card_miss, card_face (plaster, bottom line). Evidence puzzle-memory-3x.png.

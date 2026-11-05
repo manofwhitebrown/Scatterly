@@ -43,8 +43,9 @@ def ring(r):
 def streak(n_):
     im = Image.new('RGBA', (n_, 3), (0, 0, 0, 0)); px = im.load()
     for x in range(n_):
-        px[x, 1] = W if x > n_ // 3 else L
-        if x > n_ // 2: px[x, 0] = L; px[x, 2] = L
+        if x > n_ // 4: px[x, 1] = W
+        elif x % 2 == 0: px[x, 1] = L
+        if x > (n_ * 2) // 3: px[x, 0] = L; px[x, 2] = L
     return im
 def conf(i):
     w, h = ((4, 2), (3, 3), (2, 4))[i]; im = Image.new('RGBA', (w, h), W); px = im.load()
@@ -64,12 +65,14 @@ def bang(i):
 def tick(i):
     return bm([["....W", "...W.", "W.W..", ".W..."], [".....W", "....WW", "W..WW.", "WWWW..", ".WW..."], ["......W", ".....WW", "W...WW.", "WW.WW..", ".WWW...", "..W...."]][i], {'W': W})
 def dots(i):
-    n = (2, 3, 4)[i]; im = Image.new('RGBA', (n, n), W); return im
+    return bm([[".W.", "WWW", ".W."], [".L.", "LWL", "WWW", "LWL", ".L."], ["W"]][i], {'W': W, 'L': L})
+def qmark(i):
+    return bm([["WW.", "..W", ".W.", "...", ".W."], ["WWW.", "...W", "..W.", ".W..", "....", ".W.."], ["LL.", "..L", ".L.", "...", ".L."]][i], {'W': W, 'L': L})
 def comp(base, over, dx, dy):
     w, h = max(base.width, dx + over.width), max(base.height, dy + over.height); im = Image.new('RGBA', (w, h), (0, 0, 0, 0)); im.alpha_composite(base, (0, 0)); im.alpha_composite(over, (dx, dy)); return im
 FRAMES = {
  'tap': lambda i: puff((1, 2, 2)[i]), 'open': lambda i: spark((1, 2, 1)[i]), 'empty': lambda i: puff((1, 1, 2)[i]),
- 'found': star, 'take': dots, 'clue': lambda i: Image.new('RGBA', ((3, 4, 3)[i], (3, 3, 4)[i]), L if i == 1 else W),
+ 'found': star, 'take': dots, 'clue': qmark,
  'hint': lambda i: ring((3, 5, 7)[i]), 'room': lambda i: streak((5, 8, 11)[i]), 'urgent': bang,
  'win': conf, 'lose': drop, 'coin': coin, 'star': star, 'buy': lambda i: comp(coin(i), spark(1), 4, 0),
  'unlock': lambda i: comp(ring((2, 3, 4)[i]), spark(1), 0, 0), 'puzzleOk': tick,
