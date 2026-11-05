@@ -13,9 +13,13 @@ import { isoTasks } from './isoKit';
 
 interface Task { key: string; w: number; h: number; draw: (g: G) => void }
 
+/** The five 1280x720 legacy room backgrounds: by far the most expensive bakes, so they are NOT baked at boot (see ensureRoomTexture). */
+function roomTask(id: (typeof LEGACY_ROOMS)[number]): Task {
+  return { key: tex.room(id), w: 1280, h: 720, draw: (g) => drawRoom(g, id) };
+}
+
 function buildTasks(): Task[] {
   const tasks: Task[] = [];
-  for (const id of LEGACY_ROOMS) tasks.push({ key: tex.room(id), w: 1280, h: 720, draw: (g) => drawRoom(g, id) });
   for (const kind of Object.keys(SPOT_SIZE) as SpotKind[]) {
     const { w, h } = SPOT_SIZE[kind];
     tasks.push({ key: tex.spot(kind), w, h, draw: (g) => drawSpot(g, kind, false) });
@@ -28,23 +32,40 @@ function buildTasks(): Task[] {
   return tasks;
 }
 
-/** Generates every texture in code. Idempotent; yields to the event loop so loading bars animate. */
+function bakeTask(scene: Phaser.Scene, t: Task): void {
+  if (scene.textures.exists(t.key)) return;
+  try {
+    bake(scene, t.key, t.w, t.h, t.draw);
+  } catch {
+    try {
+      bakeFallback(scene, t.key, t.w, t.h);
+    } catch {
+      /* texture stays missing; callers guard with textures.exists */
+    }
+  }
+}
+
+/**
+ * Bakes one legacy room background on first use (idempotent, synchronous). Call it before `add.image(.., tex.room(id))`.
+ * Home never needs these, so a Home boot skips five 1280x720 canvases.
+ */
+export function ensureRoomTexture(scene: Phaser.Scene, id: string): void {
+  const legacy = LEGACY_ROOMS.find((r) => r === id);
+  if (legacy) bakeTask(scene, roomTask(legacy));
+}
+
+/** Bakes every legacy room background (for scenes that show several, e.g. Organise). */
+export function ensureAllRoomTextures(scene: Phaser.Scene): void {
+  for (const id of LEGACY_ROOMS) ensureRoomTexture(scene, id);
+}
+
+/** Generates the boot textures in code (everything except the legacy room backgrounds). Idempotent; yields so loading bars animate. */
 export async function generateAllTextures(scene: Phaser.Scene, onProgress?: (p: number) => void): Promise<void> {
   const tasks = buildTasks();
   const total = tasks.length;
   for (let i = 0; i < total; i++) {
     const t = tasks[i];
-    if (!scene.textures.exists(t.key)) {
-      try {
-        bake(scene, t.key, t.w, t.h, t.draw);
-      } catch {
-        try {
-          bakeFallback(scene, t.key, t.w, t.h);
-        } catch {
-          /* texture stays missing; callers guard with textures.exists */
-        }
-      }
-    }
+    bakeTask(scene, t);
     if (i % 6 === 5) {
       onProgress?.((i + 1) / total);
       await new Promise<void>((r) => setTimeout(r, 0));

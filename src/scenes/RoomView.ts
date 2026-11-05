@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { ensureRoomTexture } from '../art';
 import { isLowFx } from '../core/perf';
 import { DECOR, GameSession } from '../logic';
 import { tex } from '../shared/types';
@@ -167,6 +168,7 @@ export class RoomView {
 
   private build(room: RoomId): RoomLayer {
     const box = this.scene.add.container(0, 0).setVisible(false);
+    ensureRoomTexture(this.scene, room);
     box.add(this.scene.add.image(0, 0, tex.room(room)).setOrigin(0, 0));
 
     for (const d of DECOR) {

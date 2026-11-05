@@ -5,6 +5,7 @@ import { DECOR, allSpots, buyDecor, homeSpotCandidates, listDecor, setHomeSpot }
 import { commitProfile, defaultProfile } from '../core/save';
 import { isLowFx } from '../core/perf';
 import { sfx } from '../audio/sfx';
+import { ensureAllRoomTextures } from '../art';
 import { PAL, makeButton, makeText, panelBox, shade, vgrad } from '../art/palette';
 import type { G } from '../art/palette';
 
@@ -117,6 +118,7 @@ export class OrganiseScene extends Phaser.Scene {
     fr.fillStyle(shade(PAL.gold, -0.25), 1);
     fr.fillCircle(PRE_X + 20, PRE_Y + 432 + 44, 8);
     this.u(fr);
+    ensureAllRoomTextures(this);
     this.roomImg = this.u(this.add.image(PRE_X, PRE_Y, tex.room('entrance')).setOrigin(0, 0).setScale(S));
     for (let i = 0; i < POOL_IMAGES; i++) {
       this.pool.push(this.u(this.add.image(0, 0, tex.room('entrance')).setOrigin(0, 0).setScale(S).setVisible(false)));
