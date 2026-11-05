@@ -1,36 +1,20 @@
 import Phaser from 'phaser';
 import { PUZZLE_SCENE } from '../shared/types';
+import { PUZZLES } from '../logic/puzzles';
+import { caesar } from '../logic/puzzles/word';
+import type { WordSpec } from '../logic/puzzles/word';
 import { sfx } from '../audio/sfx';
 import { PAL, makeButton, makeText, panelBox, shade } from './ui';
 import type { G } from './ui';
-import { PW, PX, PY, PuzzleShell, shuffle } from './PuzzleShell';
+import { PW, PX, PY, PuzzleShell } from './PuzzleShell';
 
-const WORDS: string[] = [
-  'DOOR', 'LAMP', 'SOFA', 'SINK', 'BOWL', 'BOOK', 'DESK', 'SHOE', 'COAT', 'HOOK', 'VASE', 'BATH', 'OVEN', 'SOAP',
-  'CHAIR', 'TABLE', 'SHELF', 'BREAD', 'PLATE', 'CLOCK', 'PLANT', 'SHEET', 'RADIO', 'STOVE', 'TOAST', 'SCARF', 'BRUSH', 'FRAME', 'COUCH', 'TOWEL',
-  'DRAWER', 'WALLET', 'BASKET', 'MIRROR', 'PILLOW', 'KETTLE', 'JACKET', 'COOKER', 'WINDOW', 'CARPET', 'FRIDGE', 'BOTTLE', 'SOCKET', 'HANGER', 'PENCIL',
-  'BLANKET', 'CUSHION', 'LAUNDRY', 'TOASTER', 'COUNTER', 'CURTAIN', 'KEYRING', 'SLIPPER', 'BEDROOM', 'KITCHEN', 'BATHTUB', 'HALLWAY', 'CABINET', 'MORNING', 'SHELVES',
-];
-const NOTES = ['LOOK INSIDE THE', 'I LEFT IT NEAR THE', 'TRY CHECKING THE'];
 const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
 interface Cell { ch: string; cx: number; cy: number; w: number; h: number; used: boolean; t: Phaser.GameObjects.Text }
 interface Slot { cx: number; cy: number; w: number; h: number; from: number; t: Phaser.GameObjects.Text }
 
-function sortedLetters(w: string): string {
-  return w.split('').sort().join('');
-}
-
-function caesar(s: string, shift: number): string {
-  let out = '';
-  for (const ch of s) {
-    const i = ALPHA.indexOf(ch);
-    out += i < 0 ? ch : ALPHA[(i + shift) % 26];
-  }
-  return out;
-}
-
 export class WordScene extends PuzzleShell {
+  private spec!: WordSpec;
   private word = '';
   private custom = false;
   private keyboard = false;
@@ -46,7 +30,7 @@ export class WordScene extends PuzzleShell {
   }
 
   protected defaultTitle(): string {
-    return this.req.difficulty === 3 ? 'Crack the note' : 'Find the word';
+    return this.level === 3 ? 'Crack the note' : 'Find the word';
   }
 
   protected contextIsTitle(): boolean {
@@ -57,14 +41,13 @@ export class WordScene extends PuzzleShell {
     this.pool = [];
     this.slots = [];
     this.wrong = false;
-    const d = this.req.difficulty;
-    this.keyboard = d === 3;
-    const payload = (this.req.payload ?? '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 12);
-    this.custom = payload.length >= 2;
-    this.word = this.custom ? payload : this.pickWord(d);
+    // The shared generator decides mode, word, tiles and note, so every level 1-5 plays as AI-2 tuned it.
+    this.spec = PUZZLES.word.generate(this.req.seed, this.level, { payload: this.req.payload, context: this.req.context });
+    this.keyboard = this.spec.mode === 'cipher';
+    this.custom = this.spec.custom;
+    this.word = this.spec.word;
     const cx = PX + PW / 2;
-    let hint = this.keyboard ? 'Each letter was shifted. The last word is your answer.' : d === 2 ? 'Find the word. One tile is a decoy.' : 'Unscramble the word.';
-    if (this.req.context && this.req.context.trim()) hint = this.req.context.trim();
+    const hint = this.spec.hint;
     makeText(this, cx, PY + 90, hint, 22, PAL.inkSoft, { ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 160 });
     this.gSlots = this.add.graphics();
     this.gPool = this.add.graphics();
@@ -87,22 +70,13 @@ export class WordScene extends PuzzleShell {
     this.refresh();
   }
 
-  private pickWord(d: number): string {
-    const [lo, hi] = d === 1 ? [4, 5] : d === 2 ? [6, 7] : [4, 6];
-    const list = WORDS.filter((w) => w.length >= lo && w.length <= hi);
-    return list[Math.floor(this.rand() * list.length)];
-  }
-
   private accepted(guess: string): boolean {
-    if (guess === this.word) return true;
-    if (this.custom) return false;
-    return WORDS.includes(guess) && sortedLetters(guess) === sortedLetters(this.word);
+    return PUZZLES.word.check(this.spec, guess);
   }
 
   private buildNote(cx: number): void {
-    const shift = 2 + Math.floor(this.rand() * 8);
-    const prefix = NOTES[Math.floor(this.rand() * NOTES.length)];
-    makeText(this, cx, PY + 150, caesar(`${prefix} ${this.word}`, shift), 30, PAL.ink, { mono: true, bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 120 });
+    const shift = this.spec.shift;
+    makeText(this, cx, PY + 150, this.spec.coded, 30, PAL.ink, { mono: true, bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 120 });
     const plain = ALPHA.split('').join(' ');
     const coded = caesar(ALPHA, shift).split('').join(' ');
     makeText(this, cx, PY + 205, `Real   ${plain}`, 17, PAL.inkSoft, { mono: true, ox: 0.5, oy: 0.5 });
@@ -132,16 +106,7 @@ export class WordScene extends PuzzleShell {
   }
 
   private buildTiles(cx: number, cy: number): void {
-    const letters = this.word.split('');
-    let tiles = letters.slice();
-    if (this.req.difficulty === 2) {
-      const spare = ALPHA.split('').filter((c) => !letters.includes(c));
-      tiles.push(spare[Math.floor(this.rand() * spare.length)]);
-    }
-    for (let k = 0; k < 20; k++) {
-      tiles = shuffle(tiles, this.rand);
-      if (tiles.length < 2 || tiles.join('') !== this.word || new Set(tiles).size < 2) break;
-    }
+    const tiles = this.spec.tiles.slice();
     const n = tiles.length;
     const w = Math.min(72, (PW - 160) / n - 8);
     const pitch = w + 8;

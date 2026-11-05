@@ -1,20 +1,15 @@
 import Phaser from 'phaser';
 import { PUZZLE_SCENE } from '../shared/types';
-import type { Difficulty } from '../shared/types';
 import { sfx } from '../audio/sfx';
 import { PAL, line, makeText, rrect, shade } from './ui';
 import type { G } from './ui';
-import { PW, PX, PY, PuzzleShell, shuffle } from './PuzzleShell';
+import { PUZZLES } from '../logic/puzzles';
+import type { Pt } from '../logic/puzzles/untangle';
+import { PW, PX, PY, PuzzleShell } from './PuzzleShell';
 
 const AREA = { x: PX + 80, y: PY + 150, w: PW - 160, h: 390 };
 const NODE_R = 28;
 const THROTTLE_MS = 32;
-
-const LAYOUT: Record<Difficulty, { cols: number; rows: number; drop: number; minCross: number }> = {
-  1: { cols: 3, rows: 2, drop: 0, minCross: 2 },
-  2: { cols: 3, rows: 3, drop: 0, minCross: 4 },
-  3: { cols: 4, rows: 4, drop: 3, minCross: 6 },
-};
 
 interface Theme { title: string; rope: number; node: number; hint: string }
 
@@ -71,104 +66,22 @@ export class UntangleScene extends PuzzleShell {
     this.input.dragDistanceThreshold = 3;
   }
 
+  /** Graph, solved layout and tangled start come from the shared generator, so levels 1-5 play as AI-2 tuned them. */
   private makeGraph(): void {
-    const L = LAYOUT[this.req.difficulty] ?? LAYOUT[1];
-    const { cols, rows } = L;
-    const removed = new Set<number>();
-    const corners = shuffle([0, cols - 1, (rows - 1) * cols, rows * cols - 1], this.rand);
-    for (let i = 0; i < L.drop; i++) removed.add(corners[i]);
-    const idx = new Array<number>(cols * rows).fill(-1);
-    const sx: number[] = [];
-    const sy: number[] = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const k = r * cols + c;
-        if (removed.has(k)) continue;
-        idx[k] = sx.length;
-        const jx = (this.rand() - 0.5) * 28;
-        const jy = (this.rand() - 0.5) * 20;
-        sx.push(AREA.x + 60 + (AREA.w - 120) * (c / (cols - 1)) + jx);
-        sy.push(AREA.y + 50 + (AREA.h - 100) * (r / (rows - 1)) + jy);
-      }
-    }
-    const ea: number[] = [];
-    const eb: number[] = [];
-    const link = (a: number, b: number): void => {
-      if (a >= 0 && b >= 0) {
-        ea.push(a);
-        eb.push(b);
-      }
-    };
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const a = idx[r * cols + c];
-        if (a < 0) continue;
-        if (c + 1 < cols) link(a, idx[r * cols + c + 1]);
-        if (r + 1 < rows) link(a, idx[(r + 1) * cols + c]);
-        if (c + 1 < cols && r + 1 < rows) {
-          const tl = idx[r * cols + c];
-          const tr = idx[r * cols + c + 1];
-          const bl = idx[(r + 1) * cols + c];
-          const br = idx[(r + 1) * cols + c + 1];
-          if (tl >= 0 && tr >= 0 && bl >= 0 && br >= 0) {
-            if (this.rand() < 0.5) link(tl, br);
-            else link(tr, bl);
-          }
-        }
-      }
-    }
-    this.n = sx.length;
-    this.ne = ea.length;
-    this.sx = Float32Array.from(sx);
-    this.sy = Float32Array.from(sy);
-    this.ea = Int16Array.from(ea);
-    this.eb = Int16Array.from(eb);
+    const spec = PUZZLES.untangle.generate(this.req.seed, this.level, { context: this.req.context });
+    const place = (p: Pt, axis: 0 | 1): number => (axis === 0 ? AREA.x + NODE_R + (AREA.w - 2 * NODE_R) * p[0] : AREA.y + NODE_R + (AREA.h - 2 * NODE_R) * p[1]);
+    this.n = spec.start.length;
+    this.ne = spec.edges.length;
+    this.sx = Float32Array.from(spec.solved, (p) => place(p, 0));
+    this.sy = Float32Array.from(spec.solved, (p) => place(p, 1));
+    this.px = Float32Array.from(spec.start, (p) => place(p, 0));
+    this.py = Float32Array.from(spec.start, (p) => place(p, 1));
+    this.ea = Int16Array.from(spec.edges, (e) => e[0]);
+    this.eb = Int16Array.from(spec.edges, (e) => e[1]);
     this.bad = new Uint8Array(this.ne);
     this.cxs = new Float32Array(this.ne * this.ne + 1);
     this.cys = new Float32Array(this.ne * this.ne + 1);
-    this.px = new Float32Array(this.n);
-    this.py = new Float32Array(this.n);
-    this.scramble(L.minCross);
-  }
-
-  private scramble(minCross: number): void {
-    const order: number[] = [];
-    for (let i = 0; i < this.n; i++) order.push(i);
-    let bestPerm = order.slice();
-    let best = -1;
-    for (let attempt = 0; attempt < 80 && best < minCross; attempt++) {
-      const perm = shuffle(order.slice(), this.rand);
-      this.applyPerm(perm);
-      this.recalc();
-      if (this.nc > best) {
-        best = this.nc;
-        bestPerm = perm;
-      }
-    }
-    if (best < 1) bestPerm = order.slice().reverse();
-    this.applyPerm(bestPerm);
-    for (let i = 0; i < this.n; i++) {
-      this.px[i] += (this.rand() - 0.5) * 16;
-      this.py[i] += (this.rand() - 0.5) * 16;
-      this.clampNode(i);
-    }
     this.recalc();
-    if (this.nc === 0) {
-      for (let i = 0; i < this.n; i++) {
-        const a = (i / this.n) * Math.PI * 2;
-        const j = (i * 5) % this.n;
-        this.px[i] = AREA.x + AREA.w / 2 + Math.cos((j / this.n) * Math.PI * 2) * (AREA.w * 0.4);
-        this.py[i] = AREA.y + AREA.h / 2 + Math.sin(a * 0 + (j / this.n) * Math.PI * 2) * (AREA.h * 0.38);
-      }
-      this.recalc();
-    }
-  }
-
-  private applyPerm(perm: number[]): void {
-    for (let i = 0; i < this.n; i++) {
-      this.px[i] = this.sx[perm[i]];
-      this.py[i] = this.sy[perm[i]];
-    }
   }
 
   private clampNode(i: number): void {

@@ -3,18 +3,13 @@ import { PUZZLE_SCENE } from '../shared/types';
 import { sfx } from '../audio/sfx';
 import { PAL, circle, line, makeText, panelBox, poly, rotPts, shade } from './ui';
 import type { G } from './ui';
-import { PW, PX, PY, PuzzleShell, shuffle } from './PuzzleShell';
+import { PUZZLES } from '../logic/puzzles';
+import { PW, PX, PY, PuzzleShell } from './PuzzleShell';
 
 type Mode = 'colour' | 'shape' | 'type' | 'combo';
 
 const COLOURS = [
   { n: 'Red', c: PAL.red }, { n: 'Blue', c: PAL.blue }, { n: 'Yellow', c: PAL.yellow },
-];
-const SHAPES = ['Button', 'Card', 'Flag'];
-const CATS = [
-  { n: 'Kitchen', items: ['Spoon', 'Cork', 'Whisk', 'Tongs'] },
-  { n: 'Stationery', items: ['Pen', 'Ruler', 'Eraser', 'Stapler'] },
-  { n: 'Tools', items: ['Nail', 'Screw', 'Tape', 'Pliers'] },
 ];
 
 interface Piece {
@@ -75,36 +70,13 @@ export class SortScene extends PuzzleShell {
     this.input.on('pointerdown', () => { this.dragMoved = false; });
   }
 
+  /** Pieces and bins come from the shared generator (AI-2), so the scene plays exactly what the logic tests cover. */
   private generate(): { colour: number; shape: number; cat: number; label: string; bin: number }[] {
-    const d = this.req.difficulty;
-    const out: { colour: number; shape: number; cat: number; label: string; bin: number }[] = [];
-    const r = this.rand;
-    const add = (colour: number, shape: number, cat: number, label: string, bin: number): void => {
-      out.push({ colour, shape, cat, label, bin });
-    };
-    const cl = (c: number, s: number): string => `${COLOURS[c].n} ${SHAPES[s].toLowerCase()}`;
-    this.mode = d === 1 ? 'colour' : d === 2 ? (r() < 0.5 ? 'shape' : 'type') : 'combo';
-    if (this.mode === 'colour') {
-      const cs = shuffle([0, 1, 2], r).slice(0, 2);
-      this.rule = 'Sort by colour';
-      this.addBins(cs.map((c) => COLOURS[c].n), 2);
-      cs.forEach((c, k) => { for (let i = 0; i < 3; i++) { const s = Math.floor(r() * 3); add(c, s, 0, cl(c, s), k); } });
-    } else if (this.mode === 'shape') {
-      this.rule = 'Sort by shape';
-      this.addBins(SHAPES.map((s) => `${s}s`), 3);
-      for (let s = 0; s < 3; s++) for (let i = 0; i < 3; i++) { const c = Math.floor(r() * 3); add(c, s, 0, cl(c, s), s); }
-    } else if (this.mode === 'type') {
-      this.rule = 'Sort by type of thing';
-      this.addBins(CATS.map((c) => c.n), 3);
-      CATS.forEach((c, k) => shuffle(c.items.slice(), r).slice(0, 3).forEach((name) => add(0, 0, k, name, k)));
-    } else {
-      this.rule = 'Follow the rule on each bin (top rule first)';
-      this.addBins(['1. Red, any shape', '2. Round, not red', '3. Everything else'], 3);
-      for (let i = 0; i < 4; i++) { const s = Math.floor(r() * 3); add(0, s, 0, cl(0, s), 0); }
-      for (let i = 0; i < 4; i++) { const c = 1 + Math.floor(r() * 2); add(c, 0, 0, cl(c, 0), 1); }
-      for (let i = 0; i < 4; i++) { const c = 1 + Math.floor(r() * 2); const s = 1 + Math.floor(r() * 2); add(c, s, 0, cl(c, s), 2); }
-    }
-    return shuffle(out, r);
+    const spec = PUZZLES.sort.generate(this.req.seed, this.level);
+    this.mode = spec.mode;
+    this.rule = spec.rule;
+    this.addBins(spec.bins, spec.bins.length);
+    return spec.pieces.map((p) => ({ colour: p.colour, shape: p.shape, cat: p.cat, label: p.label, bin: p.bin }));
   }
 
   private pendingLabels: string[] = [];
