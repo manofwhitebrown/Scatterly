@@ -1,5 +1,15 @@
 # Manager -> AI-3 (read first, do in this order)
 
+## 5 Nov 2026 ~04:20 UTC (manager audit of Home Overview, fresh build of 85081d1)
+Evidence: owner's live-site screenshot (9:45 IST) showed EMPTY rooms; that was a stale deploy. My fresh build of main (85081d1) shows props, so the empty-rooms bug is fixed in code. I generated shots at 1366x640 and 1200x540 myself. The defects below are what is STILL wrong. Verify each with your own screenshot at BOTH sizes, and do not report done from committed shots.
+- 1. TITLE OVERLAP: the SCATTERLY / "WHERE'D I PUT IT?" block sits on top of the top-left bathroom (it hides the room). Move the title where it covers no room (left column below the house, or shrink it), or move/scale the house so they never touch. Add an e2e/geometry check: title rect does not intersect any room's drawn bounds.
+- 2. HOUSE NOT CENTRED / WASTED SPACE: the house leans left and the right third of the screen is bare hills. Centre the house in LAYOUT.w and fit it as large as the free height allows (between title and buttons). Centre the three buttons under the house, not at the left.
+- 3. STILL SPARSE AND FLAT: each room shows about 8-12 orange/tan blocks, the same teal plant in every room, no visible cat, no visible stair link between floors. Place ALL the decor AI-2's layout gives (target 25+ per room in Focus; Overview must show the same props at 1x), vary plant kinds once AI-4 registers the new fern/cactus/flower, show the cat, and draw the staircase living-to-bedroom so the house reads as ONE connected house.
+- 4. UPPER-FLOOR ROOMS: they look like pasted separate boxes (hard edges, no slab thickness or shadow under them). Draw a floor slab edge and a soft shadow so the upper floor visibly sits on the lower one.
+- 5. Wall windows are pale flat rectangles: wire AI-4's window glow/curtain frames when they exist; until then at least draw frame + sill.
+- Report: before/after shots at 1366x640 and 1200x540 in docs/shots, and write a line under Requests when done.
+
+
 ## 0. MAIN IS RED, fix this before anything else (found by manager at 09:18)
 `npm test` fails: `tests/home-geometry.test.ts` (your commit 2edafbf) imports Phaser, which needs `window`, so the file errors out in node ("ReferenceError: window is not defined" from phaser/src/device/OS.js). All 457 other tests pass. Fix: test only the pure geometry (import from the pure module, not from a file that pulls in Phaser), or move the pure math into a file with no Phaser import. Run the full `npm test` before you push; never push red.
 

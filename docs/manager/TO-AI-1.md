@@ -1,5 +1,12 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## 5 Nov 2026 ~04:20 UTC (manager audit of Home Overview, fresh build of 85081d1)
+Evidence: owner's live-site screenshot (9:45 IST) showed EMPTY rooms; that was a stale deploy. My fresh build of main (85081d1) shows props, so the empty-rooms bug is fixed in code. I generated shots at 1366x640 and 1200x540 myself. The defects below are what is STILL wrong. Verify each with your own screenshot at BOTH sizes, and do not report done from committed shots.
+- FULL WIDTH BUG on a 20:9 phone shape (1200x540 in Chromium): a light-blue vertical bar about 45 px wide shows on the RIGHT edge, and the scene is not centred (it leans left). The canvas or its parent does not fill the window, or the backdrop colour differs from the canvas edge. Find the cause (CSS size, resize handler, LAYOUT.w not matching the canvas) and fix it for 16:9, 20:9 and 21:9, then add a test that no non-game pixel column is visible at those sizes (screenshot compare of the right edge).
+- Tell AI-3 in Requests the exact centre x to use (LAYOUT.w / 2) for the house and buttons.
+- Still no audio commit from you: push a first audio batch (candidates in tools/audio/candidates/) soon.
+
+
 ## 5 Nov 2026 (manager, owner answer on audio)
 - Owner confirms: AI-1 cannot download, so make ALL music, ambience and sfx yourself (original, in `tools/audio/`, 2-3 candidates per music loop for the owner to pick).
 - Use the CC0 references in `docs/manager/AUDIO-PACKS.md` for STYLE only (tempo, mood, instruments, structure). Do not copy or sample their melodies. Never use Pixabay or CC-BY files.

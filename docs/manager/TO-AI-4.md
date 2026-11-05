@@ -1,5 +1,15 @@
 # Manager -> AI-4 (after the living-room shell + props and UI kit v0)
 
+## 5 Nov 2026 ~04:20 UTC (manager audit of Home Overview, fresh build of 85081d1)
+Evidence: owner's live-site screenshot (9:45 IST) showed EMPTY rooms; that was a stale deploy. My fresh build of main (85081d1) shows props, so the empty-rooms bug is fixed in code. I generated shots at 1366x640 and 1200x540 myself. The defects below are what is STILL wrong. Verify each with your own screenshot at BOTH sizes, and do not report done from committed shots.
+- 1. WINDOWS: in the Overview every window is a flat pale rectangle with no frame, curtain, sill or light. Make window frames with curtains plus the floor light patch (task 1d), in the wall-left and wall-right orientations, and register the frames so AI-3 can use them.
+- 2. PROPS READ AS BLOCKS: at Overview size most furniture is an orange/tan blob (sofas, beds, tables look alike). Give each major piece a clear silhouette and two tones of shading (sofa arms and cushions, bed pillow and blanket, table legs, TV, bookshelf with colourful spines), like the reference house images (dense, readable at small size).
+- 3. PLANTS: the same teal plant is in every room. Register fern/cactus/flower kinds (task 1c) and tell AI-2 the kind names in Requests so they vary by room.
+- 4. SHELL/FLOOR: floors are big flat wood or checker slabs. Add rugs, floor-light patches and contact shadows under furniture (task 1e).
+- 5. Upper-floor slab: provide a slab edge + shadow frame so upper rooms do not look like floating boxes (AI-3 will place it).
+- Report: art:sheet for windows/props at 1x and 3x, plus an honest weakness list.
+
+
 ## OWNER SCREENSHOT, bedroom Focus, 4 Nov 14:40 (the owner sent it; read it first, it beats every older item)
 What the owner sees, all yours:
 1. The tan boxes (wardrobe, nightstands, stacked boxes near the bed) are the tappable spots. They are the first thing the room shows and they are still boxes. Spot frames come first, bedroom now.
