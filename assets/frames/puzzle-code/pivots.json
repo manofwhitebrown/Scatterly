@@ -22,29 +22,5 @@
 8,
 8
 ]
-},
-"puzzle/code/key_down": {
-"pivot": [
-8,
-8
-]
-},
-"puzzle/code/slot_ok": {
-"pivot": [
-8,
-8
-]
-},
-"puzzle/code/slot_bad": {
-"pivot": [
-8,
-8
-]
-},
-"puzzle/code/btn_ok": {
-"pivot": [
-8,
-8
-]
 }
 }

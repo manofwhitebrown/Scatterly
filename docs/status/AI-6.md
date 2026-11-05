@@ -22,4 +22,6 @@
 ## Next
 - Task 2, memory: card_match, card_miss, card_face (plaster, bottom line). Evidence puzzle-memory-3x.png.
 
-Task 2 next: pipes, slide, sort (one per commit, add to KINDS in puzzle2.py). Then atlas repack request -> AI-4 and name list -> AI-7.
+- Task 2, pipes: pipe_tee, pipe_end, pipe_source (all drawn pointing up; scene rotates in 90 deg steps), plus _on water versions of straight, elbow, tee, end. Evidence puzzle-pipes-3x.png. Weak: source valve is a tiny yellow square; the old elbow channel is a pixel wider than the new pieces.
+
+Task 2 next: slide, sort (one per commit, add to KINDS in puzzle2.py). Then atlas repack request -> AI-4 and name list -> AI-7.

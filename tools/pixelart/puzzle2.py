@@ -29,7 +29,21 @@ def memory():
         put_all(px, [(x, y) for x in range(4, 8) for y in range(4, 8)], 'sage.4'); put_all(px, [(x, y) for x in range(8, 12) for y in range(8, 12)], 'sage.4')
     return {'card_match': (tilec('sage', pair), (7, 7)), 'card_miss': (tilec('terracotta', cross('plaster.1')), (7, 7)),
             'card_face': (tilec('plaster', lambda px: put_all(px, [(x, 12) for x in range(3, 11)], 'plaster.3')), (7, 7))}
-KINDS = {'code': code, 'memory': memory}
+def pipe_mark(dirs, water=None, valve=False):
+    box = {'u': (5, 0, 8, 8), 'd': (5, 5, 8, 13), 'l': (0, 5, 8, 8), 'r': (5, 5, 13, 8)}
+    def m(px):
+        for k in dirs:
+            x0, y0, x1, y1 = box[k]; put_all(px, [(x, y) for x in range(x0, x1 + 1) for y in range(y0, y1 + 1)], 'teal.1')
+        for k in dirs:
+            x0, y0, x1, y1 = box[k]; ix, iy = (6, 7) if k in 'ud' else (6, 7)
+            put_all(px, [(x, y) for x in range(max(x0, 6) if k in 'ud' else x0 + (1 if k == 'r' else 0), min(x1, 7) + 1 if k in 'ud' else x1 + 1 - (1 if k == 'l' and False else 0)) for y in range(max(y0, 6) if k in 'lr' else y0, min(y1, 7) + 1 if k in 'lr' else y1 + 1)], water or 'teal.3')
+        if valve: put_all(px, [(x, y) for x in range(5, 9) for y in range(5, 9)], 'butter.3'); put_all(px, [(6, 6), (7, 6)], 'butter.4')
+    return m
+def pipes():
+    t = lambda d, w=None, v=False: (tilec('stone', pipe_mark(d, w, v)), (7, 7))
+    return {'pipe_tee': t('urd'), 'pipe_end': t('u'), 'pipe_source': t('u', None, True),
+            'pipe_straight_on': t('ud', 'sky.4'), 'pipe_elbow_on': t('ur', 'sky.4'), 'pipe_tee_on': t('urd', 'sky.4'), 'pipe_end_on': t('u', 'sky.4')}
+KINDS = {'code': code, 'memory': memory, 'pipes': pipes}
 def save(d, kind, name, im, pv, piv):
     pd = new(im.width + 2, im.height + 2); pd.alpha_composite(im, (1, 1))
     pd.save(os.path.join(d, f'puzzle__{kind}__{name}.png')); piv[f'puzzle/{kind}/{name}'] = {'pivot': [pv[0] + 1, pv[1] + 1]}
