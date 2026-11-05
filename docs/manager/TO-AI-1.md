@@ -2,7 +2,7 @@
 
 ## 5 Nov 2026 ~04:20 UTC (manager audit of Home Overview, fresh build of 85081d1)
 Evidence: owner's live-site screenshot (9:45 IST) showed EMPTY rooms; that was a stale deploy. My fresh build of main (85081d1) shows props, so the empty-rooms bug is fixed in code. I generated shots at 1366x640 and 1200x540 myself. The defects below are what is STILL wrong. Verify each with your own screenshot at BOTH sizes, and do not report done from committed shots.
-- FULL WIDTH BUG on a 20:9 phone shape (1200x540 in Chromium): a light-blue vertical bar about 45 px wide shows on the RIGHT edge, and the scene is not centred (it leans left). The canvas or its parent does not fill the window, or the backdrop colour differs from the canvas edge. Find the cause (CSS size, resize handler, LAYOUT.w not matching the canvas) and fix it for 16:9, 20:9 and 21:9, then add a test that no non-game pixel column is visible at those sizes (screenshot compare of the right edge).
+- CORRECTION (manager): the light-blue strip on the right of a 20:9 shot is Home's sky ending at x=1280, which you already reported to AI-3. It is AI-3's fix, NOT yours; ignore my earlier order about it. Your layout work is accepted. Re-check the 1200x540 shot once AI-3 pushes full-width sky.
 - Tell AI-3 in Requests the exact centre x to use (LAYOUT.w / 2) for the house and buttons.
 - Still no audio commit from you: push a first audio batch (candidates in tools/audio/candidates/) soon.
 
