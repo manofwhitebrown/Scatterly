@@ -1,7 +1,10 @@
 import Phaser from 'phaser';
 import type { GameSession } from '../logic';
 import type { GameMode, RoomId, Scenario, SpotId } from '../shared/types';
+import { LAYOUT } from '../core/layout';
 import { Button } from '../ui/Button';
+import { hudBoxes } from '../ui/hudLayout';
+import type { Box } from '../ui/hudLayout';
 import { COLOR, CSS, DEPTH, SIZE, drawPlate, makeText } from '../ui/theme';
 import { caseProgress, checkpointText, stripText } from './caseProgress';
 
@@ -14,6 +17,8 @@ const BAR_MS = 7000;
  */
 export class CaseUi {
   private readonly strip: Phaser.GameObjects.Text;
+  private readonly pill: Phaser.GameObjects.Graphics;
+  private readonly pillRect: Box;
   private readonly bar: Phaser.GameObjects.Container;
   private readonly barText: Phaser.GameObjects.Text;
   private hide: Phaser.Time.TimerEvent | null = null;
@@ -29,7 +34,12 @@ export class CaseUi {
     mode: GameMode,
     onBreak: () => void,
   ) {
-    this.strip = makeText(scene, 640, 70, '', { fontSize: '24px', color: CSS.muted }).setOrigin(0.5, 0).setDepth(DEPTH.hud);
+    const slot = hudBoxes(LAYOUT.w, LAYOUT.h, 0, 0).strip;
+    this.pillRect = slot;
+    this.pill = scene.add.graphics().setDepth(DEPTH.hud);
+    drawPlate(this.pill, slot.x, slot.y, slot.w, slot.h, 14, COLOR.plateEdge, COLOR.plate);
+    this.pill.setAlpha(0.9);
+    this.strip = makeText(scene, slot.x + slot.w / 2, slot.y + slot.h / 2, '', { fontSize: '28px', color: CSS.cream }).setOrigin(0.5).setDepth(DEPTH.hud);
     const g = scene.add.graphics();
     drawPlate(g, -420, -56, 840, 112, 16, COLOR.plate, COLOR.plateEdge);
     this.barText = makeText(scene, -400, 0, '', { fontSize: `${SIZE.label}px`, wordWrap: { width: 380 } }).setOrigin(0, 0.5);
@@ -39,8 +49,11 @@ export class CaseUi {
     scene.time.addEvent({ delay: POLL_MS, loop: true, callback: () => this.refresh() });
     this.refresh();
     const offFound = mode === 'rush' ? () => undefined : session.on('found', () => this.checkpoint());
-    this.off = () => { offFound(); this.hide?.remove(false); };
+    this.off = () => { offFound(); this.hide?.remove(false); this.pill.destroy(); this.strip.destroy(); };
   }
+
+  /** Rect of the progress pill, for the HUD overlap audit. */
+  rect(): { id: string; x: number; y: number; w: number; h: number } { return { id: 'strip', ...this.pillRect }; }
 
   private refresh(): void {
     const t = stripText(caseProgress(this.session, this.scenario, this.rooms, this.spotRoom));

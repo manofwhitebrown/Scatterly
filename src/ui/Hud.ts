@@ -1,8 +1,12 @@
 import Phaser from 'phaser';
 import { isLowFx } from '../core/perf';
+import { LAYOUT } from '../core/layout';
+import { frame } from '../art/manifest';
 import { GAME_W, LEGACY_ROOMS, tex } from '../shared/types';
 import type { ItemId, RoomId } from '../shared/types';
 import { Button } from './Button';
+import { TRAY_STEP, TRAY_H, centre, hudBoxes, trayBox } from './hudLayout';
+import type { Box } from './hudLayout';
 import { COLOR, CSS, DEPTH, ROOM_LABEL, drawPlate, fmtClock, isCalm, makeText } from './theme';
 
 export interface HudHandlers {
@@ -24,6 +28,7 @@ export interface HudConfig {
 
 interface Slot {
   img: Phaser.GameObjects.Image;
+  outline: Phaser.GameObjects.Image[];
   check: Phaser.GameObjects.Text;
   x: number;
   y: number;
@@ -47,6 +52,9 @@ export class Hud {
   private readonly hintBtn: Button;
   private readonly clueBtn: Button;
   private houseBtn: Button | null = null;
+  private readonly home: boolean;
+  private readonly pauseBtn: Button;
+  private trayRect: Box = { x: 0, y: 0, w: 0, h: 0 };
   private lastSec = -1;
   private tone = 0;
   private clueCount = -1;
@@ -55,18 +63,27 @@ export class Hud {
   constructor(private readonly scene: Phaser.Scene, cfg: HudConfig) {
     this.root = scene.add.container(0, 0).setDepth(DEPTH.hud);
 
-    const bar = scene.add.graphics();
-    bar.fillStyle(COLOR.plate, 0.94);
-    bar.fillRect(0, 0, GAME_W, 64);
-    bar.fillStyle(COLOR.plateEdge, 1);
-    bar.fillRect(0, 62, GAME_W, 2);
-    this.root.add(bar);
-
-    this.root.add(new Button(scene, 52, 32, 56, 'II', cfg.handlers.onPause, { fontSize: 28, height: 56 }));
-
     const onHouse = cfg.handlers.onHouse;
+    this.home = !!onHouse;
+    const g = hudBoxes(LAYOUT.w, LAYOUT.h, cfg.targets.length, 0);
+    if (!this.home) {
+      const bar = scene.add.graphics();
+      bar.fillStyle(COLOR.plate, 0.94);
+      bar.fillRect(0, 0, GAME_W, 64);
+      bar.fillStyle(COLOR.plateEdge, 1);
+      bar.fillRect(0, 62, GAME_W, 2);
+      this.root.add(bar);
+    }
+
+    const pc = centre(g.pause);
+    this.pauseBtn = this.home
+      ? new Button(scene, pc.x, pc.y, g.pause.w, 'II', cfg.handlers.onPause, { fontSize: 32, height: g.pause.h })
+      : new Button(scene, 52, 32, 56, 'II', cfg.handlers.onPause, { fontSize: 28, height: 56 });
+    this.root.add(this.pauseBtn);
+
     if (onHouse) {
-      this.houseBtn = new Button(scene, 190, 32, 180, 'House', onHouse, { fontSize: 28, height: 56 });
+      const hc = centre(g.house);
+      this.houseBtn = new Button(scene, hc.x, hc.y, g.house.w, 'Home', onHouse, { fontSize: 24, height: g.house.h });
       this.root.add(this.houseBtn);
     } else {
       for (const room of LEGACY_ROOMS) {
@@ -81,11 +98,16 @@ export class Hud {
     this.setRooms(cfg.rooms);
     this.setActive(cfg.active);
 
-    this.timerText = makeText(scene, 790, 32, '', { fontSize: '36px', fontStyle: 'bold' }).setOrigin(0.5);
+    const tc = this.home ? centre(g.timer) : { x: 790, y: 32 };
+    this.timerText = makeText(scene, tc.x, tc.y, '', { fontSize: '36px', fontStyle: 'bold' }).setOrigin(0.5);
     this.timerText.setVisible(cfg.timed);
     this.root.add(this.timerText);
 
-    const clueBtn = new Button(scene, 938, 32, 176, 'Clues', cfg.handlers.onClues, { fontSize: 28, height: 56 });
+    const cc = this.home ? centre(g.clues) : { x: 938, y: 32 };
+    const wide = this.home ? g.clues.w : 176;
+    const bh = this.home ? g.clues.h : 56;
+    const fs = this.home ? 24 : 28;
+    const clueBtn = new Button(scene, cc.x, cc.y, wide, 'Clues', cfg.handlers.onClues, { fontSize: fs, height: bh });
     this.clueBtn = clueBtn;
     this.root.add(clueBtn);
     const dot = scene.add.graphics();
@@ -94,10 +116,11 @@ export class Hud {
     dot.lineStyle(3, COLOR.cream, 1);
     dot.strokeCircle(0, 0, 16);
     this.badgeText = makeText(scene, 0, 0, '0', { fontSize: '22px', fontStyle: 'bold' }).setOrigin(0.5);
-    this.badge = scene.add.container(938 + 80, 10, [dot, this.badgeText]).setVisible(false);
+    this.badge = scene.add.container(cc.x + wide / 2 - 4, cc.y - bh / 2 + 10, [dot, this.badgeText]).setVisible(false);
     this.root.add(this.badge);
 
-    this.hintBtn = new Button(scene, 1126, 32, 176, 'Hint', cfg.handlers.onHint, { fontSize: 28, height: 56 });
+    const hh = this.home ? centre(g.hint) : { x: 1126, y: 32 };
+    this.hintBtn = new Button(scene, hh.x, hh.y, wide, 'Hint', cfg.handlers.onHint, { fontSize: fs, height: bh });
     this.root.add(this.hintBtn);
 
     this.buildTray(cfg.targets);
@@ -186,6 +209,7 @@ export class Hud {
     s.done = true;
     s.img.clearTint();
     s.img.setAlpha(1);
+    for (const o of s.outline) o.setVisible(false);
     s.check.setVisible(true);
     if (!isCalm(this.scene)) {
       const base = s.img.scaleX;
@@ -219,29 +243,46 @@ export class Hud {
     this.root.destroy(true);
   }
 
+  /** One item image: the `icon/<item>` art frame when it is loaded, else the procedural item texture. */
+  private itemImage(item: ItemId, x: number, y: number): Phaser.GameObjects.Image {
+    const art = frame(`icon/${item}`);
+    const img = art ? this.scene.add.image(x, y, art.atlas, art.frame) : this.scene.add.image(x, y, tex.item(item));
+    const k = 64 / Math.max(img.width, img.height);
+    return img.setScale(k);
+  }
+
   private buildTray(targets: ItemId[]): void {
     const n = targets.length;
     if (n === 0) return;
-    const w = n * SLOT_STEP + 24;
-    const x0 = (GAME_W - w) / 2;
+    const box = trayBox(LAYOUT.w, LAYOUT.h, n);
+    this.trayRect = box;
     const tray = this.scene.add.graphics();
-    tray.fillStyle(COLOR.plate, 0.82);
-    drawPlate(tray, x0, SLOT_Y - 34, w, 66, 18, COLOR.plate, COLOR.plateEdge);
+    drawPlate(tray, box.x, box.y, box.w, box.h, 18, COLOR.plate, COLOR.plateEdge);
     this.root.add(tray);
+    const y = box.y + TRAY_H / 2;
     targets.forEach((item, i) => {
-      const x = x0 + 12 + SLOT_STEP / 2 + i * SLOT_STEP;
-      const img = this.scene.add.image(x, SLOT_Y, tex.item(item));
-      img.setDisplaySize(56, 56);
-      img.setTintFill(0x000000);
-      img.setAlpha(0.5);
-      const check = makeText(this.scene, x + 22, SLOT_Y - 24, '✓', {
-        fontSize: '30px',
-        fontStyle: 'bold',
-        color: CSS.green,
-      }).setOrigin(0.5);
+      const x = box.x + 12 + TRAY_STEP / 2 + i * TRAY_STEP;
+      // Not found yet: a cream silhouette with a dark outline (readable on the dark plate), never a black blob.
+      const outline = [[-3, 0], [3, 0], [0, -3], [0, 3]].map(([dx, dy]) => this.itemImage(item, x + dx, y + dy).setTintFill(COLOR.plateEdge));
+      const img = this.itemImage(item, x, y).setTintFill(COLOR.cream).setAlpha(0.75);
+      const check = makeText(this.scene, x + 26, y - 28, '✓', { fontSize: '30px', fontStyle: 'bold', color: CSS.green }).setOrigin(0.5);
       check.setVisible(false);
-      this.root.add([img, check]);
-      this.slots.set(item, { img, check, x, y: SLOT_Y, done: false });
+      this.root.add([...outline, img, check]);
+      this.slots.set(item, { img, outline, check, x, y, done: false });
     });
+  }
+
+  /** Real on-screen rects of every HUD element this class owns (for the overlap audit). */
+  rects(): Array<{ id: string; x: number; y: number; w: number; h: number }> {
+    const out: Array<{ id: string; x: number; y: number; w: number; h: number }> = [];
+    const add = (id: string, o: Phaser.GameObjects.GameObject | null, on = true): void => {
+      if (!o || !on) return;
+      const b = (o as unknown as Phaser.GameObjects.Components.GetBounds).getBounds();
+      out.push({ id, x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) });
+    };
+    add('pause', this.pauseBtn); add('house', this.houseBtn); add('clues', this.clueBtn); add('hint', this.hintBtn);
+    add('timer', this.timerText, this.timerText.visible);
+    if (this.trayRect.w > 0) out.push({ id: 'tray', x: this.trayRect.x, y: this.trayRect.y, w: this.trayRect.w, h: this.trayRect.h });
+    return out;
   }
 }

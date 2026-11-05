@@ -51,6 +51,7 @@ export class HomeActors {
   private catCell: Cell = { x: 2, y: 2 };
   private walking = false;
   private catTimer: Phaser.Time.TimerEvent | null = null;
+  private chains: Phaser.Tweens.TweenChain[] = [];
 
   constructor(private readonly scene: Phaser.Scene, private readonly world: Phaser.GameObjects.Container, private readonly instant: () => boolean, private readonly catRoom: RoomId, private readonly calm: () => boolean = instant) {
     this.catCell = sofaCell(catRoom);
@@ -65,7 +66,14 @@ export class HomeActors {
     return s;
   }
 
+  /** Stops every walking tween so none of them can touch a sprite that is about to be destroyed. */
+  private stopChains(): void {
+    for (const c of this.chains) c.stop();
+    this.chains = [];
+  }
+
   setRoom(room: RoomId | null): void {
+    this.stopChains();
     this.avatar?.destroy(); this.cat?.destroy(); this.catTimer?.remove(false);
     this.avatar = null; this.cat = null; this.catTimer = null; this.walking = false;
     this.room = room;
@@ -101,11 +109,11 @@ export class HomeActors {
     if (path.length < 2) { this.catTimer = this.scene.time.delayedCall(catDelay(Math.random()), () => this.wander()); return; }
     cat.play('cat-walk');
     const pts = path.map((c) => cellPt(room, c));
-    this.scene.tweens.chain({
+    this.chains.push(this.scene.tweens.chain({
       targets: cat,
-      tweens: pts.slice(1).map((p, i) => ({ x: p.x, y: p.y, duration: 380, onStart: () => cat.setFlipX(p.x < pts[i].x) })),
-      onComplete: () => { this.catCell = path[path.length - 1]; cat.play('cat-sleep'); this.catTimer = this.scene.time.delayedCall(catDelay(Math.random()), () => this.wander()); },
-    });
+      tweens: pts.slice(1).map((p, i) => ({ x: p.x, y: p.y, duration: 380, onStart: () => { if (cat.active) cat.setFlipX(p.x < pts[i].x); } })),
+      onComplete: () => { if (!cat.active) return; this.catCell = path[path.length - 1]; cat.play('cat-sleep'); this.catTimer = this.scene.time.delayedCall(catDelay(Math.random()), () => this.wander()); },
+    }));
   }
 
   /** True when a tap at game-px (x, y) hit the cat; plays its reaction. Costs the player nothing. */
@@ -134,19 +142,20 @@ export class HomeActors {
     if (ms === 0) { av.setPosition(pts[pts.length - 1].x, pts[pts.length - 1].y); arrive(); return; }
     this.walking = true;
     const per = ms / (pts.length - 1);
-    this.scene.tweens.chain({
+    this.chains.push(this.scene.tweens.chain({
       targets: av,
       tweens: pts.slice(1).map((p, i) => ({
         x: p.x, y: p.y, duration: per,
-        onStart: () => { this.dir = facingOf(p.x - pts[i].x, this.dir); av.play(`av-${this.dir}-walk`, true); },
+        onStart: () => { if (!av.active) return; this.dir = facingOf(p.x - pts[i].x, this.dir); av.play(`av-${this.dir}-walk`, true); },
       })),
-      onComplete: () => { this.walking = false; av.play(`av-${this.dir}-idle`, true); arrive(); },
-    });
+      onComplete: () => { this.walking = false; if (av.active) av.play(`av-${this.dir}-idle`, true); arrive(); },
+    }));
   }
 
   get busy(): boolean { return this.walking; }
 
   destroy(): void {
+    this.stopChains();
     this.catTimer?.remove(false);
     this.avatar?.destroy(); this.cat?.destroy();
     this.avatar = null; this.cat = null;

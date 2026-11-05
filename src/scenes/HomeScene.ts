@@ -5,13 +5,16 @@ import { allSpots } from '../logic';
 import { markTried } from './caseProgress';
 import { GAME_H, GAME_W, SCENE } from '../shared/types';
 import type { RoomId, RoomSceneData, Spot } from '../shared/types';
-import { COLOR, DEPTH, ROOM_LABEL, SAFE, drawPlate, isCalm, makeText } from '../ui/theme';
+import { COLOR, DEPTH, isCalm, makeText } from '../ui/theme';
 import { HomeMenu } from './HomeMenu';
 import { HomeSpots } from './HomeSpots';
 import { RoomRun } from './RoomRun';
 import type { RunView } from './RoomRun';
 import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
+import { buildHomeChrome } from './homeChrome';
+import { LAYOUT } from '../core/layout';
+import { hudBoxes } from '../ui/hudLayout';
 import { DecorFeel } from './homeDecor';
 import { artStats, artStatsText } from './homeArtStats';
 import { hasFrame } from '../core/assets';
@@ -37,7 +40,8 @@ const TAP_SLOP = 14;
 
 const LONG_MS = 450;
 
-interface HomeHooks { spots(): Array<{ spotId: string; x: number; y: number }>; hotspots(): Array<{ room: RoomId; x: number; y: number }>; focus(room: RoomId): void; overview(): void; focused(): RoomId | null }
+interface HomeHooks { spots(): Array<{ spotId: string; x: number; y: number }>; hotspots(): Array<{ room: RoomId; x: number; y: number }>; focus(room: RoomId): void; overview(): void; focused(): RoomId | null; hud(): HudRect[] }
+interface HudRect { id: string; x: number; y: number; w: number; h: number }
 
 /**
  * `?view=home` (SCENE.Home): ONE connected house on the global iso grid. Overview shows the whole cutaway; tapping a
@@ -60,7 +64,6 @@ export class HomeScene extends Phaser.Scene {
   private readonly baseCam: CameraState = overviewCamera(GAME_W, GAME_H);
   private focusRoom: RoomId | null = null;
   private tween: Phaser.Tweens.Tween | null = null;
-  private back: Phaser.GameObjects.Container | null = null;
   private doors: Phaser.GameObjects.Container[] = [];
   private menu: HomeMenu | null = null;
   private data0: RoomSceneData | null = null;
@@ -90,7 +93,6 @@ export class HomeScene extends Phaser.Scene {
     this.doors = [];
     this.focusRoom = null;
     this.tween = null;
-    this.back = null;
     this.menu = null;
     this.__e2e = undefined;
   }
@@ -187,6 +189,14 @@ export class HomeScene extends Phaser.Scene {
     return true;
   }
 
+  /** Real on-screen rect of every HUD element (the AI-1 overlap e2e reads this). Test hook only. */
+  private hudRects(): HudRect[] {
+    const out: HudRect[] = this.run ? this.run.hud.rects() : [];
+    if (this.run) out.push({ id: 'strip', ...hudBoxes(LAYOUT.w, LAYOUT.h, 0, 0).strip });
+    this.doors.forEach((d, i) => { const b = d.getBounds(); out.push({ id: i === 0 ? 'show' : `nav${i - 1}`, x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }); });
+    return out;
+  }
+
   private makeHooks(): HomeHooks {
     return {
       hotspots: () => HOUSE_WORLD.map((s) => {
@@ -197,6 +207,7 @@ export class HomeScene extends Phaser.Scene {
       focus: (r) => this.focusOn(r),
       overview: () => this.focusOn(null),
       focused: () => this.focusRoom,
+      hud: () => this.hudRects(),
     };
   }
 
@@ -322,29 +333,11 @@ export class HomeScene extends Phaser.Scene {
     if (f) this.rooms.bringToTop(f);
   }
 
-  private chip(x: number, y: number, label: string, cb: () => void): Phaser.GameObjects.Container {
-    const c = this.add.container(x, y).setDepth(DEPTH.hud);
-    const w = Math.max(BTN, label.length * 20 + 40);
-    const plate = this.add.graphics();
-    drawPlate(plate, -w / 2, -BTN / 2, w, BTN, 0, COLOR.plateLight, COLOR.plateEdge);
-    const t = makeText(this, 0, 0, label).setOrigin(0.5);
-    c.add([plate, t]).setSize(w, BTN).setInteractive({ useHandCursor: true });
-    c.on('pointerup', cb);
-    return c;
-  }
-
   private buildChrome(): void {
-    this.back?.destroy();
     for (const d of this.doors) d.destroy();
-    this.doors = [];
     const room = this.focusRoom;
-    this.back = room ? this.chip(SAFE + BTN / 2 + 24, SAFE + BTN / 2, '< House', () => this.focusOn(null)) : null;
-    if (!room) return;
-    if (this.run) this.doors.push(this.chip(SAFE + 130, GAME_H - SAFE - BTN / 2, 'Show tappables', () => this.hints?.outline()));
-    const near = LINKS.flatMap(([a, b]) => (a === room ? [b] : b === room ? [a] : [])).filter((r) => !this.run || this.run.rooms.includes(r));
-    near.forEach((to, i) => {
-      this.doors.push(this.chip(GAME_W - SAFE - 140, SAFE + BTN / 2 + i * (BTN + 12), ROOM_LABEL[to], () => this.focusOn(to)));
-    });
+    const near = room ? LINKS.flatMap(([a, b]) => (a === room ? [b] : b === room ? [a] : [])).filter((r) => !this.run || this.run.rooms.includes(r)) : [];
+    this.doors = room ? buildHomeChrome(this, { run: !!this.run, near, onShow: () => this.hints?.outline(), onGo: (r) => this.focusOn(r) }) : [];
   }
 
   private cleanup(): void {
@@ -366,7 +359,6 @@ export class HomeScene extends Phaser.Scene {
     this.hints = null;
     this.actors?.destroy();
     this.actors = null;
-    this.back = null;
     this.doors = [];
     this.shells.clear();
     this.dimmers.clear();
