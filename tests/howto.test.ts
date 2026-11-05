@@ -10,6 +10,16 @@ describe('how-to cards', () => {
       expect(howToText(k).length, k).toBeLessThan(110);
     }
   });
+  it('each rule describes the game that kind really is (it once described other puzzles)', () => {
+    expect(howToText('lights')).toMatch(/off/i);
+    expect(howToText('lights')).not.toMatch(/\bon\b/i);
+    expect(howToText('memory')).toMatch(/pads/i);
+    expect(howToText('sequence')).toMatch(/missing/i);
+    expect(howToText('target')).toMatch(/number/i);
+    expect(howToText('word')).toMatch(/spell/i);
+    expect(howToText('sort')).toMatch(/bin/i);
+    expect(howToText('untangle')).toMatch(/cross/i);
+  });
   it('kinds without a scene fall back to the generic line', () => {
     expect(howToText('gears')).toBe(HOWTO_FALLBACK);
   });

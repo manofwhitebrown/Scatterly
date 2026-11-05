@@ -2,17 +2,17 @@ import type { PuzzleKind } from '../shared/types';
 
 /** One-sentence rules shown once per kind on first play (flag `profile.puzzles[kind].seen`). Pure data, no Phaser. */
 export const HOWTO: Partial<Record<PuzzleKind, string>> = {
-  untangle: 'Drag the dots until no two lines cross.',
-  sort: 'Move items between containers until each one holds a single kind.',
-  word: 'Fill the letter slots. Tap a slot, then a letter.',
+  untangle: 'Drag the knots until no two cords cross.',
+  sort: 'Put each item in the right bin. The rule is shown at the top.',
+  word: 'Spell the word the line above asks for. Tap the letters in order.',
   code: 'Enter the code. Clues you have found are in the Notes drawer.',
-  target: 'Tap the targets in the order the rule says.',
-  sequence: 'Watch the pattern, then repeat it in the same order.',
-  lights: 'Tapping a light flips it and its neighbours. Turn them all on.',
+  target: 'Pick a number, an operation, then a number. Build the target.',
+  sequence: 'Every number follows a rule. Find the one missing from the gap.',
+  lights: 'Tapping a light flips it and its neighbours. Switch them all off.',
   slide: 'Slide the tiles into the empty space until the picture is in order.',
   pipes: 'Turn the pipe pieces so water can flow from the start to the end.',
-  mastermind: 'Guess the hidden colour row. Pegs tell you how close you are.',
-  memory: 'Flip two cards at a time and find every matching pair.',
+  mastermind: 'Guess the hidden row. Pegs tell you how close you are.',
+  memory: 'Watch the pads light up, then tap them in the same order.',
 };
 export const HOWTO_FALLBACK = 'Look for the pattern, then try one small change.';
 
