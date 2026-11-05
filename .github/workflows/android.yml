@@ -106,13 +106,6 @@ jobs:
           git tag -f latest
           git push -f origin refs/tags/latest
 
-      - name: Remove the previous APK from the latest release (only one file to download)
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          for a in $(gh release view latest --json assets -q '.assets[].name'); do gh release delete-asset latest "$a" -y; done
-
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
@@ -121,3 +114,12 @@ jobs:
           prerelease: true
           files: ${{ steps.apk.outputs.name }}
           overwrite_files: true
+
+      - name: Remove older APKs from the latest release (after the new one is up, so the release is never empty)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for a in $(gh release view latest --json assets -q '.assets[].name'); do
+            if [ "$a" != "${{ steps.apk.outputs.name }}" ]; then gh release delete-asset latest "$a" -y; fi
+          done
