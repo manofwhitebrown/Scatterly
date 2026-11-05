@@ -1,132 +1,150 @@
-import { getCtx, isRunning, makeBus, noiseBuffer } from './engine';
+import { getCtx, isRunning, makeBus } from './engine';
+import { getBuffer, hasBuffer, loadFile } from './bank';
+import { Loop } from './loops';
+import { tensionGain } from './logic';
+import { STING_FILE, TENSION_FILE, musicFile } from './manifest';
+import type { MusicTrack } from './manifest';
+import { runSynth, setSynthIntensity, stopSynth, synthIntensity, tempoFactor } from './musicSynth';
 
-const MUSIC_GAIN = 0.12;
-const LOOKAHEAD = 0.5;
-const EIGHTH = 0.36;
-const CHORDS: number[][] = [
-  [130.81, 196.0],
-  [110.0, 164.81],
-  [87.31, 130.81],
-  [98.0, 146.83],
-];
-const PENTA = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5];
+export { tempoFactor };
 
-let bus: GainNode | null = null;
-let timer: number | null = null;
-let nextTime = 0;
-let step = 0;
+const MUSIC_LEVEL = 0.55; // loops are at -16 LUFS; the music bus sits under the sound effects
+const FADE = 1.6;
+
+let track: MusicTrack = 'lofi_a';
+let running = false; // runMusic called and allowed
+let loop: Loop | null = null;
+let loopTrack: MusicTrack | null = null;
+let tension: Loop | null = null;
 let intensity = 0;
+let bedTimer: number | null = null;
+let ticket = 0; // bumped on every change so a slow download cannot start an outdated track
 
-/** About +8% tempo at full intensity. */
-export function tempoFactor(level: number): number {
-  return 1 + 0.08 * Math.min(1, Math.max(0, level));
-}
-
-export function setMusicIntensity(level: number): void {
-  intensity = Number.isFinite(level) ? Math.min(1, Math.max(0, level)) : 0;
+export function musicTrack(): MusicTrack {
+  return track;
 }
 
 export function musicIntensity(): number {
-  return intensity;
+  return intensity || synthIntensity();
 }
 
-function note(c: AudioContext, out: GainNode, f: number, t: number, d: number, peak: number, type: OscillatorType, attack: number): void {
-  const osc = c.createOscillator();
-  const g = c.createGain();
-  osc.type = type;
-  osc.frequency.value = f;
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.linearRampToValueAtTime(peak, t + attack);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + d);
-  osc.connect(g);
-  g.connect(out);
-  osc.start(t);
-  osc.stop(t + d + 0.05);
-}
-
-function kick(c: AudioContext, out: GainNode, t: number): void {
-  const osc = c.createOscillator();
-  const g = c.createGain();
-  osc.frequency.setValueAtTime(130, t);
-  osc.frequency.exponentialRampToValueAtTime(45, t + 0.12);
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.5, t + 0.005);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
-  osc.connect(g);
-  g.connect(out);
-  osc.start(t);
-  osc.stop(t + 0.16);
-}
-
-function hat(c: AudioContext, out: GainNode, t: number): void {
-  const src = c.createBufferSource();
-  src.buffer = noiseBuffer(c);
-  const f = c.createBiquadFilter();
-  f.type = 'highpass';
-  f.frequency.value = 6000;
-  const g = c.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.exponentialRampToValueAtTime(0.12, t + 0.003);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
-  src.connect(f);
-  f.connect(g);
-  g.connect(out);
-  src.start(t);
-  src.stop(t + 0.05);
-}
-
-function schedule(): void {
+function bus(): GainNode | null {
   const c = getCtx();
-  if (!c || !bus || !isRunning()) return;
-  const eighth = EIGHTH / tempoFactor(intensity);
-  while (nextTime < c.currentTime + LOOKAHEAD) {
-    const bar = Math.floor(step / 8) % CHORDS.length;
-    if (step % 8 === 0) {
-      for (const f of CHORDS[bar]) note(c, bus, f, nextTime, eighth * 8 + 0.2, 0.08, 'triangle', 0.6);
-    }
-    if (Math.random() < 0.3) note(c, bus, PENTA[Math.floor(Math.random() * PENTA.length)], nextTime, 0.5, 0.09, 'sine', 0.01);
-    if (intensity > 0.3 && step % 4 === 0) kick(c, bus, nextTime);
-    if (intensity > 0.6 && step % 2 === 1) hat(c, bus, nextTime);
-    nextTime += eighth;
-    step++;
+  return c ? makeBus(c, MUSIC_LEVEL, 'music') : null;
+}
+
+function stopLoop(fade: number): void {
+  loop?.stop(fade);
+  loop = null;
+  loopTrack = null;
+}
+
+function startTrack(t: MusicTrack): void {
+  const my = ++ticket;
+  const buf = getBuffer(musicFile(t));
+  const go = (b: AudioBuffer): void => {
+    if (my !== ticket || !running || document.hidden) return;
+    const dest = bus();
+    if (!dest) return;
+    stopLoop(FADE);
+    stopSynth();
+    const l = new Loop(musicFile(t));
+    if (l.start(b, dest, 1, FADE)) {
+      loop = l;
+      loopTrack = t;
+      syncTension();
+    } else runSynth(true);
+  };
+  if (buf) go(buf);
+  else {
+    if (!loop) runSynth(true); // synthesised music until the file arrives
+    void loadFile(musicFile(t)).then((b) => {
+      if (b) go(b);
+    });
   }
+}
+
+function syncTension(): void {
+  const g = tensionGain(intensity);
+  if (g <= 0) {
+    tension?.setLevel(0, 0.6);
+    return;
+  }
+  const buf = getBuffer(TENSION_FILE);
+  if (!buf) {
+    void loadFile(TENSION_FILE).then((b) => {
+      if (b) syncTension();
+    });
+    return;
+  }
+  if (!tension?.playing) {
+    const dest = bus();
+    const l = new Loop(TENSION_FILE);
+    if (dest && l.start(buf, dest, 0, 1)) tension = l;
+  }
+  tension?.setLevel(g, 0.8);
+}
+
+/** Rush tension 0..1: opens the pulse layer on top of the track (and speeds the synth fallback). */
+export function setMusicIntensity(level: number): void {
+  intensity = Number.isFinite(level) ? Math.min(1, Math.max(0, level)) : 0;
+  setSynthIntensity(intensity);
+  if (running && loop) syncTension();
+}
+
+/** Switches the background track (crossfade). Remembered, so it also applies when music starts later. */
+export function setMusicTrack(t: MusicTrack): void {
+  if (t === track && (loopTrack === t || !running)) return;
+  track = t;
+  if (running) startTrack(t);
 }
 
 export function stopMusic(): void {
-  if (timer !== null) {
-    window.clearInterval(timer);
-    timer = null;
-  }
-  const b = bus;
-  const c = getCtx();
-  if (b && c) {
-    try {
-      b.gain.setTargetAtTime(0, c.currentTime, 0.04);
-    } catch {
-      /* ignore */
-    }
-    window.setTimeout(() => {
-      try {
-        b.disconnect();
-      } catch {
-        /* ignore */
-      }
-    }, 300);
-  }
-  bus = null;
+  running = false;
+  ticket++;
+  if (bedTimer !== null) window.clearTimeout(bedTimer);
+  bedTimer = null;
+  stopLoop(0.4);
+  tension?.stop(0.4);
+  tension = null;
+  stopSynth();
 }
 
 export function runMusic(allowed: boolean): void {
+  if (!allowed || document.hidden || !getCtx() || running) return;
+  running = true;
+  startTrack(track);
+}
+
+/** The win moment: the 6 s sting plays once over a ducked bed, then the calm result bed fades in. Falls back to nothing special. */
+export function playResultMoment(): void {
   const c = getCtx();
-  if (!c || timer !== null || !allowed || document.hidden) return;
-  try {
-    stopMusic();
-    bus = makeBus(c, MUSIC_GAIN, 'music');
-    nextTime = c.currentTime + 0.05;
-    step = 0;
-    timer = window.setInterval(schedule, 100);
-    schedule();
-  } catch {
-    /* ignore */
+  if (!running || !c || !isRunning()) return;
+  const sting = getBuffer(STING_FILE);
+  if (!sting) {
+    void loadFile(STING_FILE);
+    void loadFile(musicFile('result'));
+    setMusicTrack('result');
+    return;
   }
+  const my = ++ticket;
+  stopLoop(0.8);
+  tension?.setLevel(0, 0.4);
+  stopSynth();
+  const dest = bus();
+  if (!dest) return;
+  const src = c.createBufferSource();
+  src.buffer = sting;
+  src.connect(dest);
+  src.start();
+  track = 'result';
+  if (bedTimer !== null) window.clearTimeout(bedTimer);
+  bedTimer = window.setTimeout(() => {
+    bedTimer = null;
+    if (my === ticket && running) startTrack('result');
+  }, 4500);
+}
+
+export function musicLoaded(t: MusicTrack): boolean {
+  return hasBuffer(musicFile(t));
 }

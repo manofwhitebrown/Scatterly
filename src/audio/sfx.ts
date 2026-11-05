@@ -1,17 +1,30 @@
 import { envelope, getCtx, getSfxBus, isRunning, noiseBuffer, resumeCtx, setVolumes, suspendCtx } from './engine';
 import { ambienceRoom, setAmbience, syncAmbience } from './ambience';
-import { musicIntensity, runMusic, setMusicIntensity, stopMusic } from './music';
+import { musicIntensity, playResultMoment, runMusic, setMusicIntensity, setMusicTrack, stopMusic } from './music';
+import { loadGroup } from './bank';
+import { playSample } from './samples';
+import type { MusicTrack, SoundGroup } from './manifest';
 import { RECIPES, SUCCESS_VARIANTS } from './recipes';
 import type { Recipe, SfxName } from './recipes';
 import { VOICE_BUDGET, VoiceBook } from './voices';
 
 export type { SfxName } from './recipes';
+export type { MusicTrack, SoundGroup } from './manifest';
+
+/** Any sound by name: the synthesised base set, or any of the recorded-style names in `src/audio/manifest.ts` (SFX_GROUPS). */
+export type SoundName = SfxName | (string & {});
 
 export interface PlayOpts { step?: number }
 
 export interface SfxApi {
   unlock(): void;
-  play(name: SfxName, opts?: PlayOpts): void;
+  play(name: SoundName, opts?: PlayOpts): void;
+  /** Switch the background loop (crossfade). Applies now if music runs, otherwise when it starts. */
+  setTrack(track: MusicTrack): void;
+  /** The win moment: 6 s sting over a ducked bed, then the calm result bed. */
+  resultMoment(): void;
+  /** Start downloading a group of sounds ahead of need (idle time). */
+  preload(group: SoundGroup): void;
   setIntensity(level: number): void;
   setRoomAmbience(room: string | null): void;
   setEnabled(sfx: boolean, music: boolean): void;
@@ -29,17 +42,23 @@ let hooked = false;
 const voices = new VoiceBook(VOICE_BUDGET.sfx);
 const lastPlayed: Partial<Record<SfxName, number>> = {};
 
-function play(name: SfxName, opts?: PlayOpts): void {
+function play(name: SoundName, opts?: PlayOpts): void {
   if (!sfxOn) return;
   const c = getCtx();
   const out = getSfxBus();
   if (!c || !out || !isRunning()) return;
   try {
+    const now0 = c.currentTime;
+    const lastS = lastPlayed[name as SfxName];
+    if (lastS !== undefined && now0 - lastS < MIN_GAP) return;
+    if (playSample(name, opts?.step ?? 0, voices)) {
+      lastPlayed[name as SfxName] = now0;
+      return;
+    }
+    if (!(name in RECIPES)) return; // a recorded-only name that is not loaded yet: silent this once, loaded for next time
     const now = c.currentTime;
-    const last = lastPlayed[name];
-    if (last !== undefined && now - last < MIN_GAP) return;
-    lastPlayed[name] = now;
-    const r: Recipe = name === 'success' ? SUCCESS_VARIANTS[Math.floor(Math.random() * SUCCESS_VARIANTS.length)] : RECIPES[name];
+    lastPlayed[name as SfxName] = now;
+    const r: Recipe = name === 'success' ? SUCCESS_VARIANTS[Math.floor(Math.random() * SUCCESS_VARIANTS.length)] : RECIPES[name as SfxName];
     const stepUp = Math.pow(2, Math.min(12, Math.max(0, Math.floor(opts?.step ?? 0))) / 12);
     const jitter = (1 + (Math.random() - 0.5) * 0.06) * stepUp;
     const gains: GainNode[] = [];
@@ -123,6 +142,7 @@ export const sfx: SfxApi = {
       if (c) {
         syncAmbience(sfxOn);
         if (musicWanted) runMusic(musicOn);
+        void loadGroup('core'); // the interface sounds; the rest load when first needed
       }
     } catch {
       /* ignore */
@@ -147,6 +167,15 @@ export const sfx: SfxApi = {
     else if (musicWanted) runMusic(true);
   },
   setVolumes,
+  setTrack(track: MusicTrack): void {
+    setMusicTrack(track);
+  },
+  resultMoment(): void {
+    if (musicOn) playResultMoment();
+  },
+  preload(group: SoundGroup): void {
+    void loadGroup(group);
+  },
   startMusic(): void {
     musicWanted = true;
     if (!musicOn || !getCtx()) return;

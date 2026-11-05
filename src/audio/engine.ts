@@ -1,10 +1,17 @@
 /** Shared AudioContext, master gain and limiter. Everything is lazy and silent-safe before the first user gesture. */
-const SFX_GAIN = 0.25;
+const SFX_GAIN = 0.25; // synthesised fallback sounds
+const SAMPLE_GAIN = 0.8; // recorded-style files are already level-matched offline (see tools/audio/render.py)
 const MASTER_GAIN = 0.9;
+/** Music dips to this fraction under a stinger or result sound, then recovers. */
+export const DUCK_DEPTH = 0.45;
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let sfxBus: GainNode | null = null;
+let sampleBus: GainNode | null = null;
+let uiBus: GainNode | null = null;
+let duckNode: GainNode | null = null;
+export type BusName = 'sfx' | 'ui';
 export type VolGroup = 'music' | 'ambience';
 const groups: Partial<Record<VolGroup, GainNode>> = {};
 const trims: Record<'music' | 'sfx' | 'ambience', number> = { music: 1, sfx: 1, ambience: 1 };
@@ -37,17 +44,25 @@ export function getCtx(): AudioContext | null {
     sfxBus = ctx.createGain();
     sfxBus.gain.value = SFX_GAIN * trims.sfx;
     sfxBus.connect(master);
+    sampleBus = ctx.createGain();
+    sampleBus.gain.value = SAMPLE_GAIN * trims.sfx;
+    sampleBus.connect(master);
+    uiBus = ctx.createGain(); // UI sounds follow the sound-effects slider but are their own bus (never ducked, never stolen)
+    uiBus.gain.value = SAMPLE_GAIN * trims.sfx;
+    uiBus.connect(master);
+    duckNode = ctx.createGain();
+    duckNode.connect(master);
     for (const g of ['music', 'ambience'] as const) {
       const n = ctx.createGain();
       n.gain.value = trims[g];
-      n.connect(master);
+      n.connect(g === 'music' ? duckNode : master);
       groups[g] = n;
     }
     return ctx;
   } catch {
     ctx = null;
     master = null;
-    sfxBus = null;
+    sfxBus = sampleBus = uiBus = duckNode = null;
     groups.music = groups.ambience = undefined;
     return null;
   }
@@ -70,12 +85,30 @@ export function setVolumes(v: { music: number; sfx: number; ambience: number }):
   if (!ctx) return;
   const t = ctx.currentTime;
   sfxBus?.gain.setTargetAtTime(SFX_GAIN * trims.sfx, t, 0.03);
+  sampleBus?.gain.setTargetAtTime(SAMPLE_GAIN * trims.sfx, t, 0.03);
+  uiBus?.gain.setTargetAtTime(SAMPLE_GAIN * trims.sfx, t, 0.03);
   groups.music?.gain.setTargetAtTime(trims.music, t, 0.03);
   groups.ambience?.gain.setTargetAtTime(trims.ambience, t, 0.03);
 }
 
 export function getSfxBus(): GainNode | null {
   return sfxBus;
+}
+
+/** Bus for recorded-style samples: `ui` for buttons and panels (never ducked), `sfx` for everything else. */
+export function getSampleBus(bus: BusName): GainNode | null {
+  return bus === 'ui' ? uiBus : sampleBus;
+}
+
+/** Music dips under a sound, holds, then eases back. Safe to call repeatedly: later calls extend the dip. */
+export function duckMusic(hold: number, depth = DUCK_DEPTH): void {
+  const c = ctx;
+  const g = duckNode?.gain;
+  if (!c || !g) return;
+  const t = c.currentTime;
+  g.cancelScheduledValues(t);
+  g.setTargetAtTime(depth, t, 0.04);
+  g.setTargetAtTime(1, t + hold, 0.35);
 }
 
 export function noiseBuffer(c: AudioContext): AudioBuffer {

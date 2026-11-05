@@ -1,6 +1,11 @@
 import type Phaser from 'phaser';
 import { PUZZLE_SCENE } from '../shared/types';
 import { LAYOUT } from './layout';
+import { failedFiles, loadedCount } from '../audio/bank';
+import { getCtx } from '../audio/engine';
+import { musicTrack } from '../audio/music';
+import { audioDebug, sfx } from '../audio/sfx';
+import type { SfxApi } from '../audio/sfx';
 import type { Difficulty, PuzzleKind, PuzzleResult } from '../shared/types';
 import type { FrameStats } from './frameStats';
 import { readMetrics } from './metrics';
@@ -13,6 +18,8 @@ import { isBackground, setBackground } from './lifecycle';
 export interface ScatterlyE2E {
   game: Phaser.Game;
   size: { w: number; h: number };
+  sound: SfxApi;
+  audio(): { state: string; decoded: number; failed: string[]; ambience: string | null; track: string; intensity: number };
   metrics(): Metrics;
   resetFrameStats(): void;
   errors(): readonly { at: number; message: string }[];
@@ -86,6 +93,8 @@ export function installE2e(game: Phaser.Game, stats: FrameStats): void {
   const api: ScatterlyE2E = {
     game,
     get size() { return { w: LAYOUT.w, h: LAYOUT.h }; },
+    sound: sfx,
+    audio: () => ({ state: getCtx()?.state ?? 'none', decoded: loadedCount(), failed: failedFiles(), ambience: audioDebug().ambience, track: musicTrack(), intensity: audioDebug().intensity }),
     metrics: () => readMetrics(game, stats),
     resetFrameStats: () => stats.reset(),
     errors: () => errorLog(),

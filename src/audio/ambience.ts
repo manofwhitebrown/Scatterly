@@ -1,4 +1,8 @@
 import { bedBuffer, getCtx, isRunning, makeBus } from './engine';
+import { getBuffer, loadFile } from './bank';
+import { Loop } from './loops';
+import { loopsFor } from './logic';
+import { AMBIENCE_LEVEL, ambFile } from './manifest';
 
 interface BedSpec { lo: number; q: number; level: number; hum?: number; humLevel?: number }
 
@@ -86,14 +90,58 @@ export function setAmbience(room: string | null, enabled: boolean): void {
   syncAmbience(enabled);
 }
 
+let sampleLoops: Loop[] = [];
+let sampleRoom: string | null = null;
+let lastEnabled = true;
+
+function stopSamples(fade: number): void {
+  for (const l of sampleLoops) l.stop(fade);
+  sampleLoops = [];
+  sampleRoom = null;
+}
+
+/** Starts the room's recorded loops once all of them are decoded. Returns true when they are playing (the synth bed is not needed). */
+function trySamples(room: string): boolean {
+  const names = loopsFor(room);
+  if (names.length === 0) return false;
+  const bufs = names.map((n) => getBuffer(ambFile(n)));
+  if (bufs.some((b) => !b)) {
+    for (const n of names) void loadFile(ambFile(n)).then((b) => b && wanted === room && syncAmbience(lastEnabled));
+    return false;
+  }
+  if (sampleRoom === room && sampleLoops.length > 0) return true;
+  const c = getCtx();
+  if (!c) return false;
+  stopSamples(0.8);
+  const bus = makeBus(c, 1, 'ambience');
+  names.forEach((n, i) => {
+    const l = new Loop(ambFile(n));
+    if (l.start(bufs[i] as AudioBuffer, bus, AMBIENCE_LEVEL[n], 1.2)) sampleLoops.push(l);
+  });
+  sampleRoom = room;
+  return sampleLoops.length > 0;
+}
+
 export function syncAmbience(enabled: boolean): void {
+  lastEnabled = enabled;
   if (!isRunning() || document.hidden || !enabled || !wanted) {
+    stopSamples(0.15);
     if (current) {
       stopBed(current, 0.15);
       current = null;
+      currentRoom = null;
     }
     return;
   }
+  if (trySamples(wanted)) {
+    if (current) {
+      stopBed(current, 0.8);
+      current = null;
+      currentRoom = null;
+    }
+    return;
+  }
+  if (sampleRoom !== wanted) stopSamples(0.6);
   if (current && currentRoom === wanted) return;
   if (current) stopBed(current, 0.6);
   current = startBed(wanted);

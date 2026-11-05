@@ -8,6 +8,8 @@ const JS_GZIP_LIMIT = 600 * 1024; // fail
 // Manager decision (4 Nov): budget = hard limit = 2560 KB, no more silent growth. New art and audio must be lazy groups.
 const DIST_BUDGET = 2560 * 1024; // warn
 const DIST_LIMIT = 2560 * 1024; // fail
+// Audio has its own cap (owner brief: at most 8 MB, lazy groups only) and is NOT part of the dist total above.
+const AUDIO_LIMIT = 8 * 1024 * 1024; // fail
 const BOOT_LIMIT = 1900 * 1024; // fail: index.html plus everything it loads before the first frame
 
 function walk(dir) {
@@ -32,9 +34,14 @@ try {
 
 let jsGzip = 0;
 let distBytes = 0;
+let audioBytes = 0;
 console.log('JS bundles (gzip):');
 for (const f of files) {
   const size = statSync(f).size;
+  if (relative(DIST, f).startsWith('audio')) {
+    audioBytes += size;
+    continue;
+  }
   distBytes += size;
   if (!f.endsWith('.js') || !relative(DIST, f).startsWith('assets')) continue;
   const gz = gzipSync(readFileSync(f)).length;
@@ -42,7 +49,8 @@ for (const f of files) {
   console.log(`  ${relative(DIST, f).padEnd(40)} ${kb(size).padStart(11)} raw  ${kb(gz).padStart(10)} gzip`);
 }
 console.log(`Total JS gzip: ${kb(jsGzip)} (budget ${kb(JS_GZIP_BUDGET)}, limit ${kb(JS_GZIP_LIMIT)})`);
-console.log(`Total dist:    ${kb(distBytes)} (budget ${kb(DIST_BUDGET)}, limit ${kb(DIST_LIMIT)})`);
+console.log(`Total dist:    ${kb(distBytes)} without audio (budget ${kb(DIST_BUDGET)}, limit ${kb(DIST_LIMIT)})`);
+console.log(`Audio:         ${kb(audioBytes)} (limit ${kb(AUDIO_LIMIT)}), lazy groups only`);
 
 // Boot payload: index.html + every script / modulepreload / stylesheet it references. Everything else (dynamic chunks,
 // atlases, audio, fonts fetched on demand) is lazy and only counts toward the total.
@@ -60,6 +68,10 @@ for (const ref of refs) {
 console.log(`Boot payload:  ${kb(bootBytes)} (limit ${kb(BOOT_LIMIT)}), lazy: ${kb(distBytes - bootBytes)} (atlases, audio, dynamic chunks)`);
 
 let failed = false;
+if (audioBytes > AUDIO_LIMIT) {
+  console.error('FAIL: audio is over its 8 MB limit.');
+  failed = true;
+}
 if (bootBytes > BOOT_LIMIT) {
   console.error('FAIL: boot payload is over the limit: make the new art/audio a lazy group.');
   failed = true;
