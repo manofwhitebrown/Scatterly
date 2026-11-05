@@ -104,6 +104,7 @@ export class HomeScene extends Phaser.Scene {
     this.actors = new HomeActors(this, this.world, () => isCalm(this) || this.run?.mode === 'rush' || this.run?.profile.settings.walkAnim === false, 'living', () => isCalm(this));
     this.rooms = this.add.container(0, 0);
     this.world.add(this.rooms);
+    this.actors = new HomeActors(this, this.world, () => isCalm(this) || this.run?.mode === 'rush' || this.run?.profile.settings.walkAnim === false, 'living', () => isCalm(this));
     void Promise.all([ensureGroup(this, 'room:slice'), ensureGroup(this, 'house'), ...WORLD_ROOMS.map((r) => ensureGroup(this, `room:${r}`))]).then(() => { if (this.sys.isActive() && this.rooms.active) this.rebuildRooms(); });
     void ensureGroup(this, 'house').then(() => { if (this.sys.isActive() && this.rooms.active) this.world.addAt(bakeYard(this), 0); });
     for (const s of HOUSE_WORLD) {
@@ -144,7 +145,9 @@ export class HomeScene extends Phaser.Scene {
       c.add(g);
     }
     addWindowGlow(this, c, room as WorldRoom);
-    this.decor?.setTargets(room, drawRoomProps(this, c, room as WorldRoom));
+    // Always draw the props (the Overview needs them too); `decor` only exists during a run, and `a?.f(g())` would skip g().
+    const targets = drawRoomProps(this, c, room as WorldRoom);
+    this.decor?.setTargets(room, targets);
     if (drawStairsArt(this, c, room as WorldRoom)) return;
     const st = this.add.graphics();
     drawStairs(st, room as WorldRoom);
