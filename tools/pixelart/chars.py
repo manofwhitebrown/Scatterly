@@ -20,13 +20,16 @@ def avatar(anim, n):
     c.r(2, t, 8, 4, 'h'); c.r(2, t + 3, 2, 3, 'h')                       # hair, side lock
     c.r(3, t + 3, 7, 6, 's'); c.r(9, t + 4, 1, 3, 'S')                   # face, cheek shade
     c.p(6, t + 5, 'e'); c.p(8, t + 5, 'e'); c.p(7, t + 7, 'x')           # eyes shifted to SE, mouth
-    c.r(3, t + 9, 7, 7, 'a'); c.r(3, t + 15, 7, 1, 'A')                  # sweater
+    c.r(4, t + 1, 3, 1, 'f'); c.p(3, t + 4, 'H'); c.p(2, t + 7, 'H'); c.p(4, t + 5, 'S')   # hair highlight, back-hair shade, ear
+    c.r(3, t + 9, 7, 7, 'a'); c.r(3, t + 15, 7, 1, 'A'); c.r(9, t + 10, 1, 5, 'A')       # sweater, shade on the far-from-light side
+    c.r(5, t + 9, 3, 1, 'w')                                                               # collar
+    for i in range(5): c.p(4 + i, t + 10 + i, 'c' if i % 2 == 0 else 'C')                  # satchel strap
     swing = {0: 0, 1: 1, 2: 0, 3: 0, 4: -1, 5: 0}.get(n, 0) if anim == 'walk' else 0
-    c.r(2, t + 10 + swing, 1, 5, 'a'); c.r(10, t + 10 - swing, 1, 5, 'a')  # arms
+    c.r(2, t + 10 + swing, 1, 5, 'A'); c.r(10, t + 10 - swing, 1, 5, 'a')  # arms
     c.p(2, t + 15 + swing, 's'); c.p(10, t + 15 - swing, 's')             # hands
     if anim == 'reach': c.r(10, t + 5, 1, 6, 'a'); c.p(10, t + 4, 's'); c.r(10, t + 10, 1, 1, 'a')
     a, b = {0: (0, 0), 1: (-1, 1), 2: (-2, 2), 3: (0, 0), 4: (1, -1), 5: (2, -2)}.get(n, (0, 0)) if anim == 'walk' else (0, 0)
-    c.r(4, 16, 2, 5 - (1 if a < 0 else 0), 'n'); c.r(7, 16, 2, 5 - (1 if b < 0 else 0), 'n')
+    c.r(4, 16, 2, 5 - (1 if a < 0 else 0), 'N'); c.r(7, 16, 2, 5 - (1 if b < 0 else 0), 'n')
     c.r(4 + max(a, 0) - (1 if a < 0 else 0) * 0, 21 - (1 if a < 0 else 0), 3, 1, 'f'); c.r(7 + max(b, 0), 21 - (1 if b < 0 else 0), 3, 1, 'f')
     return c.rows()
 def cat(anim, n):

@@ -9,11 +9,13 @@
 - Task 1(d) windows: shells now have rose curtains (tie-back, folds, darker at dusk/night) via tools/materials/gen.py window_px; the window glow overlay (tools/pixelart/light.py) is now a light dither over the glass only, so frame, muntins and curtains show through. Floor light patch under each window already existed in the shell. Regenerate: gen.py assets/frames, light.py assets/frames/house, pack.py.
 - Task 1(e) part 1, contact shadows: tools/pack/pack.py now bakes a checker-dithered palette `shade` ellipse behind every floor-standing `prop/<kind>` frame in room-slice (kinds parsed from src/content/worldKinds.ts: not flat/top/mount); source PNGs stay clean, frames gain 2 px of canvas at the bottom, pivots unchanged. Shadow sits under the sprite's visible base, not the true footprint, so a few look a pixel or two off.
 - Task 2 spot frames: audit of every spot kind in src/content/house.ts showed all already had `spot/<kind>/closed|open` except `keyHook`; added it (wall key board, 3 hooks with keys; open state shows one empty hook). Added `ui/check`, `ui/hunch`, `ui/ruledOut` marks (12x12, core atlas) to replace the text glyphs in HomeSpots; `ui/padlock` already existed. Source: tools/pixelart/spots2.py <room-slice dir> <core dir>.
+- Task 3 avatar: existing outlined 12x22 figure (idle 2, walk 6, reach 3, se and mirrored sw) got a 3/4 pass: hair highlight and back-hair shade, ear, collar, terracotta satchel strap, shaded far arm and leg, shade on the sweater's far side. Same frame names, sizes and pivots, so nothing to wire. Cat unchanged (sleep, idle, walk, react, eat all exist). Source: tools/pixelart/chars.py.
 ## Verified
 - `python3 tools/check-frames/check.py assets/frames/room-slice --max 96` -> "141 files, 0 problems".
 - `npm run art:sheet` -> "missing frames: none"; rugs checked by eye in docs/art/evidence/art-sheet.png; bed frames checked enlarged in isolation only (art-sheet does not draw spots).
 - Arrival baseline: `npm test` 458 passed, 1 suite red (tests/home-geometry.test.ts, "window is not defined", AI-3's to fix).
 ## Not verified
+- Avatar and cat at Overview/phone size: only checked enlarged on a contact sheet.
 - `npm run shots` could not run: no browser in this sandbox (Chromium download blocked). No Focus or Overview screenshot checked this unit; only the browser-free art sheet. Phone feel: owner only.
 ## Weaknesses (honest, from art-sheet)
 - Same teal spiky plant still used 2-3 times per room; rooms still read 18-29 props with big empty floor; floor-level pieces like the small red tiles look like stray markers.
