@@ -226,5 +226,23 @@
 6,
 3
 ]
+},
+"ui/check": {
+"pivot": [
+8,
+13
+]
+},
+"ui/hunch": {
+"pivot": [
+8,
+13
+]
+},
+"ui/ruledOut": {
+"pivot": [
+8,
+12
+]
 }
 }

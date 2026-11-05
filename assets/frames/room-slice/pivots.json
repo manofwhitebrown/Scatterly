@@ -742,5 +742,17 @@
 9,
 15
 ]
+},
+"spot/keyHook/closed": {
+"pivot": [
+8,
+8
+]
+},
+"spot/keyHook/open": {
+"pivot": [
+8,
+8
+]
 }
 }
