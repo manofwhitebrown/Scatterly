@@ -17,9 +17,9 @@ def pane(night):
             dx, dy = max(m - x, 0, x - (m + W - 1)), max(m - y, 0, y - (m + H - 1))
             d = max(dx, dy)
             if d == 0:
-                edge = x in (m, m + W - 1) or y in (m, m + H - 1)
-                mun = (x - m) % 16 == 8 or y == m + H // 2
-                px[x, y] = col('plaster.4') if edge or mun else col('butter.4') if (night or (x + y) % 5 == 0) else col('butter.3')
+                # the shell already draws frame, muntins and curtains: only dither warm light over the glass between the drapes
+                u, v = x - m, y - m
+                if 7 <= u < W - 7 and 3 <= v < H - 2 and (x + y) % (2 if night else 3) == 0: px[x, y] = col('butter.4') if night else col('butter.3')
             elif d <= m and ((x + y) % 2 == 0 if d <= 2 else (x % 2 == 0 and y % 2 == 0)): px[x, y] = col('glow')
     return im
 def lamp():

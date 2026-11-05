@@ -58,6 +58,15 @@ def window_px(u, v, u0, w_cells, tod):
     if not (x0 <= u < x1 and y0 <= v < y1): return None
     if u < x0 + 2 or u >= x1 - 2 or v < y0 + 2 or v >= y1 - 2: return R('woodDark', 3 if v >= y1 - 2 else 2)   # frame
     if v < y0 + 4: return R('woodDark', 3)                                                                  # sill
+    # curtains: a drape on each side, wider above the tie-back (mid-height) than below, folds alternate tone, darker at night
+    cw = 5 if v >= (y0 + y1) // 2 else 3
+    cu = min(u - (x0 + 2), (x1 - 3) - u)
+    if 0 <= cu < cw:
+        t = {'day': 3, 'dusk': 2, 'night': 1}[tod]
+        if cu == cw - 1 or v == (y0 + y1) // 2 - 1: t -= 1
+        elif (u - x0) % 2 == 0: t += 0
+        else: t -= 0
+        return R('rose', max(0, min(4, t + (1 if (u + v // 3) % 2 else 0))))
     if (u - x0) % 16 == 8 or v == (y0 + y1) // 2: return R('woodDark', 2)                                  # muntins
     rn, base, hi = SKY[tod]
     if tod != 'night' and ((u - x0) + (v - y0)) % 14 in (0, 1) and (u - x0) % 16 < 8: return R(rn, hi)      # glint
