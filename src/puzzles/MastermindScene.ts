@@ -92,6 +92,13 @@ export class MastermindScene extends PuzzleShell {
       if (!t) continue;
       if (!row) {
         t.setText('');
+        const cy = HY + r * ROW_H + ROW_H / 2;
+        if (r === this.guesses.length) {
+          h.fillStyle(PAL.butter, 0.55);
+          h.fillRoundedRect(HX - 2, cy - ROW_H / 2 + 2, 424, ROW_H - 4, 8); // the row being guessed now
+        }
+        h.lineStyle(3, PAL.panelEdge, 0.3);
+        for (let c = 0; c < spec.slots; c++) h.strokeCircle(HX + 24 + c * 46, cy, 13); // empty peg holes
         continue;
       }
       row.forEach((sym, c) => drawSymbol(h, sym, HX + 24 + c * 46, HY + r * ROW_H + ROW_H / 2, 15));
