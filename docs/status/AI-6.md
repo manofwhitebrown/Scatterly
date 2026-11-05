@@ -20,4 +20,6 @@
 - slot_ok/slot_bad are colour only (no mark), so colour-blind players get no cue unless the scene adds one. Panel trims still near-identical across kinds.
 
 ## Next
-Task 2: memory, pipes, slide, sort (one per commit, add to KINDS in puzzle2.py). Then atlas repack request -> AI-4 and name list -> AI-7.
+- Task 2, memory: card_match, card_miss, card_face (plaster, bottom line). Evidence puzzle-memory-3x.png.
+
+Task 2 next: pipes, slide, sort (one per commit, add to KINDS in puzzle2.py). Then atlas repack request -> AI-4 and name list -> AI-7.

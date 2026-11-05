@@ -24,7 +24,12 @@ def code():
     return {'key': (tilec('stone', keycap(False)), (7, 7)), 'key_down': (tilec('stone', keycap(True)), (7, 7)),
             'slot': (tilec('plaster', well('plaster.1')), (7, 7)), 'slot_ok': (tilec('sage', well('sage.3')), (7, 7)),
             'slot_bad': (tilec('terracotta', well('terracotta.3')), (7, 7)), 'btn_ok': (tilec('sage', check()), (7, 7))}
-KINDS = {'code': code}
+def memory():
+    def pair(px):
+        put_all(px, [(x, y) for x in range(4, 8) for y in range(4, 8)], 'sage.4'); put_all(px, [(x, y) for x in range(8, 12) for y in range(8, 12)], 'sage.4')
+    return {'card_match': (tilec('sage', pair), (7, 7)), 'card_miss': (tilec('terracotta', cross('plaster.1')), (7, 7)),
+            'card_face': (tilec('plaster', lambda px: put_all(px, [(x, 12) for x in range(3, 11)], 'plaster.3')), (7, 7))}
+KINDS = {'code': code, 'memory': memory}
 def save(d, kind, name, im, pv, piv):
     pd = new(im.width + 2, im.height + 2); pd.alpha_composite(im, (1, 1))
     pd.save(os.path.join(d, f'puzzle__{kind}__{name}.png')); piv[f'puzzle/{kind}/{name}'] = {'pivot': [pv[0] + 1, pv[1] + 1]}
