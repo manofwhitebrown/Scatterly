@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import type { WorldRoom } from '../content/world';
 import type { RoomId } from '../shared/types';
-import { FLOOR1_RAISE, HOUSE_WORLD, ROOM_SIZE, SLAB_PX, WALL_PX, project } from './homeWorld';
+import type { Pt } from './homeWorld';
+import { FLOOR1_RAISE, HOUSE_WORLD, ROOM_SIZE, SLAB_PX, WALL_PX, project, roomPolygon } from './homeWorld';
 
 const TINT: Record<string, { floor: number; wallL: number; wallR: number }> = {
   entrance: { floor: 0xc99a62, wallL: 0xe3c28f, wallR: 0xd9b27a },
@@ -32,4 +33,33 @@ export function drawRoomShell(g: Phaser.GameObjects.Graphics, room: RoomId): voi
   g.lineStyle(1, 0x3b2a1c, 0.35);
   for (let i = 1; i < w; i++) g.lineBetween(P(i, 0).x, P(i, 0).y, P(i, d).x, P(i, d).y);
   for (let j = 1; j < d; j++) g.lineBetween(P(0, j).x, P(0, j).y, P(w, j).x, P(w, j).y);
+}
+
+const SLAB_EDGE = 16; // art px of visible slab thickness under an upper-floor room
+
+/** The four floor corners of a room (art px): left, back, right, front. */
+function floorCorners(room: RoomId): { L: Pt; B: Pt; R: Pt; F: Pt } {
+  const p = roomPolygon(room);
+  return { L: { x: p[0].x, y: p[0].y + WALL_PX }, B: { x: p[1].x, y: p[1].y + WALL_PX }, R: p[3], F: { x: p[4].x, y: p[4].y - SLAB_PX } };
+}
+
+/** Soft shadow an upper room casts on the floor below: the floor diamond pushed down, three faint layers. Drawn BEFORE the shell. */
+export function drawUpperShadow(g: Phaser.GameObjects.Graphics, room: RoomId): void {
+  const { L, B, R, F } = floorCorners(room);
+  for (let k = 0; k < 3; k++) {
+    const dy = 22 + k * 10; const grow = k * 6;
+    g.fillStyle(0x16252a, 0.10).fillPoints([{ x: L.x - grow, y: L.y + dy }, { x: B.x, y: B.y + dy - grow }, { x: R.x + grow, y: R.y + dy }, { x: F.x, y: F.y + dy + grow }], true);
+  }
+}
+
+/** Visible slab edge along the two front sides of an upper-floor room, so it sits ON the floor below instead of floating. Drawn AFTER the shell. */
+export function drawUpperSlab(g: Phaser.GameObjects.Graphics, room: RoomId): void {
+  const { L, R, F } = floorCorners(room);
+  const T = SLAB_EDGE;
+  const face = (a: Pt, b: Pt, c: number): void => {
+    g.fillStyle(c, 1).fillPoints([a, b, { x: b.x, y: b.y + T }, { x: a.x, y: a.y + T }], true);
+    g.lineStyle(2, 0x16252a, 1).strokePoints([{ x: a.x, y: a.y + T }, { x: b.x, y: b.y + T }], false);
+  };
+  face(L, F, 0x8a5a4a);
+  face(F, R, 0x6a3f45);
 }

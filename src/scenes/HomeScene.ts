@@ -10,7 +10,7 @@ import { HomeMenu } from './HomeMenu';
 import { HomeSpots } from './HomeSpots';
 import { RoomRun } from './RoomRun';
 import type { RunView } from './RoomRun';
-import { drawRoomShell } from './homeDraw';
+import { drawRoomShell, drawUpperShadow, drawUpperSlab } from './homeDraw';
 import { drawRoomProps } from './homeProps';
 import { buildHomeChrome } from './homeChrome';
 import { HomeLight } from './homeLight';
@@ -144,6 +144,8 @@ export class HomeScene extends Phaser.Scene {
   /** (Re)builds one room's static layer: shell, then decor in painter order (baked `prop/<kind>` art where a frame exists, a box otherwise). */
   private buildRoom(c: Phaser.GameObjects.Container, room: RoomId): void {
     c.removeAll(true);
+    const upper = HOUSE_WORLD.find((s) => s.room === room)?.floor === 1;
+    if (upper) { const sh = this.add.graphics(); drawUpperShadow(sh, room); c.add(sh); }
     const shell = frame(`shell/${room}/${shellPart(this.light.time)}`) ?? frame(`shell/${room}/full`);
     const slot = HOUSE_WORLD.find((s) => s.room === room);
     if (shell && slot) {
@@ -155,6 +157,7 @@ export class HomeScene extends Phaser.Scene {
       drawRoomShell(g, room);
       c.add(g);
     }
+    if (upper) { const sl = this.add.graphics(); drawUpperSlab(sl, room); c.add(sl); }
     addWindowGlow(this, c, room as WorldRoom, this.light.time === 'dusk' || this.light.time === 'night');
     // Always draw the props (the Overview needs them too); `decor` only exists during a run, and `a?.f(g())` would skip g().
     const targets = drawRoomProps(this, c, room as WorldRoom);
