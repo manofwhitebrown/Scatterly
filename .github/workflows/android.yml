@@ -81,7 +81,7 @@ jobs:
         continue-on-error: true
         run: |
           pip install pillow
-          python3 scripts/make-icon.py android/app/src/main/res
+          python3 scripts/make-icon.py android android/app/src/main/res
 
       - uses: gradle/actions/setup-gradle@v4
 
