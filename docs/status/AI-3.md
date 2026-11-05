@@ -1,53 +1,27 @@
-# AI-3 status (Phase 5, Scenes and UI)
-> Manager inbox: docs/manager/TO-AI-3.md (items 0-3 and 5 done, 4 blocked)
+# AI-3 status (Scenes and UI), Phase 6
 
-## Done
-- HomeScene (`?view=home`): world on the global iso grid, Overview <-> Focus tween, 96 px back chip, door and stairs chips, `__e2e` hooks.
-- Menu-as-house (Play sheet, chips), RoomRun inside Home with HomeSpots, deduction badges, camera push on locks.
-- TO-AI-3 0: theme tokens swapped to teal/orange/cream (src/ui/theme.ts).
-- TO-AI-3 1: Focus shows only the focused room on top; neighbours dark and behind; room fitted and centred.
-- TO-AI-3 2: house fits above a bottom button band; stairs visible and tappable (src/scenes/homeStairs.ts).
-- TO-AI-3 3: padlock only after first tap (markTried/wasTried in caseProgress.ts); HUD Locks = locks found; Settings toggle `showLockIcons`.
-- TO-AI-3 5: morning sky (src/scenes/homeSky.ts), code only; exterior kit baked behind the house from `house` atlas frames (homeYardPlan.ts plan, homeYard.ts bake): lawn, path, porch, fence+gate, trees, bushes, flowers, mailbox; missing frames skipped.
-- Theme mirrored from palette.json `theme` by tests/home-yard.test.ts (dim text now #b3c9c6).
-
-- Room layer uses baked art: decor draws `prop/<kind>` frames (ground-anchored at the footprint centre, rot 1 mirrored) where AI-4 has them (13 of 66 kinds today, atlas `room:slice`), a box otherwise; stairs use `prop/stairsUp` / `shell/house/stairwell`. Rooms rebuild when the atlases arrive.
-
-- "Show tappables" chip (bottom-left in Focus during a run): rings every piece for 2 s, identical for all so lock state is never revealed. Idle shimmer: after 10 s without input one unopened piece pulses every 2 s, cycling (none when calm). Files homeHints.ts, homeShimmer.ts.
-
-- Gestures (homeGesture.ts): Overview drag-pan and two-finger pinch zoom (0.85x-2x of fitted, centre clamped to the house); pinch-out in Focus returns to the Overview. A drag never counts as a tap.
-
-- Avatar (homeActors.ts): walks `pathTo` to a cell beside the tapped container, at most 600 ms, instant when calm, Rush, walkAnim off or no frames; the action runs on arrival. Cat (lives in the living room): sleeps, wanders every 8-14 s, reacts to a tap at no cost. Frames from the core atlas (avatar se/sw idle/walk/reach, pet/cat).
-
-- Audio hooks: Rush `setIntensity` now ramps over the last 20 s (feelMath.ts; tint red in the last 5 s, pulse FX in the last 10 s); focusing a room calls `feel.roomSwitch` (swoosh + `setRoomAmbience`).
-
-- Reduced-motion audit of Home + HUD (code read, grep of every tween/anim/timer): zoom tween, shimmer, spot bounces, walking, cat wander/react, sky clouds, FX all check calm; fixed two gaps (HUD badge pulse, tab flash). The cat no longer freezes in Rush or with walkAnim off (only calm stops it).
-
-- Android Back (AI-1 relay): Home, Journal, Settings and Result listen for `BACK_EVENT`. Home order: Play sheet, open overlay (inspect, clue board, pause), swallow while a card/puzzle is up, Focus to Overview, pause during a run; otherwise unhandled (exit guard). homeBack.ts + tests/home-back.test.ts.
-
-- URGENT orders: pieces use `spot/<kind>/<closed|open>` frames automatically (box fallback, padlock still drawn on top; props under a piece with art are hidden); room shells use `shell/<room>/full` (back-corner pivot) with the procedural shell as fallback; all 6 `room:<id>` groups load. Decor taps bounce + tick + FX, and 3 decor taps with no piece between show the outline once (homeDecor.ts). First-ever morning shows one toast "Tap furniture to look inside" (localStorage, once). `?debug=1` shows `props with art X/N   spots with art Y/M` (homeArtStats.ts).
-
-- Playtest items: Overview fits the set-back house at exactly 1.0x (house 624x552 art px; zoom snaps down to a multiple of 0.5; bottom band 150 px); Focus is x2.7-2.9 (not integer x3, the room is wider than 1280/3, say if you want it cropped instead); title "Scatterly" + "Where'd I put it?" top-left of the Overview; the cat is visible in the Overview (asleep on the sofa, wanders every 8-14 s); morning window glow (`fx/windowGlow`) on every window. Props with art 66/66, spots with art 19/19 (frames present; look unverified).
+## Done (pushed to main)
+- Task 0: red test fixed. Pure maths moved to `src/scenes/homeGeometry.ts` (no Phaser import); `homeSky`/`homeStairs`/`homeGlow` re-export it.
+- Overview was EMPTY: cause was `this.decor?.setTargets(room, drawRoomProps(...))` in `HomeScene.buildRoom`. `decor` only exists during a run, and `a?.f(g())` skips `g()`, so props were never drawn without a run. Props are now always drawn.
+- Actors were built before `this.world` existed (AI-1 fixed the same line); avatar and cat walking tweens are now stopped on room change (crash "reading play").
+- Task 1 HUD: fixed grid in `src/ui/hudLayout.ts` (pure, tested in `tests/home-hud-layout.test.ts`, 18 cases at widths 1280-1680): pause+home top-left, Clues+Hint top-right, progress pill top-centre (28 px), item tray bottom-centre with `icon/<item>` frames and a cream outline for items not found, 96 px "Look" chip bottom-left, room buttons as a column bottom-right (`src/scenes/homeChrome.ts`). Old "< House" chip removed. `__e2e.hud()` exists.
+- Task 2 Focus: ONE veil dims every other room, props, yard and sky equally; the focused room is lifted above it (`HomeScene.refreshDim`, `HomeSky.setDim`).
+- Task 3 (part): props visible from outside; title moved top-right so it no longer covers the house; cat sprite respawns after art loads; menu centred on `LAYOUT.w`.
 
 ## Verified
-- `npm test`: 45 files, 406 tests passed (new: tests/home-geometry.test.ts; updated ui-caseprogress).
-- `npx tsc --noEmit`: no errors. `npm run build`: ok, dist 2269.5 KB (over 2048 soft budget, under 2560 limit). `npm run secret-scan`: clean.
+- `npm test`: 62 files, 555 tests passed. `npm run build`: dist 2414 KB (limit 2560).
+- Live run in headless Chromium (swiftshader) at 1280x720: tappable HUD targets 96 px, no overlaps (screens: /tmp only, not yet in docs/shots).
 
 ## Not verified
-- Reduced-motion audit is by code reading only; no automated test (needs a browser).
-- Avatar/cat never seen: walk path uses legacy `LAYOUTS` obstacles (not the world decor), frame pivots assumed identical across an animation, cat sits at a fixed start cell.
-- Gestures never tried on a touch device (multi-touch pointer2 path unverified).
-- Prop frame placement (pivot/flip) is assumed, never seen.
-- NO screenshots: this session has no Playwright browser (install fails: download blocked), so `npm run shots` was not run and the committed PNGs are still the old ones. No Gate A claim. Please run `npm run shots` where a browser exists.
-- Yard bake never seen rendered (frame anchors/pivots assumed ground-anchored).
-- Sky, dimming, stairs and padlock icon look: never seen rendered. Feel on a phone: only the owner can judge.
-- Show tappables / shimmer never seen rendered; the chip may collide with HUD panels at the bottom-left (unchecked).
+- How anything FEELS on a real phone (owner only). 4x CPU throttle not measured.
+- `__e2e.hud()` returns label bounds for Hud buttons, not the 96 px plates: fix before AI-1 relies on it.
+- Wide screens (20:9) not rendered yet. Cat is tiny in Overview. docs/shots PNGs not yet regenerated for my pushes.
 
 ## Requests
-- AI-4: `shell/<room>/full` (room-slice) is a 10x8 room but ROOM_SIZE is 12x9 (living), so I do NOT use it; need frames per ROOM_SIZE or the sizes agreed. 53 of 66 decor kinds still have no `prop/<kind>` frame. Please confirm the pivot is the base centre of the footprint and rot 1 = mirrored rot 0.
-- (answered by manager, set-back (-6,-6) pending from AI-2) AI-2 layout: at floor raise 72 art px an upper room's front corner sits at (w+d)*8-64 above its origin, so it ALWAYS covers the ground room below it (living 12x9 under bedroom 12x9 overlaps by about 100 art px). No-overlap would need raise >= (w+d)*8+72. Options: much shallower upper rooms (d <= 3), or stagger the upper floor, or the manager allows the cutaway overlap. Needs a decision.
-- AI-1: save v4 gained `settings.showLockIcons` (types.ts, saveFields.ts); please check the migration test is happy.
-- AI-4: `theme` block in docs/art/palette.json (interim values are in theme.ts).
+- -> AI-4: window glow draws a dotted halo outside the window (focus-living); same teal plant repeated in every room (see AI-4's own request to register pottedFern/Cactus/Flower); cat sprite is small for the Overview.
+- -> AI-2: answered: I will switch Relaxed to `generateCase` and add Resume (profile.resume) in task 6.
 
 ## Next
-- Screenshots once a browser exists; baked room layer and `prop/<id>` frames; interactive piece states; checked/marked piece states; Result/Journal v2.
+1. Task 4: full width. Sky/hills/grass to `LAYOUT.w`, HUD already anchors to `LAYOUT.w`; listen to `LAYOUT_EVENT` (src/core/screen.ts). Start in `HomeSky` (SKY_W) and `HomeScene.apply`.
+2. Regenerate `npm run shots` (use `SHOTS_CHROMIUM=/tmp/chromium`) and commit PNGs.
+3. Task 5 spot frames, Task 6 screens, Task 7 audio hooks, Task 8 READY FOR CLEANUP.
