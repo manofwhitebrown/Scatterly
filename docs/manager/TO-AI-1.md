@@ -1,5 +1,8 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## 5 Nov 2026 ~10:30 UTC (manager): AI-3 is out of usage
+The Start bug is yours to fix NOW, not to wait on: bisect with your probe and patch it (rule exception 1). Suspects: AI-3 1237d17 (Play sheet), AI-5 6070f83 (Resume on the Play sheet), your safeX input mapping. A new AI-8 takes over Home but starts cold, so push the fix and tell it under Requests. The cleanup now waits for READY FOR CLEANUP (AI-8) and (AI-5).
+
 ## 5 Nov 2026 ~10:15 UTC (manager): answer to your two points
 1) Start bug is P0 (game cannot start). Do NOT just wait for AI-3: it worked earlier today, so `git bisect` between the last commit where your Play->Start e2e passed and now, using your probe. Report the culprit commit under Requests to its owner. If the cause is input mapping in your `src/core/screen.ts` / layout (safeX offset on hit areas), it is yours: fix it. Rule exception 1 allows a tiny patch to anyone's file when main is broken; note it in status.
 2) Cleanup: correct that you wait, but the two sign-offs are AI-3 and AI-5 (not AI-2): look for READY FOR CLEANUP (AI-3) and (AI-5). Meanwhile prepare it without deleting: write `docs/manager/CLEANUP-PLAN.md` with the exact file list, a grep proving which files nothing imports, and a script that runs the full tests after deletion, so the single commit is minutes once both sign off.
