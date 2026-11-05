@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readdirSync, statSync } from 'node:fs';
 import { dismissHowTo, interactives, openGame, openHome, startMorning, tapMatch, waitScene } from '../e2e/helpers';
 import { IMPLEMENTED } from '../../src/puzzles/manifest';
 import { PUZZLE_SCENE } from '../../src/shared/types';
@@ -11,6 +11,12 @@ const OUT = 'docs/shots';
 /** Every puzzle with a scene: they all share the shell, so the whole set shows the skin. */
 const SHOT_PUZZLES: PuzzleKind[] = IMPLEMENTED;
 const SIZES = [{ w: 1280, h: 720, suffix: '' }, { w: 800, h: 360, suffix: '-800' }] as const;
+/** Extra viewports (20:9 phone, 4:3 tablet) for the Home overview and two focus rooms only. */
+const WIDE = [{ w: 1200, h: 540, suffix: '-1200' }, { w: 1024, h: 768, suffix: '-1024' }] as const;
+const WIDE_NAMES = ['home-overview', 'focus-bedroom', 'focus-kitchen'];
+const RUN_START = Date.now();
+/** Owned by someone else or not produced by this spec. */
+const NOT_OURS = new Set(['art-proof.png']);
 
 /** Fails the run when the named scene is not active (and, for Home, when the old Menu is) so a shot can never show the wrong view. */
 async function expectScene(page: Page, key: string): Promise<void> {
@@ -20,7 +26,7 @@ async function expectScene(page: Page, key: string): Promise<void> {
 }
 
 async function snap(page: Page, name: string): Promise<void> {
-  for (const s of SIZES) {
+  for (const s of WIDE_NAMES.includes(name) ? [...SIZES, ...WIDE] : SIZES) {
     await page.setViewportSize({ width: s.w, height: s.h });
     await page.waitForTimeout(500);
     await page.screenshot({ path: `${OUT}/${name}${s.suffix}.png`, type: 'png' });
@@ -40,6 +46,12 @@ async function dismissAny(page: Page): Promise<void> {
 }
 
 test.beforeAll(() => mkdirSync(OUT, { recursive: true }));
+
+// Runs last (file order): a PNG that this run did not rewrite is stale and fails the run, so the manager never sees an old screen.
+test.afterAll(() => {
+  const stale = readdirSync(OUT).filter((f) => f.endsWith('.png') && !NOT_OURS.has(f) && statSync(`${OUT}/${f}`).mtimeMs < RUN_START);
+  if (stale.length) throw new Error(`stale shots not regenerated this run: ${stale.join(', ')}`);
+});
 
 test('menu (old Menu, ?view=legacy)', async ({ page }) => {
   await openGame(page);
