@@ -65,7 +65,7 @@ export class SortScene extends PuzzleShell {
     this.placed = 0;
     this.dragMoved = false;
     const specs = this.generate();
-    makeText(this, PX + PW / 2, PY + 90, this.rule, 24, PAL.inkSoft, { ox: 0.5, oy: 0.5, align: 'center' });
+    makeText(this, PX + PW / 2, PY + 90, this.rule, 30, PAL.inkSoft, { ox: 0.5, oy: 0.5, align: 'center' });
     this.makeBins();
     this.makePieces(specs);
     this.input.dragDistanceThreshold = 10;
@@ -111,7 +111,7 @@ export class SortScene extends PuzzleShell {
       const g = this.add.graphics();
       panelBox(g, x, y, w, h, 18, shade(PAL.wood, 0.45), PAL.woodDark, 3);
       this.binIcon(g, i, x + 36, y + 34);
-      makeText(this, x + 70, y + 34, label, 20, PAL.ink, { bold: true, oy: 0.5, wrap: w - 84 });
+      makeText(this, x + 70, y + 34, label, 26, PAL.ink, { bold: true, oy: 0.5, wrap: w - 84 });
       g.setInteractive(new Phaser.Geom.Rectangle(x, y, w, h), Phaser.Geom.Rectangle.Contains);
       g.on('pointerup', () => {
         if (this.sel >= 0 && !this.solved) this.tryPlace(this.sel, i, false);
@@ -151,9 +151,9 @@ export class SortScene extends PuzzleShell {
       const hx = PX + 80 + sx * (c + 0.5) + (this.rand() - 0.5) * 16;
       const hy = baseY + r * 112 + (this.rand() - 0.5) * 12;
       const g = this.add.graphics();
-      const text = makeText(this, 0, 36, s.label, 15, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: 92 });
+      const text = makeText(this, 0, 36, s.label, 22, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: 128 });
       const box = this.add.container(hx, hy, [g, text]);
-      box.setSize(92, 100);
+      box.setSize(128, 100);
       box.setAngle((this.rand() - 0.5) * 16);
       box.setInteractive({ draggable: true });
       const p: Piece = { colour: s.colour, shape: s.shape, cat: s.cat, label: s.label, bin: s.bin, box, g, text, hx, hy, done: false };
