@@ -161,6 +161,7 @@ export class HomeScene extends Phaser.Scene {
   private rebuildRooms(): void {
     for (const [room, c] of this.shells) this.buildRoom(c, room);
     this.spots?.redrawAll();
+    if (this.actors && !this.actors.busy) this.actors.setRoom(this.focusRoom); // the cat / avatar art may have arrived after boot
     this.debugText?.setText(artStatsText(artStats(hasFrame)));
   }
 
