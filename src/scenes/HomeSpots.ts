@@ -21,7 +21,7 @@ const shade = (c: number, k: number): number => {
 };
 const BASE: Partial<Record<string, number>> = { fridge: 0xe8e4da, sofa: 0x7d9b7a, bed: 0xc9a0a8, tv: 0x2f2f38, plant: 0x5e9a5a, rug: 0xb7674b, sink: 0xbfd0d4 };
 
-interface Node { spot: Spot; g: Phaser.GameObjects.Graphics; centre: Pt; img?: Phaser.GameObjects.Image; badge?: Phaser.GameObjects.Text }
+interface Node { spot: Spot; g: Phaser.GameObjects.Graphics; centre: Pt; img?: Phaser.GameObjects.Image; badge?: Phaser.GameObjects.Text; badgeArt?: Phaser.GameObjects.Image }
 const GLYPH = { ruledOut: '✕', hunch: '?' } as const;
 
 /** Placeholder tappable pieces for the Home world (iso boxes) and the RunView the run controller drives. Hit-testing is by nearest centre. */
@@ -99,10 +99,19 @@ export class HomeSpots implements RunView {
     const z = this.camera().zoom;
     for (const [id, n] of this.nodes) {
       const mark = marks.get(id);
-      if (!mark) { n.badge?.setVisible(false); continue; }
+      if (!mark) { n.badge?.setVisible(false); n.badgeArt?.setVisible(false); continue; }
+      const at = { x: n.centre.x, y: n.centre.y - (n.spot.iso.h * UNIT) / 2 - 4 / z };
+      const show = n.spot.room === this.shown;
+      const art = frame(mark === 'hunch' ? 'ui/hunch' : 'ui/ruledOut');
+      if (art) {
+        // Baked badge art (kept ~48 game px whatever the zoom).
+        if (!n.badgeArt) { n.badgeArt = this.scene.add.image(0, 0, art.atlas, art.frame).setOrigin(art.pivotX / art.w, 1); this.world.add(n.badgeArt); }
+        n.badgeArt.setTexture(art.atlas, art.frame).setScale(48 / art.w / z).setPosition(at.x, at.y).setVisible(show);
+        n.badge?.setVisible(false);
+        continue;
+      }
       if (!n.badge) { n.badge = makeText(this.scene, 0, 0, GLYPH[mark], { fontSize: '40px', fontStyle: 'bold' }).setOrigin(0.5, 1); this.world.add(n.badge); }
-      n.badge.setText(GLYPH[mark]).setColor(mark === 'hunch' ? CSS.amber : CSS.red).setScale(1 / z)
-        .setPosition(n.centre.x, n.centre.y - (n.spot.iso.h * UNIT) / 2 - 4 / z).setVisible(n.spot.room === this.shown);
+      n.badge.setText(GLYPH[mark]).setColor(mark === 'hunch' ? CSS.amber : CSS.red).setScale(1 / z).setPosition(at.x, at.y).setVisible(show);
     }
   }
 
@@ -171,7 +180,7 @@ export class HomeSpots implements RunView {
 
   destroy(): void {
     this.off();
-    for (const n of this.nodes.values()) { n.g.destroy(); n.badge?.destroy(); }
+    for (const n of this.nodes.values()) { n.g.destroy(); n.badge?.destroy(); n.badgeArt?.destroy(); }
     this.nodes.clear();
   }
 }

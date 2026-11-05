@@ -33,7 +33,7 @@ export class HomeMenu {
   private openSheet(): void {
     if (this.sheet.length) return;
     const s = this.scene;
-    const w = 760; const h = 400; const x = LAYOUT.w / 2 - w / 2; const y = GAME_H / 2 - h / 2 - 40;
+    const w = 760; const h = 456; const x = LAYOUT.w / 2 - w / 2; const y = GAME_H / 2 - h / 2 - 20;
     const dim = s.add.rectangle(LAYOUT.w / 2, GAME_H / 2, LAYOUT.w, GAME_H, 0x000000, 0.35).setDepth(DEPTH.dim).setInteractive();
     dim.on('pointerup', () => this.closeSheet());
     const plate = s.add.graphics().setDepth(DEPTH.panel);
@@ -53,9 +53,10 @@ export class HomeMenu {
       this.sheet.push(...btns);
     };
     const p = getProfile(s);
-    row(y + 138, SHEET_MODES.map((m) => m.label), 0, (i) => { this.mode = SHEET_MODES[i].mode; });
-    row(y + 252, SHEET_LENGTHS.map((l) => l.label), SHEET_LENGTHS.findIndex((l) => l.length === p.settings.sessionLength), (i) => this.setLength(SHEET_LENGTHS[i].length));
-    const start = new Button(s, LAYOUT.w / 2, y + h - 12 - BH / 2 + 4, 320, 'Start', () => go(s, SCENE.Home, startData(this.mode)), { variant: 'primary', height: BH });
+    row(y + 130, SHEET_MODES.map((m) => m.label), 0, (i) => { this.mode = SHEET_MODES[i].mode; });
+    row(y + 246, SHEET_LENGTHS.map((l) => l.label), SHEET_LENGTHS.findIndex((l) => l.length === p.settings.sessionLength), (i) => this.setLength(SHEET_LENGTHS[i].length));
+    const by = y + h - 24 - BH / 2;
+    const start = new Button(s, LAYOUT.w / 2, by, 320, 'Start', () => go(s, SCENE.Home, startData(this.mode)), { variant: 'primary', height: BH });
     start.setDepth(DEPTH.panel);
     this.sheet.push(start);
   }
