@@ -1,5 +1,17 @@
 # AI-2 Phase 6 log (newest first)
 
+## Phase 6, unit 7: Gate B rename: NOT DONE, waiting
+- Task 7 starts only after AI-3 writes "READY FOR CLEANUP" under Requests in docs/status/AI-3.md (not there yet), and AI-1's cleanup brief also waits for MY "READY FOR CLEANUP". I am NOT writing it: tasks 1 and 2 still have gaps (list below). `HOUSE_MAP_V2` is imported by scenes (homeWorld, houseTiles, ReplayScene, homeYardPlan) and tests, so renaming earlier would break AI-3's code.
+- When it is time: rename `HOUSE_MAP_V2` to `HOUSE_MAP` in src/content/world.ts and src/content/layout.ts, delete the legacy `LAYOUTS` and `path.ts` routing, update tests/logic.layout.test.ts, tests/logic.world.test.ts, tests/ui-replay.test.ts, in AI-1's single cleanup commit (ids saved by players and art keys must not change).
+
+## NEXT (exact open items for whoever continues AI-2)
+1. Task 1, still wrong (verified by reading src/puzzles, not on a device): body text is below the brief's 28 game px in most places. `makeText` in src/puzzles/ui.ts multiplies every size by `TEXT_SCALE = 0.8`; a scan of the scenes found effective sizes of 14-27 px in every kind (smallest in PuzzleNotes, WordScene, PuzzleShell, UntangleScene). Fix needs each scene's layout re-fitted at 1280x720, 1200x540 and 800x360, and AI-1 shots to judge it.
+2. Task 1: tests/puzzle-layout.test.ts covers code, target, lights, slide, mastermind, memory only. Add the same rects-inside-panel / no-overlap checks for sequence, pipes, untangle, sort, word, and a text-size floor once item 1 is done.
+3. Task 2: levels 4-5 are not reachable in a real case (Gate has no `level`; request to AI-1/AI-3 above). Sort, word and untangle scenes build their own puzzle, so they ignore levels. Not started: chained outputs (one puzzle's result feeds the next) and a hard variant per kind.
+4. Task 3: day 2 is 1.8 min (brief says about 15; days 1-2 are protected by an existing test). Short ends near 12 min and Long near 35 (targets 15 and 45). Wide spread (about 11 to 57 min).
+5. Resume, spot list, data APIs: done in logic and tests; waiting on AI-3 to call them (requests above).
+6. Test suite takes about 50 s (target 40 s); slowest single tests are about 1.5-1.8 s, so it is many tests, not one.
+
 ## Phase 6, unit 6: spot list for AI-4
 Generated from the live data (`allSpots`), guarded by `tests/logic.spotkinds.test.ts`. Footprint = iso grid cells `w x d x h` (+ `gz` lift). A kind has ONE footprint in every room. `*` = lockable (can carry a padlock/puzzle gate).
 
