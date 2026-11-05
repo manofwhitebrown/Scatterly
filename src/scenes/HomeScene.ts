@@ -100,8 +100,8 @@ export class HomeScene extends Phaser.Scene {
     listenBack(this, () => homeBack({ sheetOpen: this.menuOpen(), focused: !!this.focusRoom, run: this.run ?? null }, { closeSheet: () => this.menu?.closeSheet(), zoomOut: () => this.focusOn(null) }));
     this.cameras.main.setBackgroundColor(COLOR.sky);
     this.sky = new HomeSky(this, isCalm(this));
-    this.actors = new HomeActors(this, this.world, () => isCalm(this) || this.run?.mode === 'rush' || this.run?.profile.settings.walkAnim === false, 'living', () => isCalm(this));
     this.world = this.add.container(0, 0);
+    this.actors = new HomeActors(this, this.world, () => isCalm(this) || this.run?.mode === 'rush' || this.run?.profile.settings.walkAnim === false, 'living', () => isCalm(this));
     this.rooms = this.add.container(0, 0);
     this.world.add(this.rooms);
     void Promise.all([ensureGroup(this, 'room:slice'), ensureGroup(this, 'house'), ...WORLD_ROOMS.map((r) => ensureGroup(this, `room:${r}`))]).then(() => { if (this.sys.isActive() && this.rooms.active) this.rebuildRooms(); });
