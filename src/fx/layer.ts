@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { ART_PX, FRAME_KEYS, frame } from '../art/manifest';
+import type { FrameRef } from '../art/manifest';
 import { tex } from '../shared/types';
 import { GAME_H, GAME_W } from '../shared/types';
 import { Pool } from './pool';
@@ -7,7 +9,7 @@ import type { FxSpec } from './specs';
 import type { FxName } from './names';
 import { ensureFxTextures } from './textures';
 
-interface P { img: Phaser.GameObjects.Image; vx: number; vy: number; age: number; life: number; g: number; s0: number; s1: number; spin: number; confetti: boolean; wait: number }
+interface P { img: Phaser.GameObjects.Image; vx: number; vy: number; age: number; life: number; g: number; s0: number; s1: number; spin: number; confetti: boolean; wait: number; art: FrameRef[] | null; artIdx: number }
 
 const DEPTH_FX = 800;
 let liveTotal = 0;
@@ -28,7 +30,7 @@ export class FxLayer {
     ensureFxTextures(scene);
     this.pool = new Pool<P>(MAX_PARTICLES, () => {
       const img = scene.add.image(0, 0, tex.fx('dot')).setVisible(false).setActive(false).setDepth(DEPTH_FX);
-      return { img, vx: 0, vy: 0, age: 0, life: 1, g: 0, s0: 1, s1: 1, spin: 0, confetti: false, wait: 0 };
+      return { img, vx: 0, vy: 0, age: 0, life: 1, g: 0, s0: 1, s1: 1, spin: 0, confetti: false, wait: 0, art: null, artIdx: 0 };
     });
     scene.events.on(Phaser.Scenes.Events.UPDATE, this.step, this);
     scene.events.once(Phaser.Scenes.Events.SHUTDOWN, this.destroy, this);
@@ -44,13 +46,21 @@ export class FxLayer {
       return;
     }
     const n = allowedCount(spec, this.live, this.liveConfetti);
-    if (n > 0) this.emit(spec, n, x, y);
+    if (n > 0) this.emit(spec, n, x, y, name);
     if (spec.flash) this.doFlash(spec.flash.color, spec.flash.alpha, spec.flash.ms);
   }
 
-  private emit(spec: FxSpec, n: number, x: number, y: number): void {
+  /** Art frames `fx/<name>/0..2` when all three are in the manifest and their atlas is loaded; else null (procedural texture is used). */
+  private artFrames(name: FxName | undefined): FrameRef[] | null {
+    if (!name) return null;
+    const fs = [0, 1, 2].map((i) => frame(FRAME_KEYS.fx(name, i)));
+    return fs.every((f) => f && this.scene.textures.exists(f.atlas)) ? (fs as FrameRef[]) : null;
+  }
+
+  private emit(spec: FxSpec, n: number, x: number, y: number, name?: FxName): void {
     const key = tex.fx(spec.tex);
-    if (!this.scene.textures.exists(key)) return;
+    const art = this.artFrames(name);
+    if (!art && !this.scene.textures.exists(key)) return;
     for (let i = 0; i < n; i++) {
       const { item: p, recycled } = this.pool.acquire();
       if (recycled) this.retire(p);
@@ -66,7 +76,9 @@ export class FxLayer {
       p.spin = spec.spin * (Math.random() < 0.5 ? -1 : 1);
       p.confetti = spec.tex === 'confetti';
       p.wait = (spec.delay ?? 0) / 1000;
-      p.img.setTexture(key).setPosition(x, y).setScale(spec.scaleFrom).setAlpha(1).setRotation(0)
+      p.art = art; p.artIdx = 0;
+      if (art) p.img.setTexture(art[0].atlas, art[0].frame); else p.img.setTexture(key);
+      p.img.setPosition(x, y).setScale(art ? ART_PX : spec.scaleFrom).setAlpha(1).setRotation(0)
         .setTint(spec.tints[i % spec.tints.length]).setVisible(p.wait <= 0).setActive(true);
       this.live++;
       liveTotal++;
@@ -100,8 +112,14 @@ export class FxLayer {
       p.vy += p.g * dt;
       p.img.x += p.vx * dt;
       p.img.y += p.vy * dt;
-      p.img.setScale(p.s0 + (p.s1 - p.s0) * k);
       p.img.setAlpha(1 - k * k);
+      if (p.art) {
+        // pixel frames play 0 -> 1 -> 2 over the particle's life at a fixed art scale (no fractional scaling, no rotation)
+        const idx = Math.min(2, Math.floor(k * 3));
+        if (idx !== p.artIdx) { p.artIdx = idx; p.img.setTexture(p.art[idx].atlas, p.art[idx].frame); }
+        return;
+      }
+      p.img.setScale(p.s0 + (p.s1 - p.s0) * k);
       if (p.spin !== 0) p.img.rotation += p.spin * dt;
     });
   }

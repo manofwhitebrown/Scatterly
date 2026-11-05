@@ -244,5 +244,293 @@
 8,
 12
 ]
+},
+"fx/tap/0": {
+"pivot": [
+3,
+3
+]
+},
+"fx/tap/1": {
+"pivot": [
+4,
+4
+]
+},
+"fx/tap/2": {
+"pivot": [
+4,
+4
+]
+},
+"fx/open/0": {
+"pivot": [
+3,
+3
+]
+},
+"fx/open/1": {
+"pivot": [
+4,
+4
+]
+},
+"fx/open/2": {
+"pivot": [
+3,
+3
+]
+},
+"fx/empty/0": {
+"pivot": [
+3,
+3
+]
+},
+"fx/empty/1": {
+"pivot": [
+3,
+3
+]
+},
+"fx/empty/2": {
+"pivot": [
+4,
+4
+]
+},
+"fx/found/0": {
+"pivot": [
+3,
+3
+]
+},
+"fx/found/1": {
+"pivot": [
+4,
+4
+]
+},
+"fx/found/2": {
+"pivot": [
+4,
+4
+]
+},
+"fx/take/0": {
+"pivot": [
+2,
+2
+]
+},
+"fx/take/1": {
+"pivot": [
+2,
+2
+]
+},
+"fx/take/2": {
+"pivot": [
+3,
+3
+]
+},
+"fx/clue/0": {
+"pivot": [
+2,
+2
+]
+},
+"fx/clue/1": {
+"pivot": [
+3,
+2
+]
+},
+"fx/clue/2": {
+"pivot": [
+2,
+3
+]
+},
+"fx/hint/0": {
+"pivot": [
+5,
+5
+]
+},
+"fx/hint/1": {
+"pivot": [
+7,
+7
+]
+},
+"fx/hint/2": {
+"pivot": [
+9,
+9
+]
+},
+"fx/room/0": {
+"pivot": [
+3,
+2
+]
+},
+"fx/room/1": {
+"pivot": [
+5,
+2
+]
+},
+"fx/room/2": {
+"pivot": [
+6,
+2
+]
+},
+"fx/urgent/0": {
+"pivot": [
+1,
+4
+]
+},
+"fx/urgent/1": {
+"pivot": [
+2,
+4
+]
+},
+"fx/urgent/2": {
+"pivot": [
+1,
+4
+]
+},
+"fx/win/0": {
+"pivot": [
+3,
+2
+]
+},
+"fx/win/1": {
+"pivot": [
+2,
+2
+]
+},
+"fx/win/2": {
+"pivot": [
+2,
+3
+]
+},
+"fx/lose/0": {
+"pivot": [
+3,
+3
+]
+},
+"fx/lose/1": {
+"pivot": [
+3,
+4
+]
+},
+"fx/lose/2": {
+"pivot": [
+2,
+3
+]
+},
+"fx/coin/0": {
+"pivot": [
+4,
+4
+]
+},
+"fx/coin/1": {
+"pivot": [
+3,
+4
+]
+},
+"fx/coin/2": {
+"pivot": [
+2,
+4
+]
+},
+"fx/star/0": {
+"pivot": [
+3,
+3
+]
+},
+"fx/star/1": {
+"pivot": [
+4,
+4
+]
+},
+"fx/star/2": {
+"pivot": [
+4,
+4
+]
+},
+"fx/buy/0": {
+"pivot": [
+5,
+4
+]
+},
+"fx/buy/1": {
+"pivot": [
+5,
+4
+]
+},
+"fx/buy/2": {
+"pivot": [
+5,
+4
+]
+},
+"fx/unlock/0": {
+"pivot": [
+4,
+4
+]
+},
+"fx/unlock/1": {
+"pivot": [
+5,
+5
+]
+},
+"fx/unlock/2": {
+"pivot": [
+6,
+6
+]
+},
+"fx/puzzleOk/0": {
+"pivot": [
+3,
+3
+]
+},
+"fx/puzzleOk/1": {
+"pivot": [
+4,
+3
+]
+},
+"fx/puzzleOk/2": {
+"pivot": [
+4,
+4
+]
 }
 }
