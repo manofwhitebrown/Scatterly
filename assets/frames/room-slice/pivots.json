@@ -754,5 +754,77 @@
 8,
 8
 ]
+},
+"prop/shelfBooks": {
+"pivot": [
+2,
+13
+]
+},
+"prop/shelfBooks_L": {
+"pivot": [
+17,
+13
+]
+},
+"prop/shelfPlants": {
+"pivot": [
+2,
+14
+]
+},
+"prop/shelfPlants_L": {
+"pivot": [
+17,
+14
+]
+},
+"prop/pictureWide": {
+"pivot": [
+2,
+18
+]
+},
+"prop/pictureWide_L": {
+"pivot": [
+31,
+18
+]
+},
+"prop/pictureTriptych": {
+"pivot": [
+2,
+14
+]
+},
+"prop/pictureTriptych_L": {
+"pivot": [
+31,
+14
+]
+},
+"prop/towelRail": {
+"pivot": [
+2,
+15
+]
+},
+"prop/towelRail_L": {
+"pivot": [
+17,
+15
+]
+},
+"prop/coatHooks": {
+"pivot": [
+2,
+16
+]
+},
+"prop/coatHooks_L": {
+"pivot": [
+17,
+16
+]
 }
 }

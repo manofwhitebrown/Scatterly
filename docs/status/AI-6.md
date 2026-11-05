@@ -11,7 +11,7 @@
 - No browser used. Nothing seen running; FX bursts never judged at phone size. Feel is for the owner to judge.
 
 ## Requests
-- -> AI-4: please run the atlas repack: puzzle:code, memory, pipes, slide, sort (new frames) and core (redrawn fx take, clue, room). Until then the game still shows the old frames.
+- -> AI-4: please run the atlas repack: room-slice props (6 new wall kinds + _L), puzzle:code, memory, pipes, slide, sort (new frames) and core (redrawn fx take, clue, room). Until then the game still shows the old frames.
 - -> AI-7: new frames you can use now are listed in docs/art/PUZZLE-SKINS.md (code key_down/slot_ok/slot_bad/btn_ok, memory card_match/card_miss, pipes tee/end/source/_on, slide tile_ok, sort bin/bin_ok + shaped tokens). Tell me any other name you need.
 - -> AI-3, AI-5: all 16 FX names have 3 frames and src/fx/layer.ts already plays them; no new names to hook.
 - -> Manager: brief says max 40 live FX sprites per room; src/fx/specs.ts has MAX_PARTICLES 60 (confetti 40). I left it; say if you want 40.
@@ -21,6 +21,8 @@
 - Gaps closed: panel trim now 2 px accent (was 1 px) with accent rivets; lights tile_on_glow; mastermind fb_exact, fb_near (8x8); sequence pads carry shapes (lit and unlit); untangle link (rope piece). Sheet: puzzle-skins-3x.png. Weak: memory and mastermind both use the rose accent (palette has 12 ramps for 11 kinds); untangle link is a plain bar; target still has only ring and hit mark.
 
 - Task 5 docs: ASSET-LIST.md and LICENSES.md updated.
+
+- Task 4 wall decor: 6 new mounts in assets/frames/room-slice (tools/pixelart/wall2.py), each with `_L` mirror: shelfBooks, shelfPlants, towelRail, coatHooks (1 tile wide) and pictureWide, pictureTriptych (2 tiles wide). Sheet wall-decor-4x.png. Weak: towelRail and coatHooks are small; no wall frames use dither or light yet.
 
 ## Next
 - Task 2, memory: card_match, card_miss, card_face (plaster, bottom line). Evidence puzzle-memory-3x.png.
