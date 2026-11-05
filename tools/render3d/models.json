@@ -77,7 +77,10 @@
    1,
    1
   ],
-  "h": 3
+  "h": 3,
+  "ramps": {
+   "carpet": "sage"
+  }
  },
  "prop/loungeSofa": {
   "model": "loungeSofa",
@@ -85,7 +88,10 @@
    3,
    1
   ],
-  "h": 3
+  "h": 3,
+  "ramps": {
+   "carpet": "teal"
+  }
  },
  "prop/loungeChair": {
   "model": "loungeChair",
@@ -93,7 +99,10 @@
    1,
    1
   ],
-  "h": 3
+  "h": 3,
+  "ramps": {
+   "carpet": "rose"
+  }
  },
  "prop/chairDesk": {
   "model": "chairDesk",
@@ -101,7 +110,10 @@
    1,
    1
   ],
-  "h": 3
+  "h": 3,
+  "ramps": {
+   "carpet": "sky"
+  }
  },
  "prop/chair": {
   "model": "chair",
@@ -109,7 +121,10 @@
    1,
    1
   ],
-  "h": 3
+  "h": 3,
+  "ramps": {
+   "wood": "plaster"
+  }
  },
  "prop/bench": {
   "model": "bench",
@@ -117,7 +132,10 @@
    2,
    1
   ],
-  "h": 2
+  "h": 2,
+  "ramps": {
+   "wood": "sage"
+  }
  },
  "prop/tableRound": {
   "model": "tableRound",
@@ -133,7 +151,10 @@
    2,
    1
   ],
-  "h": 3
+  "h": 3,
+  "ramps": {
+   "wood": "plaster"
+  }
  },
  "prop/sideTable": {
   "model": "sideTable",
@@ -141,7 +162,10 @@
    1,
    1
   ],
-  "h": 2
+  "h": 2,
+  "ramps": {
+   "wood": "plaster"
+  }
  },
  "prop/sideTableDrawers": {
   "model": "sideTableDrawers",
@@ -149,7 +173,10 @@
    1,
    1
   ],
-  "h": 2
+  "h": 2,
+  "ramps": {
+   "wood": "sage"
+  }
  },
  "prop/bookcaseClosed": {
   "model": "bookcaseClosed",
@@ -157,7 +184,10 @@
    1,
    1
   ],
-  "h": 5
+  "h": 5,
+  "ramps": {
+   "wood": "sage"
+  }
  },
  "prop/cabinetTelevision": {
   "model": "cabinetTelevision",
@@ -165,7 +195,10 @@
    2,
    1
   ],
-  "h": 2
+  "h": 2,
+  "ramps": {
+   "wood": "slate"
+  }
  },
  "prop/speaker": {
   "model": "speaker",
@@ -173,7 +206,10 @@
    1,
    1
   ],
-  "h": 3
+  "h": 3,
+  "ramps": {
+   "wood": "slate"
+  }
  },
  "prop/kitchenCabinet": {
   "model": "kitchenCabinet",
@@ -181,7 +217,11 @@
    1,
    1
   ],
-  "h": 3
+  "h": 3,
+  "ramps": {
+   "wood": "sage",
+   "woodDark": "woodWarm"
+  }
  },
  "prop/kitchenStove": {
   "model": "kitchenStove",
@@ -205,7 +245,11 @@
    2,
    1
   ],
-  "h": 3
+  "h": 3,
+  "ramps": {
+   "wood": "sage",
+   "woodDark": "woodWarm"
+  }
  },
  "prop/bathtub": {
   "model": "bathtub",
