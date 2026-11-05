@@ -12,7 +12,12 @@
 
 ## Requests
 - -> AI-7: which frame names do your scenes need? Proposal is in docs/art/PUZZLE-SKINS.md.
-- -> AI-4: I will edit tools/pixelart/puzzles.py and fx.py (AI-4 files, now mine per the brief) and need a repack after each kind.
+- -> AI-4: please repack puzzle:code (new frames). I edit tools/pixelart/puzzles.py and fx.py (AI-4 files, now mine per the brief) and need a repack after each kind.
+
+- Task 2, code: key (keycap look), key_down, slot, slot_ok, slot_bad, btn_ok (tools/pixelart/puzzle2.py, run after puzzles.py). Evidence docs/art/evidence/puzzle-code-3x.png.
+
+## Weak
+- slot_ok/slot_bad are colour only (no mark), so colour-blind players get no cue unless the scene adds one. Panel trims still near-identical across kinds.
 
 ## Next
-Task 2: stub kinds first (code, memory, pipes, slide, sort), one kind per commit, in tools/pixelart/puzzles.py.
+Task 2: memory, pipes, slide, sort (one per commit, add to KINDS in puzzle2.py). Then atlas repack request -> AI-4 and name list -> AI-7.
