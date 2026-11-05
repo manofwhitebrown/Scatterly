@@ -38,8 +38,10 @@ jobs:
           if [ ! -d android ]; then npx cap add android; fi
           npx cap sync android
 
-      - name: Patch Android project (landscape, fullscreen, app name)
+      - name: Patch Android project (landscape, fullscreen, app name, version)
         continue-on-error: true
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
         run: |
           node <<'NODE'
           const fs = require('fs');
@@ -65,6 +67,11 @@ jobs:
                   '    <item name="android:windowFullscreen">true</item>\n' +
                   '    <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>\n' +
                   '    ' + close));
+          // versionName from package.json, versionCode from the run number (installs over the previous APK without uninstalling)
+          const ver = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
+          edit('android/app/build.gradle', (g) =>
+            g.replace(/versionCode\s+\d+/, 'versionCode ' + process.env.RUN_NUMBER)
+             .replace(/versionName\s+"[^"]*"/, 'versionName "' + ver + '"'));
           edit(base + '/res/values/strings.xml', (xml) =>
             xml.replace(/(<string name="app_name">)[^<]*(<\/string>)/, '$1Scatterly$2')
                .replace(/(<string name="title_activity_main">)[^<]*(<\/string>)/, '$1Scatterly$2'));
@@ -78,10 +85,18 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
+      - name: Name the APK (version from package.json + run number)
+        id: apk
+        run: |
+          V=$(node -p "require('./package.json').version")
+          NAME="Scatterly-${V}-build${{ github.run_number }}.apk"
+          cp android/app/build/outputs/apk/debug/app-debug.apk "$NAME"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
       - uses: actions/upload-artifact@v4
         with:
           name: Scatterly-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ steps.apk.outputs.name }}
           if-no-files-found: error
 
       - name: Move the rolling "latest" tag to this commit
@@ -91,11 +106,18 @@ jobs:
           git tag -f latest
           git push -f origin refs/tags/latest
 
+      - name: Remove the previous APK from the latest release (only one file to download)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for a in $(gh release view latest --json assets -q '.assets[].name'); do gh release delete-asset latest "$a" -y; done
+
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: Scatterly latest APK
-          body: Debug APK built from the latest commit on main. Download app-debug.apk and install it on your phone.
+          body: "Debug APK from commit ${{ github.sha }} (build ${{ github.run_number }}). Download the .apk below and install it on your phone; it installs over the previous build."
           prerelease: true
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          files: ${{ steps.apk.outputs.name }}
           overwrite_files: true

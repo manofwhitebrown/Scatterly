@@ -9,6 +9,8 @@
 - Task 5 (audio): the game used to play NO files (all sound was live synthesis; `public/audio` was dead weight). Now: `src/audio/` has a sample player (`bank.ts` lazy fetch+decode, `samples.ts`, `loops.ts` gapless loops), buses music/sfx/ui/ambience with music ducking (`engine.ts`), `music.ts` (track crossfade, Rush tension layer, result sting then calm bed), recorded ambience per room with the old synth beds as fallback, pure logic in `logic.ts`, data in `manifest.ts`. Old synth sounds/music remain as fallback when a file is missing. Content: 77 sfx x 3 variants, 5 music loops + tension layer + 6 s sting, 6 ambience loops, all original (`tools/audio/*.py`, `render.py`). `docs/art/AUDIO-LIST.md` has the "what plays when" table. Shipped audio 5.2 MB of 8 MB; `size-check` now reports audio separately (own 8 MB limit) and dist without audio.
 - Loop seams measured after encoding: music about 1 (no click), worst ambience 2.7 (a smooth hum). Evidence: `docs/art/evidence/audio-*.png`, `audio-report.json`.
 
+- Task 7 (partial): `android.yml` now names the APK `Scatterly-<package version>-build<run>.apk`, sets versionName/versionCode (installs over the previous build), deletes the old asset so the `latest` release holds one file, release text names the commit. `docs/DEPLOY.md` has the owner's install steps. YAML parses; the workflow itself has NOT run yet (needs a push to main and a look at the Actions result).
+
 ## Verified
 - `npx vitest run`: 64 files, 566 passed. `npx playwright test tests/e2e/audio.e2e.ts`: loads 168 files in Chromium, music track + room loop active, 0 errors. Boot e2e (Home, Menu, uncaught error) 3 passed.
 - `npx playwright test tests/e2e/layout.e2e.ts`: 5 passed (1280x720 -> 1280, 1200x540 -> 1600, 800x360 -> 1600, 1024x768 -> 1280, rotate + overlay).
@@ -31,6 +33,9 @@
 - -> AI-3: in-run HUD is missing on main (Play -> Start -> living room, no back/pause/room buttons, no progress strip, `hud()` empty). Also focus-bedroom shows no props. Run `npx playwright test tests/e2e/hud-overlap.e2e.ts` to see it.
 
 - -> AI-3 / AI-2: please call the new sounds per the table in `docs/art/AUDIO-LIST.md` (`sfx.play('drawer')`, `sfx.setTrack(...)`, `sfx.resultMoment()`, `sfx.setRoomAmbience(room)`). I did not touch your scenes.
+
+## Waiting
+- Task 6 (Gate B cleanup, one commit) waits for "READY FOR CLEANUP" from AI-3 and AI-2 (neither written yet). Task 7 still open: app icon (default Capacitor icon today), Back router check, background pause, 4x-throttle perf, leak counts.
 
 ## Next
 Task 6/7 when READY FOR CLEANUP arrives. Task 3: size-check already has budget 2560 and separate boot/total lines.

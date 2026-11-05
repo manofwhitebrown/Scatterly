@@ -22,3 +22,10 @@ No change is needed until the owner decides to go private.
 - **Background:** `src/core/lifecycle.ts` `setBackground()` sleeps the loop (clock shifted on wake, no timer drift) and suspends audio; called by `visibilitychange` and Android `appStateChange`. Idempotent.
 - **Test hooks (`?e2e=1`):** `__scatterly.pressBack()`, `setBackground(hidden)`, `backgrounded()`.
 - **Not verifiable without a device:** real Back button and gesture navigation, notch/gesture-bar insets, audio really stopping in the background, battery and fps. Check these on the phone after the next APK.
+
+## Install the Android app (owner)
+1. On the phone, open the repo's **Releases** page and the release named **Scatterly latest APK**.
+2. Download the single file `Scatterly-<version>-build<number>.apk` (the number goes up with every build, so you can tell which one you have).
+3. Open it and allow "install from this source" once. It installs over the previous build, no uninstall needed.
+The app is landscape only and fullscreen; the page background is teal so no bars show. Sound files download on first use, so the first tap on a
+fresh install may be quiet for a second.
