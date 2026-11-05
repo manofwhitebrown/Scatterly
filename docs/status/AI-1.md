@@ -22,7 +22,7 @@
 ## Not verified
 - **Nothing has been listened to.** Balance, taste and how convincing the synthesised foley is are unknown; mixer levels are calculated, not tuned by ear. Needs the owner's ears on a phone.
 - Callers: scenes still use mostly the old 18 sound names (they now play the new files automatically); the many new names (drawer, door, puzzle_*, star_stamp...) and `setTrack`, `resultMoment`, `setRoomAmbience('overview')` are NOT called from scenes yet.
-- hud-overlap.e2e.ts is RED on purpose: after Play -> Start the run opens in the living room but `__e2e.hud()` returns [] and no HUD is drawn (screenshot checked, 15 s wait). The overlap check cannot run until AI-3 shows the HUD.
+- hud-overlap.e2e.ts is RED on purpose (re-checked on main f101704, 5 Nov): Play -> Start does nothing at all. A tap on the Start button at its reported position (640,496) never reaches its handler (`go()` never sets the scene `nav` flag, no error, scene stays on the sheet), so no run starts and `hud()` is empty. Earlier the same flow worked. Probe: tap Play, wait 1 s, tap Start, wait 6 s. Owner: AI-3 (Home sheet / input layering). Old note: after Play -> Start the run opens in the living room but `__e2e.hud()` returns [] and no HUD is drawn (screenshot checked, 15 s wait). The overlap check cannot run until AI-3 shows the HUD.
 - Real phone (insets, rotation, APK). Full `npm run verify` after this push. Tasks 3-7 not started.
 
 ## Requests
