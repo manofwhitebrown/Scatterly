@@ -1,5 +1,41 @@
 # AI-2 Phase 6 log (newest first)
 
+## Phase 6, unit 6: spot list for AI-4
+Generated from the live data (`allSpots`), guarded by `tests/logic.spotkinds.test.ts`. Footprint = iso grid cells `w x d x h` (+ `gz` lift). A kind has ONE footprint in every room. `*` = lockable (can carry a padlock/puzzle gate).
+
+| Room | kind | w x d x h | spot ids |
+|---|---|---|---|
+| entrance (11 spots) | jacket | 1x1x4, gz 2 | coat1, coat2 |
+| | shelf | 2x1x5 | shelf |
+| | drawer | 1x1x3 | console* |
+| | cabinet | 1x1x5 | cabinet* |
+| | plant | 1x1x4 | plant |
+| | shoeRack | 2x1x1 | shoeRack* |
+| | bagSpot | 1x1x2 | bag* |
+| | basket | 1x1x2 | basket* |
+| | papers | 1x1x1 | papers |
+| | bin | 1x1x2 | bin* |
+| bathroom (9 spots) | cabinet | 1x1x5 | cabinet* |
+| | sink | 2x1x3 | sink |
+| | shelf | 2x1x5 | shelf |
+| | plant | 1x1x4 | plant |
+| | basket | 1x1x2 | basket* |
+| | bin | 1x1x2 | bin* |
+| | bagSpot | 1x1x2 | bagSpot* |
+| | drawer | 1x1x3 | drawer* |
+| | papers | 1x1x1 | papers |
+| study (10 spots) | shelf | 2x1x5 | bookshelfL, bookshelfR |
+| | cabinet | 1x1x5 | cabinet* |
+| | drawer | 1x1x3 | drawerL*, drawerR* |
+| | table | 2x2x2 | desk |
+| | papers | 1x1x1 | papers |
+| | basket | 1x1x2 | basket* |
+| | sofa | 3x1x3 | sofa |
+| | bin | 1x1x2 | bin* |
+
+- Result: these three rooms need NO new kinds. All 13 distinct kinds (jacket, shelf, drawer, cabinet, plant, shoeRack, bagSpot, basket, papers, bin, sink, table, sofa) already have `spot/<kind>/closed` and `open` in `public/atlas/room-slice.json`; the test fails if a spot kind is ever added without both frames.
+- Optional, my suggestion (not required by any test): `study.bookshelfL/R` and `study.desk` would read better with their own art than the generic shelf/table; only the bed has a hand-built spot so far. Same footprint, so a variant needs a new kind name only if the art differs: ask me and I add the kind (additive, and `SPOT_SIZE`/`KIND_FOOT` live in shared/layout, so that part goes through AI-1).
+
 ## Phase 6, unit 5: data for AI-3's screens
 All pure, in `src/logic/book.ts`, exported from `src/logic` (index). They read; they never change the profile or the session.
 
