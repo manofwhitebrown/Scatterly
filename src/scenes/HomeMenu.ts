@@ -7,6 +7,7 @@ import { COLOR, DEPTH, SAFE, drawPlate, getProfile, go, makeText } from '../ui/t
 import { GAME_H, SCENE } from '../shared/types';
 import type { GameMode, SessionLength } from '../shared/types';
 import { SHEET_LENGTHS, SHEET_MODES, startData } from './homeSheet';
+import { resumeData } from './runResume';
 
 const BH = 96;
 
@@ -57,9 +58,14 @@ export class HomeMenu {
     row(y + 130, SHEET_MODES.map((m) => m.label), 0, (i) => { this.mode = SHEET_MODES[i].mode; });
     row(y + 246, SHEET_LENGTHS.map((l) => l.label), SHEET_LENGTHS.findIndex((l) => l.length === p.settings.sessionLength), (i) => this.setLength(SHEET_LENGTHS[i].length));
     const by = y + h - 24 - BH / 2;
-    const start = new Button(s, LAYOUT.w / 2, by, 320, 'Start', () => go(s, SCENE.Home, startData(this.mode)), { variant: 'primary', height: BH });
-    start.setDepth(DEPTH.panel);
-    this.sheet.push(start);
+    const saved = resumeData(p);
+    const mk = (x: number, label: string, primary: boolean, run: () => void): void => {
+      const b = new Button(s, x, by, saved ? 300 : 320, label, run, { variant: primary ? 'primary' : 'plain', height: BH });
+      b.setDepth(DEPTH.panel);
+      this.sheet.push(b);
+    };
+    if (saved) mk(LAYOUT.w / 2 - 160, 'Resume', true, () => go(s, SCENE.Home, saved));
+    mk(saved ? LAYOUT.w / 2 + 160 : LAYOUT.w / 2, saved ? 'New morning' : 'Start', !saved, () => go(s, SCENE.Home, startData(this.mode)));
   }
 
   private setLength(length: SessionLength): void {

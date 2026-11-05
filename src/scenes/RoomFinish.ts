@@ -4,6 +4,7 @@ import { GameSession, applyRun } from '../logic';
 import { SCENE } from '../shared/types';
 import type { GameMode, ResultSceneData, RunResult, Scenario } from '../shared/types';
 import { getProfile, go, localDateKey } from '../ui/theme';
+import { clearResume } from './runSave';
 
 /**
  * Ends a morning: asks the session for the result, applies it to the profile (a replayed daily earns
@@ -24,6 +25,7 @@ export function finishRun(
     go(scene, SCENE.Menu);
     return;
   }
+  clearResume(scene);
   const profile = getProfile(scene);
   let shown = result;
   if (mode === 'daily' && profile.lastDailyDate === localDateKey()) {

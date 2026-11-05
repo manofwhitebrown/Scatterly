@@ -165,7 +165,7 @@ export interface PuzzleRequest {
 }
 export interface PuzzleResult { solved: boolean; skipped: boolean; ms: number; hints?: number }
 export interface PuzzleLaunchData { req: PuzzleRequest; notes: Clue[]; onDone: (r: PuzzleResult) => void }
-export interface RoomSceneData { mode: GameMode; seed?: number }
+export interface RoomSceneData { mode: GameMode; seed?: number; resume?: boolean }
 export interface ResultSceneData { result: RunResult; scenario: Scenario }
 
 export const SCENE = {

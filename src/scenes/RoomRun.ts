@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { sfx } from '../audio/sfx';
 import { isLowFx } from '../core/perf';
-import { GameSession, allSpots, generateScenario } from '../logic';
+import { GameSession, allSpots } from '../logic';
 import { ITEM_LABEL, LEGACY_ROOMS, SCENE } from '../shared/types';
 import type { GameMode, Gate, InspectOutcome, ItemId, PlayerProfile, RoomId, RoomSceneData, Scenario, Spot, SpotId } from '../shared/types';
 import { Button } from '../ui/Button';
@@ -18,11 +18,16 @@ import { burst } from './RoomFx';
 import { RoomFlyouts } from './RoomFlyouts';
 import { finishRun } from './RoomFinish';
 import { RoomBack } from './RoomBack';
+import { RoomAutosave } from './RoomAutosave';
 import { RoomClock } from './RoomClock';
 import { RoomFeel } from './RoomFeel';
 import { RoomFlow } from './RoomFlow';
 import { RoomGate } from './RoomGate';
 import { RoomHouse } from './RoomHouse';
+import { giveHint, pointAt } from './RoomHints';
+import type { HintDeps } from './RoomHints';
+import { buildCase } from './runResume';
+import { clearResume } from './runSave';
 
 /** What the run controller needs from whichever room view (flat or isometric) is on screen. */
 export interface RunView {
@@ -78,8 +83,10 @@ export class RoomRun {
   private hintsUsed = 0;
   private mounted = false;
   private house!: RoomHouse;
+  private save: RoomAutosave | null = null;
+  private startMs = 0;
 
-  constructor(private readonly scene: Phaser.Scene, data: RoomSceneData) {
+  constructor(private readonly scene: Phaser.Scene, private readonly data: RoomSceneData) {
     this.mode = data.mode;
     this.seed = data.seed ?? Math.floor(Math.random() * 2147483647);
   }
@@ -89,8 +96,10 @@ export class RoomRun {
     const s = this.scene;
     this.profile = getProfile(s);
     try {
-      this.scenario = generateScenario(this.seed, this.mode, this.profile);
-      this.session = new GameSession(this.scenario, this.profile, this.mode);
+      const setup = buildCase(this.data, this.profile, this.seed);
+      this.scenario = setup.scenario;
+      this.session = setup.session;
+      this.startMs = setup.elapsedMs;
     } catch {
       makeText(s, 640, 280, "Couldn't set up this morning.", { fontSize: `${SIZE.heading}px`, fontStyle: 'bold' }).setOrigin(0.5);
       new Button(s, 640, 400, 320, 'Back to menu', () => go(s, SCENE.Menu), { variant: 'primary' });
@@ -146,6 +155,8 @@ export class RoomRun {
       () => this.onTimeUp(),
       (sec) => this.feel.urgency(sec),
     );
+    this.clock.elapsed = this.startMs;
+    this.save = new RoomAutosave(s, this.session, this.seed, () => this.clock.elapsed, () => this.clock.started && !this.finished);
     s.events.on(Phaser.Scenes.Events.RESUME, this.clock.resync, this.clock);
     this.flow = new RoomFlow(s, this.card, this.scenario, this.mode, {
       beginClock: () => {
@@ -153,7 +164,10 @@ export class RoomRun {
         sfx.play('swoosh');
       },
       resyncClock: () => this.clock.resync(),
-      restart: () => s.scene.restart({ mode: this.mode, seed: this.seed } as RoomSceneData),
+      restart: () => {
+        clearResume(s);
+        s.scene.restart({ mode: this.mode, seed: this.seed } as RoomSceneData);
+      },
       quit: () => go(s, SCENE.Menu),
       canPause: () => this.clock.started && !this.finished && !this.puzzleOpen,
       hideOverlays: () => {
@@ -232,6 +246,8 @@ export class RoomRun {
   destroy(): void {
     if (!this.mounted) return;
     this.house.close();
+    this.save?.save();
+    this.save?.off();
     const s = this.scene;
     s.events.off(Phaser.Scenes.Events.RESUME, this.clock.resync, this.clock);
     this.back.destroy();
@@ -317,21 +333,11 @@ export class RoomRun {
   }
 
   private useHint(): void {
-    if (this.modalOpen()) return;
-    const hint = this.session.hint();
-    if (!hint) {
-      sfx.play('error');
-      this.toast.show('No more hints right now.', 'warn');
-      return;
-    }
-    this.countHint();
-    this.toast.show(hint.text, 'info', 3200);
-    if (hint.room) this.hud.flashTab(hint.room);
-    if (hint.spotId) {
-      this.view.pulse(hint.spotId);
-      const c = this.view.center(hint.spotId);
-      this.feel.hint(c ? c.x : 640, c ? c.y : 360);
-    } else this.feel.hint(640, 360);
+    if (!this.modalOpen()) giveHint(this.hintDeps());
+  }
+
+  private hintDeps(): HintDeps {
+    return { session: this.session, toast: this.toast, hud: this.hud, view: this.view, feel: this.feel, countHint: () => this.countHint() };
   }
 
   private countHint(): void {
@@ -346,12 +352,7 @@ export class RoomRun {
   }
 
   private pointTo(room: RoomId | undefined, spotId: SpotId | undefined): void {
-    if (!room && !spotId) {
-      this.toast.show("That note doesn't point anywhere specific.");
-      return;
-    }
-    if (room) this.hud.flashTab(room);
-    if (spotId) this.view.pulse(spotId);
+    pointAt(this.hintDeps(), room, spotId);
   }
 
   private reinspect(spot: Spot): void {
