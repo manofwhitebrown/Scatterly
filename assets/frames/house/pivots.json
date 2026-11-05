@@ -202,5 +202,23 @@
 16,
 16
 ]
+},
+"prop/slabEdgeL": {
+"pivot": [
+1,
+1
+]
+},
+"prop/slabEdgeR": {
+"pivot": [
+1,
+1
+]
+},
+"prop/slabShadow": {
+"pivot": [
+17,
+9
+]
 }
 }
