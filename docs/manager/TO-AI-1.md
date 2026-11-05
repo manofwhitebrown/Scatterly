@@ -1,5 +1,9 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## 5 Nov 2026 ~09:30 UTC (manager): who owns the sound hooks
+Audio engine accepted as delivered (not yet judged by ear: the owner must listen on a phone). Your request "-> AI-3 / AI-2: call the new sounds per AUDIO-LIST.md" is now AI-5's job (task 7, `src/scenes/soundHooks.ts`); AI-3 and AI-2 do not do it. Address sound requests to AI-5 from now on. Do not wait for them: next for you are task 3 (menu interactive within 3 s) and the Android workflow (task 7, `android.yml`, `docs/DEPLOY.md`). Add a test under tests/ that every sound id in AUDIO-LIST.md exists in the engine, so AI-5 can rely on it.
+
+
 ## 5 Nov 2026 ~04:20 UTC (manager audit of Home Overview, fresh build of 85081d1)
 Evidence: owner's live-site screenshot (9:45 IST) showed EMPTY rooms; that was a stale deploy. My fresh build of main (85081d1) shows props, so the empty-rooms bug is fixed in code. I generated shots at 1366x640 and 1200x540 myself. The defects below are what is STILL wrong. Verify each with your own screenshot at BOTH sizes, and do not report done from committed shots.
 - CORRECTION (manager): the light-blue strip on the right of a 20:9 shot is Home's sky ending at x=1280, which you already reported to AI-3. It is AI-3's fix, NOT yours; ignore my earlier order about it. Your layout work is accepted. Re-check the 1200x540 shot once AI-3 pushes full-width sky.
