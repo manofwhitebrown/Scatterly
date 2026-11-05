@@ -6,7 +6,7 @@ import { sfx } from '../audio/sfx';
 import { PAL, makeButton, makeText } from './ui';
 import { PuzzleShell, PX, PY } from './PuzzleShell';
 
-const PAD = 110;
+const PAD = 140;
 const GAP = 8;
 const STEP_MS = 650; // time per flashed pad during playback
 const FLASH_MS = 420;
@@ -45,12 +45,12 @@ export class MemoryScene extends PuzzleShell {
     const rows = Math.ceil(spec.pads / cols);
     const cx = PX + 330;
     const x0 = cx - (cols * (PAD + GAP) - GAP) / 2 + PAD / 2;
-    const y0 = PY + 250 - (rows * (PAD + GAP) - GAP) / 2 + PAD / 2;
+    const y0 = PY + 310 - (rows * (PAD + GAP) - GAP) / 2 + PAD / 2;
     for (let i = 0; i < spec.pads; i++) {
       const x = x0 + (i % cols) * (PAD + GAP);
       const y = y0 + Math.floor(i / cols) * (PAD + GAP);
       const box = this.add.rectangle(x, y, PAD, PAD, COLORS[i] ?? PAL.steel).setStrokeStyle(4, PAL.panelEdge).setInteractive();
-      const label = makeText(this, x, y, String(i + 1), 48, PAL.ink, { bold: true, ox: 0.5, oy: 0.5 });
+      const label = makeText(this, x, y, String(i + 1), 60, PAL.ink, { bold: true, ox: 0.5, oy: 0.5 });
       box.on('pointerdown', () => this.tap(i));
       this.pads.push({ box, label });
     }

@@ -6,7 +6,7 @@ import { sfx } from '../audio/sfx';
 import { PAL, makeButton, makeText } from './ui';
 import { PuzzleShell, PX, PY } from './PuzzleShell';
 
-const CELL = 96;
+const CELL = 140;
 const GAP = 6;
 const N = 3;
 
@@ -33,13 +33,13 @@ export class SlideScene extends PuzzleShell {
     this.spec = spec;
     this.cells = [];
     const size = N * CELL + (N - 1) * GAP;
-    const left = PX + 120;
-    const top = PY + 120;
+    const left = PX + 90;
+    const top = PY + 96;
     for (let i = 0; i < N * N; i++) {
       const x = left + (i % N) * (CELL + GAP) + CELL / 2;
       const y = top + Math.floor(i / N) * (CELL + GAP) + CELL / 2;
       const box = this.add.rectangle(x, y, CELL, CELL, PAL.blue).setStrokeStyle(4, PAL.panelEdge).setInteractive();
-      const label = makeText(this, x, y, '', 48, PAL.white, { bold: true, ox: 0.5, oy: 0.5 });
+      const label = makeText(this, x, y, '', 64, PAL.white, { bold: true, ox: 0.5, oy: 0.5 });
       box.on('pointerdown', () => this.tap(i));
       this.cells.push({ box, label });
     }
@@ -47,7 +47,7 @@ export class SlideScene extends PuzzleShell {
     const px = PX + 740;
     makeText(this, px, PY + 170, 'Tap a tile next to\nthe gap to slide it.', 28, PAL.ink, { ox: 0.5, oy: 0.5, align: 'center' });
     this.count = makeText(this, px, PY + 270, '', 32, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center' });
-    makeButton(this, px, PY + 380, 220, CELL, 'Reset', () => this.reset(), { fill: PAL.sageDark, size: 32 });
+    makeButton(this, px, PY + 380, 220, 96, 'Reset', () => this.reset(), { fill: PAL.sageDark, size: 32 });
     this.reset();
   }
 
