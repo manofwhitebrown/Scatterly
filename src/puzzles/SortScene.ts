@@ -4,6 +4,7 @@ import { sfx } from '../audio/sfx';
 import { PAL, circle, line, makeText, panelBox, poly, rotPts, shade } from './ui';
 import type { G } from './ui';
 import { PUZZLES } from '../logic/puzzles';
+import type { SortSpec } from '../logic/puzzles/sort';
 import { PW, PX, PY, PuzzleShell } from './PuzzleShell';
 
 type Mode = 'colour' | 'shape' | 'type' | 'combo';
@@ -47,6 +48,7 @@ export class SortScene extends PuzzleShell {
   private placed = 0;
   private dragMoved = false;
   private rule = '';
+  private spec: SortSpec | null = null;
 
   constructor() {
     super(PUZZLE_SCENE.sort);
@@ -73,10 +75,20 @@ export class SortScene extends PuzzleShell {
   /** Pieces and bins come from the shared generator (AI-2), so the scene plays exactly what the logic tests cover. */
   private generate(): { colour: number; shape: number; cat: number; label: string; bin: number }[] {
     const spec = PUZZLES.sort.generate(this.req.seed, this.level);
+    this.spec = spec;
     this.mode = spec.mode;
     this.rule = spec.rule;
     this.addBins(spec.bins, spec.bins.length);
     return spec.pieces.map((p) => ({ colour: p.colour, shape: p.shape, cat: p.cat, label: p.label, bin: p.bin }));
+  }
+
+  protected hintLine(): string {
+    return this.spec ? PUZZLES.sort.hint(this.spec, ...this.hintArgs()) : super.hintLine();
+  }
+
+  /** Test bot: drop every piece into its bin through the same handler a tap uses. */
+  protected e2eSolve(): void {
+    this.pieces.forEach((p, i) => this.tryPlace(i, p.bin, false));
   }
 
   private pendingLabels: string[] = [];

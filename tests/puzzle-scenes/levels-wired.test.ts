@@ -17,3 +17,14 @@ describe('puzzle scenes play the shared generators at the request level', () => 
     });
   }
 });
+
+describe('scenes expose the hint ladder and the test-bot solve', () => {
+  for (const name of ['Sort', 'Word', 'Untangle']) {
+    it(`${name}Scene has hintLine and e2eSolve`, () => {
+      const src = scene(name);
+      expect(src).toMatch(/protected hintLine\(\)/);
+      expect(src).toMatch(/protected e2eSolve\(\)/);
+      expect(src).toMatch(/\.hint\(this\.spec, \.\.\.this\.hintArgs\(\)\)/);
+    });
+  }
+});

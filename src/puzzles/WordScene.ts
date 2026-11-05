@@ -144,6 +144,19 @@ export class WordScene extends PuzzleShell {
     });
   }
 
+  protected hintLine(): string {
+    return this.spec ? PUZZLES.word.hint(this.spec, ...this.hintArgs()) : super.hintLine();
+  }
+
+  /** Test bot: clear the slots, then press the tile or key for each letter of the answer through place(). */
+  protected e2eSolve(): void {
+    this.clearAll();
+    for (const ch of PUZZLES.word.solve(this.spec)) {
+      const i = this.pool.findIndex((c) => c.ch === ch && (this.keyboard || !c.used));
+      if (i >= 0) this.place(i);
+    }
+  }
+
   private place(i: number): void {
     if (this.solved) return;
     const c = this.pool[i];

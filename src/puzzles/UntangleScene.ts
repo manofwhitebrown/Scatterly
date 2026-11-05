@@ -4,7 +4,7 @@ import { sfx } from '../audio/sfx';
 import { PAL, line, makeText, rrect, shade } from './ui';
 import type { G } from './ui';
 import { PUZZLES } from '../logic/puzzles';
-import type { Pt } from '../logic/puzzles/untangle';
+import type { Pt, UntangleSpec } from '../logic/puzzles/untangle';
 import { PW, PX, PY, PuzzleShell } from './PuzzleShell';
 
 const AREA = { x: PX + 80, y: PY + 150, w: PW - 160, h: 390 };
@@ -39,6 +39,7 @@ export class UntangleScene extends PuzzleShell {
   private nodes: Phaser.GameObjects.Arc[] = [];
   private counter!: Phaser.GameObjects.Text;
   private shown = -1;
+  private spec: UntangleSpec | null = null;
 
   constructor() {
     super(PUZZLE_SCENE.untangle);
@@ -69,6 +70,7 @@ export class UntangleScene extends PuzzleShell {
   /** Graph, solved layout and tangled start come from the shared generator, so levels 1-5 play as AI-2 tuned them. */
   private makeGraph(): void {
     const spec = PUZZLES.untangle.generate(this.req.seed, this.level, { context: this.req.context });
+    this.spec = spec;
     const place = (p: Pt, axis: 0 | 1): number => (axis === 0 ? AREA.x + NODE_R + (AREA.w - 2 * NODE_R) * p[0] : AREA.y + NODE_R + (AREA.h - 2 * NODE_R) * p[1]);
     this.n = spec.start.length;
     this.ne = spec.edges.length;
@@ -82,6 +84,21 @@ export class UntangleScene extends PuzzleShell {
     this.cxs = new Float32Array(this.ne * this.ne + 1);
     this.cys = new Float32Array(this.ne * this.ne + 1);
     this.recalc();
+  }
+
+  protected hintLine(): string {
+    return this.spec ? PUZZLES.untangle.hint(this.spec, ...this.hintArgs()) : super.hintLine();
+  }
+
+  /** Test bot: move every knot to its solved spot, then run the normal crossing check. */
+  protected e2eSolve(): void {
+    for (let i = 0; i < this.n; i++) {
+      this.px[i] = this.sx[i];
+      this.py[i] = this.sy[i];
+      this.nodes[i]?.setPosition(this.px[i], this.py[i]);
+    }
+    this.recalc();
+    if (this.nc === 0 && !this.solved) this.win();
   }
 
   private clampNode(i: number): void {
