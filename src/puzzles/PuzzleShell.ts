@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
 import { GAME_H, GAME_W } from '../shared/types';
+import { LAYOUT } from '../core/layout';
+import { ahaLine } from '../logic/puzzles';
+import { isCalm } from '../ui/theme';
 import type { Clue, PuzzleDifficulty, PuzzleLaunchData, PuzzleRequest, PuzzleResult } from '../shared/types';
 import { isLowFx } from '../core/perf';
 import { flags } from '../core/flags';
@@ -121,7 +124,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
 
   create(): void {
     this.lowFx = isLowFx(this.game);
-    this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x08141a, 0.55).setInteractive(); // the room stays visible behind, dimmed
+    this.add.rectangle(GAME_W / 2, GAME_H / 2, LAYOUT.w, GAME_H, 0x08141a, 0.55).setInteractive(); // full width: the scene is centred by safeX, the dim covers the side bars too
     const g = this.add.graphics();
     g.fillStyle(PAL.shadow, 0.3);
     g.fillRoundedRect(PX + 4, PY + 10, PW, PH, 28);
@@ -189,7 +192,7 @@ export abstract class PuzzleShell extends Phaser.Scene {
 
   private buildConfirm(): void {
     const c = this.add.container(0, 0).setDepth(60).setVisible(false);
-    const dim = this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x000000, 0.45).setInteractive();
+    const dim = this.add.rectangle(GAME_W / 2, GAME_H / 2, LAYOUT.w, GAME_H, 0x000000, 0.45).setInteractive();
     const bg = this.add.graphics();
     panelBox(bg, GAME_W / 2 - 340, GAME_H / 2 - 150, 680, 300, 24, PAL.panel, PAL.panelEdge, 4);
     const msg = makeText(this, GAME_W / 2, GAME_H / 2 - 80, 'Skip this puzzle?\nIt counts as a hint.', 32, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center' });
@@ -253,10 +256,23 @@ export abstract class PuzzleShell extends Phaser.Scene {
     if (this.solved) return;
     this.solved = true;
     sfx.play(sound);
-    playFx(this, 'puzzleOk', PX + PW / 2, PY + PH / 2);
+    const calm = isCalm(this);
+    if (!calm) playFx(this, 'puzzleOk', PX + PW / 2, PY + PH / 2);
+    this.showAha();
     // Under ?e2e=1 report at once: software GL runs few frames per second and game time follows frames.
     if (flags().e2e) this.finish({ solved: true, skipped: false });
     else this.time.delayedCall(500, () => this.finish({ solved: true, skipped: false }));
+  }
+
+  /** Solved: one warm line (ahaLine) on a small plate at the foot of the panel, above the button bar. */
+  private showAha(): void {
+    const line = ahaLine(this.req.kind);
+    if (!line) return;
+    const w = PW - 120;
+    const y = BAR_TOP - 70;
+    const g = this.add.graphics().setDepth(70);
+    panelBox(g, PX + 60, y, w, 56, 14, PAL.butter, PAL.terracotta, 3);
+    makeText(this, PX + PW / 2, y + 28, line, 26, PAL.ink, { bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: w - 40 }).setDepth(71);
   }
 
   private cancel(): void {
