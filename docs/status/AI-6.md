@@ -1,35 +1,30 @@
-# AI-6 status (Art Support)
+# AI-6 status (Art Support, now also inheriting AI-4's art and the atlas packer)
 
 ## Done
-- Task 1 audit: docs/art/PUZZLE-SKINS.md, evidence docs/art/evidence/puzzle-skins-3x.png.
-- Found: AI-4 already shipped panels plus basic extras for all 11 kinds, and 3 frames for each of the 16 FX names (tools/pixelart/fx.py). The real gap is quality and missing states, not missing kinds.
+- Audit: docs/art/PUZZLE-SKINS.md. AI-4 had made panels for all 11 kinds; real gap was stubs and missing states.
+- Puzzle skins (tools/pixelart/puzzles.py, puzzle2.py; one commit per kind): code key_down/slot_ok/slot_bad/btn_ok; memory card_match/card_miss; pipes tee/end/source + _on water; slide tile_ok/tile_down; sort shaped tokens + bin/bin_ok; lights tile_on_glow; mastermind fb_exact/fb_near; sequence shaped pads; untangle link; panels now 2 px accent trim.
+- FX: all 16 names have 3 frames (docs/art/evidence/fx-4x.png). Redrew take, clue, room (tools/pixelart/fx.py).
+- Wall decor: shelfBooks, shelfPlants, towelRail, coatHooks (1 wide), pictureWide, pictureTriptych (2 wide), each with _L (tools/pixelart/wall2.py, sheet wall-decor-4x.png).
+- Docs: ASSET-LIST.md, LICENSES.md updated.
+- Manager order 10:00: I run tools/pack/pack.py (all atlases repacked). Living room colour pass with tools/pixelart/recolor.py (tone-for-tone ramp swap; Kenney OBJs are not in the repo so no re-render): sofa, armchairs, bookcaseClosed, bench, sideTableDrawers, cat bed, doormat now sage or honey, TV unit and speaker dark wood, pottedPlant leaves sage, spot/sofa sage. Evidence docs/art/evidence/art-living-3x.png.
+- Regenerate order: props2, spots, sofa, spots3, wall2, puzzles, puzzle2, fx, recolor, then pack.py.
 
 ## Verified
-- `npm run art:sheet`: "missing frames: none". `check.py --max 96` on all 11 puzzle groups: 0 problems.
+- `npm test`: 69 files, 586 tests passed. `npm run build`: boot payload 1849.4 KB (limit 1900), dist 2081 KB. `npm run check-assets`: ok (441 files). `npm run art:sheet`: missing frames none. check.py: 0 problems on all puzzle groups and room-slice.
 
 ## Not verified
-- No browser used. Nothing seen running; FX bursts never judged at phone size. Feel is for the owner to judge.
+- No browser: nothing seen in game, no phone check. FX never judged at phone size. Feel is for the owner.
+- art:sheet draws props only, not spot frames, so it misjudges sofa/TV areas.
+
+## Weak
+- Furniture silhouettes (manager item 2) only recoloured, not redrawn: armchair still two fused blocks until AI-2 splits them, TV unit and dining set unchanged. Each room keeps its own wallpaper colour. Memory and mastermind panels share the rose accent. towelRail and coatHooks are small.
 
 ## Requests
-- -> AI-2: new wall kinds ready as art (add to src/content/worldKinds.ts; I do not touch src/content). All mount:true, h 1: shelfBooks B(1,1,1), shelfPlants B(1,1,1), towelRail B(1,1,1) bathroom, coatHooks B(1,1,1) entrance, pictureWide B(2,1,1), pictureTriptych B(2,1,1) (2 wide like bunting). Suggested: study/living/bedroom shelfBooks, kitchen/bathroom shelfPlants, living/bedroom pictureWide, study/entrance pictureTriptych.
-- -> AI-4: please run the atlas repack: room-slice props (6 new wall kinds + _L), puzzle:code, memory, pipes, slide, sort (new frames) and core (redrawn fx take, clue, room). Until then the game still shows the old frames.
-- -> AI-7: new frames you can use now are listed in docs/art/PUZZLE-SKINS.md (code key_down/slot_ok/slot_bad/btn_ok, memory card_match/card_miss, pipes tee/end/source/_on, slide tile_ok, sort bin/bin_ok + shaped tokens). Tell me any other name you need.
-- -> AI-3, AI-5: all 16 FX names have 3 frames and src/fx/layer.ts already plays them; no new names to hook.
-- -> Manager: brief says max 40 live FX sprites per room; src/fx/specs.ts has MAX_PARTICLES 60 (confetti 40). I left it; say if you want 40.
-
-- Task 3 audit: all 16 FX names have 3 frames (docs/art/evidence/fx-4x.png). Redrew take (sparkle), clue (question mark), room (comet streak): fx-redo-6x.png.
-
-- Gaps closed: panel trim now 2 px accent (was 1 px) with accent rivets; lights tile_on_glow; mastermind fb_exact, fb_near (8x8); sequence pads carry shapes (lit and unlit); untangle link (rope piece). Sheet: puzzle-skins-3x.png. Weak: memory and mastermind both use the rose accent (palette has 12 ramps for 11 kinds); untangle link is a plain bar; target still has only ring and hit mark.
-
-- Task 5 docs: ASSET-LIST.md and LICENSES.md updated.
-
-- Task 4 wall decor: 6 new mounts in assets/frames/room-slice (tools/pixelart/wall2.py), each with `_L` mirror: shelfBooks, shelfPlants, towelRail, coatHooks (1 tile wide) and pictureWide, pictureTriptych (2 tiles wide). Sheet wall-decor-4x.png. Weak: towelRail and coatHooks are small; no wall frames use dither or light yet.
+- -> AI-2 (living, worldPropsA.ts LIVING): (1) delete both loungeChair at (5,3) and (5,4); place one at (1,3) rot 1 and one at (7,4) rot 3, facing the coffee table (3,3). (2) rugRound (8,7) hugs the front edge: move to (6,5). (3) delete robotVacuum (6,8) and catBowl (10,7); keep catBed and one mat. (4) register pottedFern, pottedCactus, pottedFlower in worldKinds.ts as B(1,1,4,{sym:true}); use pottedFern at (11,5), pottedFlower at (11,8), keep pottedPlant at (0,8); same in other rooms so none repeats one plant.
+- -> AI-2: wall kinds shelfBooks, shelfPlants, towelRail, coatHooks (B(1,1,1,{mount:true})), pictureWide, pictureTriptych (B(2,1,1,{mount:true})). Suggest: living shelfBooks R t=1, pictureWide L t=3; study shelfBooks, pictureTriptych; bedroom pictureWide; kitchen and bathroom shelfPlants; bathroom towelRail; entrance coatHooks.
+- -> AI-7: new puzzle frames are in the atlases now (see docs/art/PUZZLE-SKINS.md); tell me any other name you need.
+- -> Manager: FX cap is 60 in src/fx/specs.ts, brief says 40; left as is.
 
 ## Next
-- Task 2, memory: card_match, card_miss, card_face (plaster, bottom line). Evidence puzzle-memory-3x.png.
-
-- Task 2, pipes: pipe_tee, pipe_end, pipe_source (all drawn pointing up; scene rotates in 90 deg steps), plus _on water versions of straight, elbow, tee, end. Evidence puzzle-pipes-3x.png. Weak: source valve is a tiny yellow square; the old elbow channel is a pixel wider than the new pieces.
-
-- Task 2, slide: tile_ok (star), tile_down. sort: token_0..3 now carry shapes (square, diamond, triangle, circle) so colour is not the only cue; new bin, bin_ok. Evidence puzzle-slide-sort-3x.png. Weak: slide tile numbers still come from scene text; bin is a blank well.
-
-Task 2 left: panel trims per kind (still near-identical), lights glow, mastermind feedback pegs, sequence pad shapes, untangle rope, target. Then Task 3 check, repack request (one per commit, add to KINDS in puzzle2.py). Then atlas repack request -> AI-4 and name list -> AI-7.
+- After AI-2 re-places the living room: re-run art:sheet, look again.
+- Item 2: redraw TV unit, armchair, dining set silhouettes (hand-built like tools/pixelart/sofa.py), then repack.
