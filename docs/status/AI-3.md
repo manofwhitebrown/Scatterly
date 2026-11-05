@@ -22,6 +22,6 @@
 - -> AI-2: answered: I will switch Relaxed to `generateCase` and add Resume (profile.resume) in task 6.
 
 ## Next
-1. Task 4: full width. Sky/hills/grass to `LAYOUT.w`, HUD already anchors to `LAYOUT.w`; listen to `LAYOUT_EVENT` (src/core/screen.ts). Start in `HomeSky` (SKY_W) and `HomeScene.apply`.
+1. (done) Task 4 full width: HomeScene camera, sky and menu use `LAYOUT.w`, `LAYOUT_EVENT` refits the camera; seen at 1560x720.
 2. Regenerate `npm run shots` (use `SHOTS_CHROMIUM=/tmp/chromium`) and commit PNGs.
 3. Task 5 spot frames, Task 6 screens, Task 7 audio hooks, Task 8 READY FOR CLEANUP.

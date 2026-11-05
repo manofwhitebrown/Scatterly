@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_H, GAME_W } from '../shared/types';
+import { GAME_H } from '../shared/types';
+import { LAYOUT } from '../core/layout';
 import { B, CLOUDS, HORIZON, PARALLAX, R, SKY_BANDS, SKY_H, SKY_TIMES, SKY_W, hex, hillY } from './homeGeometry';
 export { PARALLAX, SKY_BANDS, SKY_H, SKY_TIMES, SKY_W, hillY };
 import type { SkyTime } from './homeGeometry';
@@ -79,7 +80,7 @@ export class HomeSky {
   /** Parallax: the backdrop follows the camera at PARALLAX of the world's motion and zoom. */
   sync(cam: { zoom: number; cx: number; cy: number }, base: { zoom: number; cx: number; cy: number }): void {
     const k = 1 + PARALLAX * (cam.zoom / base.zoom - 1);
-    this.root.setScale(k).setPosition(GAME_W / 2 - (cam.cx - base.cx) * cam.zoom * PARALLAX, GAME_H / 2 - (cam.cy - base.cy) * cam.zoom * PARALLAX);
+    this.root.setScale(k).setPosition(LAYOUT.w / 2 - (cam.cx - base.cx) * cam.zoom * PARALLAX, GAME_H / 2 - (cam.cy - base.cy) * cam.zoom * PARALLAX);
   }
 
   destroy(): void {

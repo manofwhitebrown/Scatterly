@@ -13,7 +13,7 @@ export const SKY_BANDS: readonly number[] = [R.sky[2], R.sky[3], R.sky[4], R.but
 export const SKY_TIMES = { morning: hex(pal.dayNight.morning), noon: hex(pal.dayNight.noon), dusk: hex(pal.dayNight.dusk), night: hex(pal.dayNight.night) } as const;
 export type SkyTime = keyof typeof SKY_TIMES;
 
-export const SKY_W = 1800;
+export const SKY_W = 2600;
 export const SKY_H = 1000;
 export const PARALLAX = 0.3;
 export const HORIZON = 620;

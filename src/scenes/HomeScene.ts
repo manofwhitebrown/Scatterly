@@ -3,7 +3,7 @@ import { flags } from '../core/flags';
 import type { WorldRoom } from '../content/world';
 import { allSpots } from '../logic';
 import { markTried } from './caseProgress';
-import { GAME_H, GAME_W, SCENE } from '../shared/types';
+import { GAME_H, SCENE } from '../shared/types';
 import type { RoomId, RoomSceneData, Spot } from '../shared/types';
 import { COLOR, DEPTH, isCalm, makeText } from '../ui/theme';
 import { HomeMenu } from './HomeMenu';
@@ -14,6 +14,7 @@ import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
 import { buildHomeChrome } from './homeChrome';
 import { LAYOUT } from '../core/layout';
+import { LAYOUT_EVENT } from '../core/screen';
 import { hudBoxes } from '../ui/hudLayout';
 import { DecorFeel } from './homeDecor';
 import { artStats, artStatsText } from './homeArtStats';
@@ -63,7 +64,7 @@ export class HomeScene extends Phaser.Scene {
   private pinch: { d0: number; cam: CameraState } | null = null;
   private panning = false;
   private cam!: CameraState;
-  private readonly baseCam: CameraState = overviewCamera(GAME_W, GAME_H);
+  private baseCam: CameraState = overviewCamera(LAYOUT.w, GAME_H);
   private focusRoom: RoomId | null = null;
   private tween: Phaser.Tweens.Tween | null = null;
   private doors: Phaser.GameObjects.Container[] = [];
@@ -122,8 +123,10 @@ export class HomeScene extends Phaser.Scene {
     if (new URLSearchParams(window.location.search).get('debug') === '1') {
       this.debugText = makeText(this, 12, 8, artStatsText(artStats(hasFrame)), { fontSize: '20px' }).setOrigin(0, 0).setDepth(DEPTH.toast + 5).setScrollFactor(0);
     }
-    this.apply(overviewCamera(GAME_W, GAME_H));
+    this.baseCam = overviewCamera(LAYOUT.w, GAME_H);
+    this.apply(this.baseCam);
     this.refreshDim();
+    this.game.events.on(LAYOUT_EVENT, this.onLayout, this);
     this.input.on('pointerdown', this.onDown, this);
     this.input.on('pointerup', this.onTap, this);
     this.input.on('pointermove', this.onMove, this);
@@ -181,7 +184,7 @@ export class HomeScene extends Phaser.Scene {
     };
     run.mount(view, { goRoom: (r) => this.focusOn(r), useHouse: true, onHouse: () => { if (!run.modalOpen()) this.focusOn(null); } });
     this.focusRoom = run.start;
-    this.apply(focusCamera(run.start, GAME_W, GAME_H));
+    this.apply(focusCamera(run.start, LAYOUT.w, GAME_H));
     this.refreshDim();
     this.buildChrome();
     spots.showRoom(run.start);
@@ -203,7 +206,7 @@ export class HomeScene extends Phaser.Scene {
     return {
       hotspots: () => HOUSE_WORLD.map((s) => {
         const r = roomBounds(s.room);
-        return { room: s.room, x: (r.x + r.w / 2 - this.cam.cx) * this.cam.zoom + GAME_W / 2, y: (r.y + r.h / 2 - this.cam.cy) * this.cam.zoom + GAME_H / 2 };
+        return { room: s.room, x: (r.x + r.w / 2 - this.cam.cx) * this.cam.zoom + LAYOUT.w / 2, y: (r.y + r.h / 2 - this.cam.cy) * this.cam.zoom + GAME_H / 2 };
       }),
       spots: () => this.spots?.list() ?? [],
       focus: (r) => this.focusOn(r),
@@ -213,10 +216,18 @@ export class HomeScene extends Phaser.Scene {
     };
   }
 
+  /** The window shape changed (rotation, resize): refit the camera to the new width. */
+  private onLayout(): void {
+    this.baseCam = overviewCamera(LAYOUT.w, GAME_H);
+    this.tween?.stop();
+    this.tween = null;
+    this.apply(this.focusRoom ? focusCamera(this.focusRoom, LAYOUT.w, GAME_H) : this.baseCam);
+  }
+
   private apply(c: CameraState): void {
     this.cam = c;
     this.sky?.sync(c, this.baseCam);
-    this.world.setScale(c.zoom).setPosition(GAME_W / 2 - c.cx * c.zoom, GAME_H / 2 - c.cy * c.zoom);
+    this.world.setScale(c.zoom).setPosition(LAYOUT.w / 2 - c.cx * c.zoom, GAME_H / 2 - c.cy * c.zoom);
     this.spots?.syncBadges();
   }
 
@@ -249,7 +260,7 @@ export class HomeScene extends Phaser.Scene {
   }
 
   private toScreen(a: { x: number; y: number }): { x: number; y: number } {
-    return { x: (a.x - this.cam.cx) * this.cam.zoom + GAME_W / 2, y: (a.y - this.cam.cy) * this.cam.zoom + GAME_H / 2 };
+    return { x: (a.x - this.cam.cx) * this.cam.zoom + LAYOUT.w / 2, y: (a.y - this.cam.cy) * this.cam.zoom + GAME_H / 2 };
   }
 
   private menuOpen(): boolean { return this.menu?.sheetOpen() ?? false; }
@@ -275,7 +286,7 @@ export class HomeScene extends Phaser.Scene {
         return;
       }
     }
-    const art = screenToArt({ x: p.upX, y: p.upY }, this.cam, GAME_W, GAME_H);
+    const art = screenToArt({ x: p.upX, y: p.upY }, this.cam, LAYOUT.w, GAME_H);
     const room = roomAt(art);
     if (this.focusRoom) {
       const up = stairsTarget(this.focusRoom, art);
@@ -290,7 +301,7 @@ export class HomeScene extends Phaser.Scene {
   focusOn(room: RoomId | null): void {
     if (room === this.focusRoom) return;
     this.focusRoom = room;
-    const to = room ? focusCamera(room, GAME_W, GAME_H) : overviewCamera(GAME_W, GAME_H);
+    const to = room ? focusCamera(room, LAYOUT.w, GAME_H) : overviewCamera(LAYOUT.w, GAME_H);
     this.tween?.stop();
     this.tween = null;
     this.refreshDim();
@@ -320,12 +331,12 @@ export class HomeScene extends Phaser.Scene {
   private zoomToSpot(spot: Spot, done: () => void): void {
     const c = this.spots?.artCentre(spot.id);
     if (!c || !this.focusRoom) { done(); return; }
-    const base = focusCamera(this.focusRoom, GAME_W, GAME_H);
+    const base = focusCamera(this.focusRoom, LAYOUT.w, GAME_H);
     this.tweenTo({ zoom: base.zoom * 1.6, cx: c.x, cy: c.y }, 240, done);
   }
 
   private resetZoom(): void {
-    if (this.focusRoom) this.tweenTo(focusCamera(this.focusRoom, GAME_W, GAME_H), 240);
+    if (this.focusRoom) this.tweenTo(focusCamera(this.focusRoom, LAYOUT.w, GAME_H), 240);
   }
 
   /**
@@ -353,6 +364,7 @@ export class HomeScene extends Phaser.Scene {
 
   private cleanup(): void {
     this.tween?.stop();
+    this.game.events.off(LAYOUT_EVENT, this.onLayout, this);
     this.longTimer?.remove();
     this.input.off('pointerdown', this.onDown, this);
     this.input.off('pointerup', this.onTap, this);
