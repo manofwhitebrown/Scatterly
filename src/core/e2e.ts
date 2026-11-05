@@ -1,5 +1,6 @@
 import type Phaser from 'phaser';
-import { GAME_H, GAME_W, PUZZLE_SCENE } from '../shared/types';
+import { PUZZLE_SCENE } from '../shared/types';
+import { LAYOUT } from './layout';
 import type { Difficulty, PuzzleKind, PuzzleResult } from '../shared/types';
 import type { FrameStats } from './frameStats';
 import { readMetrics } from './metrics';
@@ -84,7 +85,7 @@ declare global {
 export function installE2e(game: Phaser.Game, stats: FrameStats): void {
   const api: ScatterlyE2E = {
     game,
-    size: { w: GAME_W, h: GAME_H },
+    get size() { return { w: LAYOUT.w, h: LAYOUT.h }; },
     metrics: () => readMetrics(game, stats),
     resetFrameStats: () => stats.reset(),
     errors: () => errorLog(),
@@ -129,7 +130,9 @@ export function installE2e(game: Phaser.Game, stats: FrameStats): void {
     },
     toClient: (x, y) => {
       const r = game.canvas.getBoundingClientRect();
-      return { x: r.left + (x / GAME_W) * r.width, y: r.top + (y / GAME_H) * r.height };
+      const top = game.scene.getScenes(true).pop(); // coordinates are in the top scene's own space (centred scenes are shifted by safeX)
+      const gx = x - (top?.cameras.main.scrollX ?? 0);
+      return { x: r.left + (gx / LAYOUT.w) * r.width, y: r.top + (y / LAYOUT.h) * r.height };
     },
   };
   window.__scatterly = api;

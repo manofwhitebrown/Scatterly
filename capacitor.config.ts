@@ -4,7 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.manofwhitebrown.scatterly',
   appName: 'Scatterly',
   webDir: 'dist',
-  backgroundColor: '#2b2230',
+  backgroundColor: '#1f3a40',
   android: { allowMixedContent: false },
 };
 
