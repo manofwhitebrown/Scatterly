@@ -77,6 +77,12 @@ jobs:
                .replace(/(<string name="title_activity_main">)[^<]*(<\/string>)/, '$1Scatterly$2'));
           NODE
 
+      - name: App icon (pixel-art house on teal)
+        continue-on-error: true
+        run: |
+          pip install pillow
+          python3 scripts/make-icon.py android/app/src/main/res
+
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Assemble debug APK
