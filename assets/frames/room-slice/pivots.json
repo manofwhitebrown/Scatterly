@@ -14,7 +14,7 @@
 "spot/bed/closed": {
 "pivot": [
 34,
-6
+26
 ]
 },
 "spot/tv/closed": {
@@ -236,7 +236,7 @@
 "spot/bed/open": {
 "pivot": [
 34,
-6
+26
 ]
 },
 "spot/tv/open": {
