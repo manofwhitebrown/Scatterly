@@ -41,10 +41,10 @@ export function caseSpec(day: number, length: SessionLength, mode: GameMode): Ca
   }
   const gatesMax = Math.min(12, Math.round(minutes / 2.5));
   const gatesMin = Math.min(gatesMax, Math.max(4, Math.round(minutes * 0.27)));
-  const chains = minutes >= 45 ? [3, 3] : minutes >= 30 ? [2, 3] : minutes >= 25 ? [2, 2] : [1, 1];
+  const chains = minutes >= 45 ? [7, 8] : minutes >= 30 ? [6, 7] : minutes >= 25 ? [3, 4] : minutes >= 20 ? [3, 3] : [2, 2];
   return {
     minutes, targets: minutes >= 30 ? 5 : 4, gatesMin, gatesMax,
     chainsMin: chains[0] as number, chainsMax: chains[1] as number, finale: minutes >= 25, scaled: true,
-    chainDepth: minutes >= 45 ? 2 : 1, finaleDepth: minutes >= 30 ? 2 : 1,
+    chainDepth: minutes >= 20 ? 2 : 1, finaleDepth: minutes >= 25 ? 2 : 1,
   };
 }

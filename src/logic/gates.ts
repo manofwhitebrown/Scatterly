@@ -15,6 +15,9 @@ const FLAVOUR: Partial<Record<PuzzleKind, SpotKind[]>> = {
   word: ['drawer', 'cabinet', 'wardrobe', 'fridge'],
 };
 
+/** Marks the compound finale gate (a distinct line, so `hasFinale` can tell it from an ordinary chained code lock). */
+export const FINALE_CONTEXT = 'A heavy keypad lock. The numbers are spread over the notes you found.';
+
 const CONTEXT: Partial<Record<PuzzleKind, readonly string[]>> = {
   code: ['A keypad lock. The numbers are on the notes you found.'],
   target: ['The dial wants an exact number.'],
@@ -41,6 +44,8 @@ export interface GateOptions {
   /** Extra stages per compound gate / on the finale (default 1). */
   chainDepth?: 1 | 2;
   finaleDepth?: 1 | 2;
+  /** Case builder: gate the spots the player must open (target and clue holders) before any decoy. */
+  pathFirst?: boolean;
 }
 
 /** Kinds that can be a second stage: no payload needed and not the clue-driven code lock. */
@@ -141,7 +146,7 @@ function addFinale(s: Scenario, rng: Rng, o: GateOptions): Difficulty | undefine
       if (!sp || !sp.lockable || s.gates[sp.id]) continue;
       const needs = finaleNeeds(s, sp.id, d, rng, (cid) => byId.get(cid)?.room);
       if (!needs) continue;
-      const gate: Gate = { kind: 'code', difficulty: d, context: 'A keypad lock. The numbers are on the notes you found.', needs };
+      const gate: Gate = { kind: 'code', difficulty: d, context: FINALE_CONTEXT, needs };
       if (stages.length > 0) gate.chain = pickStages(rng, stages, o.finaleDepth ?? 1);
       s.gates[sp.id] = gate;
       if (gatesFair(s)) return d;
@@ -155,7 +160,7 @@ function addFinale(s: Scenario, rng: Rng, o: GateOptions): Difficulty | undefine
 function addChains(s: Scenario, rng: Rng, o: GateOptions, count: number, holders: ReadonlySet<SpotId>): void {
   const stages = chainStages(o);
   if (stages.length === 0 || count <= 0) return;
-  const cand = rng.shuffle(Object.entries(s.gates).filter(([, g]) => g.kind !== 'code' && !g.chain));
+  const cand = rng.shuffle(Object.entries(s.gates).filter(([, g]) => !g.chain));
   cand.sort((a, b) => Number(holders.has(b[0])) - Number(holders.has(a[0])));
   for (const [, g] of cand.slice(0, count)) {
     const options = stages.filter((k) => k !== g.kind);
@@ -180,10 +185,14 @@ export function addGatesV3(s: Scenario, rng: Rng, o: GateOptions): void {
   const decoys = rng.shuffle(lockable.filter((sp) => !holders.has(sp.id)));
   // Alternate path / decoy spots so about half the gates are decoys.
   const order: Spot[] = [];
-  for (let i = 0; i < Math.max(onPath.length, decoys.length); i++) {
-    const a = onPath[i], b = decoys[i];
-    if (a) order.push(a);
-    if (b) order.push(b);
+  if (o.pathFirst) {
+    order.push(...onPath, ...decoys);
+  } else {
+    for (let i = 0; i < Math.max(onPath.length, decoys.length); i++) {
+      const a = onPath[i], b = decoys[i];
+      if (a) order.push(a);
+      if (b) order.push(b);
+    }
   }
   const used = new Set<PuzzleKind>();
   const finaleDiff = o.finale ? addFinale(s, rng, o) : undefined;

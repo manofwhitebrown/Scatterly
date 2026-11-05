@@ -1,5 +1,14 @@
 # AI-2 Phase 6 log (newest first)
 
+## Phase 6, unit 3: case length
+- Measured before (casual bot, 30 seeds, Standard): day 5 18.8 min, day 8 20.7, day 12 18.8. After: day 5 27.0, day 8 29.3, day 12 27.6 (window 25-35). The window test is a plain `it` now.
+- Why it was short: 8-12 gates existed, but the fairness rule (at most one gate on any clue path) leaves only 1-4 gates on the path; the rest are decoys the bot never opens. So the fix is depth on the path, not more gates: chains per case 6-7 (was 2-3; 7-8 at 45 min), 2 extra stages per compound gate from 20 min (was 45), finale depth 2 from 25 min (was 30), and code locks may be compound (`addChains` no longer skips them). Path gates are chosen before decoys (`pathFirst`).
+- The finale is now marked by `FINALE_CONTEXT` (gates.ts) so `hasFinale` stays exact now that other code locks can chain.
+- Time model (`tests/sim/session.ts`) is unchanged.
+- Other medians (Standard): day 1 1.6, day 2 1.8, day 3 12.7, day 4 21.8. Short day 5 about 12, Long day 5 about 35. Day 2 is NOT about 15 as the brief asks: days 1-2 stay the classic generator because an existing test protects them as the gentle onboarding; I did not change that.
+- Honest caveats: the spread is wide (min about 11, max about 57 min at day 8 in 30 seeds), so some mornings run long. Levels 4-5 are not in play (Gate has no level field), so this window is reached with levels 1-3 only; levels would add margin or let chains be shorter. The bot follows clues 85% of the time and the time model is an assumption, not a measurement of real players.
+- Tests changed to the new contract: chains 5-7 in logic.case.test.ts, caseSpec 6-7 chains, validator chain cap uses the spec.
+
 ## Phase 6, unit 2: puzzle levels 1-5
 - Done: generators for target, sequence, lights, slide, pipes, mastermind, memory, untangle, word and code accept `PuzzleDifficulty` 1-5; `parSeconds` is non-decreasing per level; `tests/puzzles/levels.test.ts` generates seeds 1-40 at every level for all 11 kinds, solves, and checks.
 - Mastermind: generate now rejects secrets the reference solver cannot crack inside `maxAttempts`, so every level is provably winnable.

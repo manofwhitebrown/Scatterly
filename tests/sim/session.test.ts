@@ -46,11 +46,11 @@ describe('session sim (casual bot, documented time model in session.ts)', () => 
 describe('session length contract', () => {
   /**
    * The contract: the median Standard case from day 5 takes a casual player 25-35 minutes.
-   * KNOWN GAP (see docs/status/AI-2.md): puzzle time is about 80% of the session and it comes from `parSeconds`, which only
-   * rises with puzzle levels 1-5 (order 7). Today the median is about 17 minutes. `it.fails` keeps CI green and turns red the
-   * moment the generator reaches the window, which is the cue to change this to a plain `it`.
+   * The case, not the time model, was changed to meet it: scaled cases chain more path gates (2 extra stages from 20 minutes),
+   * the finale chains from 25 minutes, and code locks may be compound. Puzzle levels 4-5 are not in play yet (Gate has no level
+   * field), so this window holds at levels 1-3; levels would add margin.
    */
-  it.fails('median Standard case from day 5 takes a casual player 25-35 minutes', () => {
+  it('median Standard case from day 5 takes a casual player 25-35 minutes', () => {
     for (const day of [5, 8, 12]) {
       const m = median(minutes(profile(day)));
       expect(m, `day ${day}`).toBeGreaterThanOrEqual(25);

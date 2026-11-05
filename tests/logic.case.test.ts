@@ -3,7 +3,7 @@ import { defaultProfile } from '../src/core/save';
 import { anySpot } from '../src/content/decor';
 import { caseSpec } from '../src/logic/caseSpec';
 import { generateCase, generateScenario, hasFinale, roomsTouched } from '../src/logic/generator';
-import { CHAIN_STAGES } from '../src/logic/gates';
+import { CHAIN_STAGES, FINALE_CONTEXT } from '../src/logic/gates';
 import { solveScenario } from '../src/logic/solver';
 import { validateScenario } from '../src/logic/validator';
 import { LEGACY_ROOMS } from '../src/shared/types';
@@ -53,11 +53,11 @@ describe('case builder: standard case from day 5', () => {
     expect(decoys / total).toBeGreaterThan(0.4);
     expect(decoys / total).toBeLessThan(0.85);
   });
-  it('has 2-3 compound gates whose second stage is a payload-free puzzle kind', () => {
+  it('has 5-7 compound gates whose second stage is a payload-free puzzle kind', () => {
     for (const s of cases) {
       const chained = Object.values(s.gates).filter((g) => g.chain);
-      expect(chained.length, s.id).toBeGreaterThanOrEqual(2);
-      expect(chained.length, s.id).toBeLessThanOrEqual(3);
+      expect(chained.length, s.id).toBeGreaterThanOrEqual(5);
+      expect(chained.length, s.id).toBeLessThanOrEqual(spec.chainsMax);
       for (const g of chained) for (const k of g.chain ?? []) {
         expect(CHAIN_STAGES).toContain(k);
         expect(k).not.toBe(g.kind);
@@ -68,7 +68,7 @@ describe('case builder: standard case from day 5', () => {
     const withFinale = cases.filter(hasFinale).length;
     expect(withFinale / cases.length).toBeGreaterThanOrEqual(0.97);
     for (const s of cases.filter(hasFinale)) {
-      const g = Object.values(s.gates).find((x) => x.kind === 'code' && x.chain) as NonNullable<Scenario['gates'][string]>;
+      const g = Object.values(s.gates).find((x) => x.kind === 'code' && x.chain && x.context === FINALE_CONTEXT) as NonNullable<Scenario['gates'][string]>;
       expect(new Set(g.needs).size).toBe(g.needs?.length);
     }
   });
@@ -78,7 +78,7 @@ describe('case builder: standard case from day 5', () => {
     for (const n of seeds(40)) {
       const s = generateCase(n, 'relaxed', late);
       expect(Object.values(s.gates).filter((g) => g.difficulty === 3).length).toBeLessThanOrEqual(1);
-      expect(validateScenario(s, late, { maxGates: 12, maxChained: 3 }), s.id).toEqual([]);
+      expect(validateScenario(s, late, { maxGates: 12, maxChained: caseSpec(12, 'standard', 'relaxed').chainsMax }), s.id).toEqual([]);
     }
   });
   it('is deterministic per seed', () => {

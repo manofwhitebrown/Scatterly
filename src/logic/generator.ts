@@ -10,7 +10,7 @@ import type { CaseSpec } from './caseSpec';
 import { buildClues } from './clues';
 import { expand, simulateEvening } from './evening';
 import type { SlotMap } from './evening';
-import { addGatesV3 } from './gates';
+import { FINALE_CONTEXT, addGatesV3 } from './gates';
 import { allSpots } from './progression';
 import { Rng, deriveSeed } from './rng';
 import { solveScenario } from './solver';
@@ -135,7 +135,7 @@ function attempt(seed: number, mode: GameMode, w: World, salt: number, enabled: 
   const gateProfile: PlayerProfile = mode === 'daily' ? { ...w.profile, day: 6, puzzles: {} } : w.profile;
   addGatesV3(s, rng, {
     enabled, profile: gateProfile, big, spots: w.spots,
-    ...(spec ? { budget: rng.int(spec.gatesMin, spec.gatesMax), finale: spec.finale, chains: rng.int(spec.chainsMin, spec.chainsMax), chainDepth: spec.chainDepth, finaleDepth: spec.finaleDepth } : {}),
+    ...(spec ? { budget: rng.int(spec.gatesMin, spec.gatesMax), finale: spec.finale, pathFirst: true, chains: rng.int(spec.chainsMin, spec.chainsMax), chainDepth: spec.chainDepth, finaleDepth: spec.finaleDepth } : {}),
   });
   s.parSearches = idealSearchCount(s) + 2;
   // Puzzles take real time: give every gate the player has to open its par time plus slack.
@@ -244,7 +244,7 @@ const MIN_ROOMS = 4;
 
 /** The compound finale: a code lock that needs facts from several clues, then a second puzzle stage. */
 export function hasFinale(s: Scenario): boolean {
-  return Object.values(s.gates).some((g) => g.kind === 'code' && (g.chain?.length ?? 0) > 0 && (g.needs?.length ?? 0) >= 2);
+  return Object.values(s.gates).some((g) => g.kind === 'code' && g.context === FINALE_CONTEXT && (g.chain?.length ?? 0) > 0 && (g.needs?.length ?? 0) >= 2);
 }
 const caseScore = (s: Scenario, spec: CaseSpec): number =>
   Math.min(roomsTouched(s), MIN_ROOMS) + (!spec.finale || hasFinale(s) ? MIN_ROOMS : 0);

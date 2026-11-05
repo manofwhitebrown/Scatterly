@@ -24,9 +24,9 @@ describe('case spec: day ramp and session length', () => {
     expect(caseSpec(1, 'standard', 'relaxed').scaled).toBe(false);
     expect(caseSpec(2, 'standard', 'relaxed').scaled).toBe(false);
   });
-  it('standard case from day 5: 8-12 padlocks, 2-3 chains, a finale, 4-5 targets', () => {
+  it('standard case from day 5: 8-12 padlocks, 6-7 chains, a finale, 4-5 targets', () => {
     const s = caseSpec(5, 'standard', 'relaxed');
-    expect(s).toMatchObject({ scaled: true, gatesMin: 8, gatesMax: 12, chainsMin: 2, chainsMax: 3, finale: true });
+    expect(s).toMatchObject({ scaled: true, gatesMin: 8, gatesMax: 12, chainsMin: 6, chainsMax: 7, finale: true });
     expect(s.targets).toBeGreaterThanOrEqual(4);
   });
   it('counts grow with length and stay within hard caps', () => {
@@ -34,7 +34,7 @@ describe('case spec: day ramp and session length', () => {
       const s = caseSpec(d, l, 'relaxed');
       expect(s.gatesMax).toBeLessThanOrEqual(12);
       expect(s.gatesMin).toBeLessThanOrEqual(s.gatesMax);
-      expect(s.chainsMax).toBeLessThanOrEqual(3);
+      expect(s.chainsMax).toBeLessThanOrEqual(8);
     }
     expect(caseSpec(5, 'short', 'relaxed').gatesMax).toBeLessThan(caseSpec(5, 'standard', 'relaxed').gatesMax);
     expect(caseSpec(5, 'long', 'relaxed').gatesMax).toBe(12);
