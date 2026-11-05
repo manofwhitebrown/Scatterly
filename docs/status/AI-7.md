@@ -25,7 +25,7 @@
 
 ## Honest notes
 - Code and Sort have no harder variant above level 3 (Sort level 4-5 repeats the 'combo' mode). AI-2 owns that logic; I did not invent any.
-- Seen on screen: the cream wooden panel, pixel font, Hint/Notes/Skip row inside the panel and the close button are consistent across all 11, nothing overlaps at 1280x720. Weakest: Word key legend (tiny), Slide and Memory grids small and off-centre, Mastermind history box empty and blank, close X sticks out of the panel corner,.
+- Seen on screen: the cream wooden panel, pixel font, Hint/Notes/Skip row inside the panel and the close button are consistent across all 11, nothing overlaps at 1280x720. Word cipher key enlarged (13 -> 18 px) and spaced clear of the slots. Weakest: Slide and Memory grids small and off-centre, Mastermind history box empty and blank, close X sticks out of the panel corner,.
 - Text is still small: `makeText` in `src/puzzles/ui.ts` scales every size by 0.8, so body text is 14-27 px, below the 28 px target. Fixing it means re-fitting each scene's layout.
 
 ## Requests

@@ -48,7 +48,7 @@ export class WordScene extends PuzzleShell {
     this.word = this.spec.word;
     const cx = PX + PW / 2;
     const hint = this.spec.hint;
-    makeText(this, cx, PY + 90, hint, 22, PAL.inkSoft, { ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 160 });
+    makeText(this, cx, PY + 90, hint, 26, PAL.inkSoft, { ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 160 });
     this.gSlots = this.add.graphics();
     this.gPool = this.add.graphics();
     let slotY = PY + 230;
@@ -76,12 +76,12 @@ export class WordScene extends PuzzleShell {
 
   private buildNote(cx: number): void {
     const shift = this.spec.shift;
-    makeText(this, cx, PY + 150, this.spec.coded, 30, PAL.ink, { mono: true, bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 120 });
+    makeText(this, cx, PY + 148, this.spec.coded, 30, PAL.ink, { mono: true, bold: true, ox: 0.5, oy: 0.5, align: 'center', wrap: PW - 120 });
     const plain = ALPHA.split('').join(' ');
     const coded = caesar(ALPHA, shift).split('').join(' ');
-    makeText(this, cx, PY + 205, `Real   ${plain}`, 17, PAL.inkSoft, { mono: true, ox: 0.5, oy: 0.5 });
-    makeText(this, cx, PY + 232, `Coded  ${coded}`, 17, PAL.terracotta, { mono: true, bold: true, ox: 0.5, oy: 0.5 });
-    makeText(this, cx, PY + 262, `Key: A becomes ${caesar('A', shift)}, B becomes ${caesar('B', shift)}, C becomes ${caesar('C', shift)}`, 18, PAL.inkSoft, { ox: 0.5, oy: 0.5 });
+    makeText(this, cx, PY + 198, `Real   ${plain}`, 22, PAL.inkSoft, { mono: true, ox: 0.5, oy: 0.5 });
+    makeText(this, cx, PY + 224, `Coded  ${coded}`, 22, PAL.terracotta, { mono: true, bold: true, ox: 0.5, oy: 0.5 });
+    makeText(this, cx, PY + 250, `Key: A becomes ${caesar('A', shift)}, B becomes ${caesar('B', shift)}, C becomes ${caesar('C', shift)}`, 24, PAL.inkSoft, { ox: 0.5, oy: 0.5 });
   }
 
   private buildSlots(cx: number, cy: number): void {
