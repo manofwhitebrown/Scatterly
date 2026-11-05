@@ -1,5 +1,17 @@
 # AI-2 Phase 6 log (newest first)
 
+## Phase 6, unit 4: Resume
+- `src/logic/snapshot.ts`: `captureSnapshot(session, seed, profile, elapsedMs)` and `restoreSnapshot(raw, profile)`; `GameSession.exportState()` / `importState()` (all or nothing). `SessionSnapshot` outer shape unchanged (`v: 1`), so `sanitizeResume` and save v4 need no change; `state.rev` = 1 is the revision of the inside.
+- The scenario is never stored: it is regenerated from seed + mode + saved day and session length, then compared with a fingerprint (targets, placement, gates, clues). Mismatch (new app version, other day) means null and a fresh case. Tries `generateCase`, then `generateScenario`, so it works with either generator.
+- Null (never a throw) for: not a v1 snapshot, another `state.rev`, the empty Phase-0 stub, wrong seed/mode/id/fingerprint/day, any progress that does not fit the case (unknown spot, taken item whose spot is unopened, opened locked spot, counts out of range, duplicates). Tests: 40 seeds x 7 mode/day mixes round trip and the restored session plays on identically to the end; real save path (profile -> JSON -> migrate); 1500-case corruption fuzz; control cases.
+- NOT saved: a puzzle that is open at the moment of the kill restarts from its start (its gate is still locked). Elapsed time is saved and clamped to 6 h.
+- Not wired: nothing in the game calls capture/restore yet.
+
+### Requests for Resume
+- AI-3 (RoomRun / Home play loop): after every inspect, take, solveGate, setMark and hint, and on pause/visibilitychange, set `profile.resume = captureSnapshot(session, seed, profile, elapsedMs)` and commit the profile; clear it (null) when the case finishes or is abandoned on purpose. On Resume use `restoreSnapshot(profile.resume, profile)`; if it returns null, start a fresh case and clear `resume`.
+- AI-3: `src/scenes/RoomRun.ts` builds the morning with `generateScenario`, so the case builder (padlock count, chains, finale, 25-35 min) is NOT what the game plays. Call `generateCase(seed, mode, profile)` instead.
+- AI-1 kill-and-reload e2e should assert: (1) start a Relaxed case on a profile with day >= 5, open 2-3 containers, take one item, mark one spot, wait for the autosave; (2) kill the page and reload; the menu offers Resume; (3) Resume shows the same case id, the same found items, the same opened containers and clue list, the marked spot still marked, and elapsed time not reset; (4) corrupt `resume.state.fp` in localStorage and reload: no Resume button, no error screen, a normal fresh start; (5) finish the resumed case: `profile.resume` is null afterwards.
+
 ## Phase 6, unit 3: case length
 - Measured before (casual bot, 30 seeds, Standard): day 5 18.8 min, day 8 20.7, day 12 18.8. After: day 5 27.0, day 8 29.3, day 12 27.6 (window 25-35). The window test is a plain `it` now.
 - Why it was short: 8-12 gates existed, but the fairness rule (at most one gate on any clue path) leaves only 1-4 gates on the path; the rest are decoys the bot never opens. So the fix is depth on the path, not more gates: chains per case 6-7 (was 2-3; 7-8 at 45 min), 2 extra stages per compound gate from 20 min (was 45), finale depth 2 from 25 min (was 30), and code locks may be compound (`addChains` no longer skips them). Path gates are chosen before decoys (`pathFirst`).

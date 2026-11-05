@@ -12,6 +12,16 @@ import type {
 type EventName = 'clue' | 'found' | 'complete' | 'hint' | 'mark';
 type Listener = (payload?: unknown) => void;
 
+/** Everything a GameSession needs to continue where it stopped (JSON-safe). The scenario itself is regenerated, never stored. */
+export interface SessionState {
+  opened: SpotId[]; solved: SpotId[]; clues: string[]; taken: ItemId[];
+  hints: Array<[ItemId, number]>; marks: Array<[SpotId, SpotMark]>; searches: number; hintsUsed: number;
+}
+
+const isStrArr = (v: unknown, max: number): v is string[] => Array.isArray(v) && v.length <= max && v.every((x) => typeof x === 'string');
+const isCount = (v: unknown, max: number): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= max;
+const distinct = (a: readonly string[]): boolean => new Set(a).size === a.length;
+
 export interface HintResult { text: string; room?: RoomId; spotId?: SpotId }
 
 const EMPTY_SPOTS: Spot[] = [];
@@ -206,6 +216,59 @@ export class GameSession {
       found: this.found(), timeMs, searches: this.searches, hintsUsed: this.hintsUsed, timedOut,
       stars, coinsEarned: coins, habitHits: [], newAchievements: [], puzzleLog: [],
     };
+  }
+
+  /** Snapshot of the player's progress for Resume. */
+  exportState(): SessionState {
+    return {
+      opened: [...this.opened], solved: [...this.solvedGates], clues: this.clueList.map((c) => c.id), taken: this.taken.slice(),
+      hints: [...this.hintStage], marks: [...this.markMap], searches: this.searches, hintsUsed: this.hintsUsed,
+    };
+  }
+
+  /**
+   * Loads a state exported earlier into a FRESH session. All or nothing: anything that does not fit this scenario
+   * (unknown ids, a taken item whose spot was never opened, a locked spot that was opened, bad counts) returns false
+   * and leaves the session untouched.
+   */
+  importState(raw: unknown): boolean {
+    if (this.opened.size > 0 || this.taken.length > 0 || this.clueList.length > 0 || this.solvedGates.size > 0 || this.searches > 0) return false;
+    const st = raw as Partial<Record<keyof SessionState, unknown>> | null;
+    if (!st || typeof st !== 'object') return false;
+    const { opened, solved, clues, taken, hints, marks, searches, hintsUsed } = st;
+    if (!isStrArr(opened, 400) || !isStrArr(solved, 400) || !isStrArr(clues, 400) || !isStrArr(taken, 100)) return false;
+    if (!Array.isArray(hints) || hints.length > 20 || !Array.isArray(marks) || marks.length > 400) return false;
+    if (!isCount(searches, 5000) || !isCount(hintsUsed, 500)) return false;
+    if (![opened, solved, clues, taken].every(distinct)) return false;
+    const gates = this.scenario.gates;
+    if (!opened.every((id) => this.spots.has(id)) || searches < opened.length) return false;
+    if (!solved.every((id) => gates[id] !== undefined)) return false;
+    if (!opened.every((id) => gates[id] === undefined || solved.includes(id))) return false;
+    const clueById = new Map(this.scenario.clues.map((c) => [c.id, c]));
+    if (!clues.every((id) => { const c = clueById.get(id); return c !== undefined && opened.includes(c.spotId); })) return false;
+    for (const c of this.scenario.clues) if (opened.includes(c.spotId) && !clues.includes(c.id)) return false;
+    if (!taken.every((id) => { const w = this.scenario.placement[id as ItemId]; return w !== undefined && opened.includes(w); })) return false;
+    const hintPairs: Array<[ItemId, number]> = [];
+    for (const h of hints) {
+      if (!Array.isArray(h) || h.length !== 2 || typeof h[0] !== 'string' || !this.scenario.targets.includes(h[0] as ItemId) || !isCount(h[1], 500)) return false;
+      hintPairs.push([h[0] as ItemId, h[1]]);
+    }
+    const markPairs: Array<[SpotId, SpotMark]> = [];
+    for (const m of marks) {
+      if (!Array.isArray(m) || m.length !== 2 || typeof m[0] !== 'string' || !this.spots.has(m[0]) || opened.includes(m[0])) return false;
+      if (m[1] !== 'ruledOut' && m[1] !== 'hunch') return false;
+      markPairs.push([m[0], m[1]]);
+    }
+    for (const id of opened) this.opened.add(id);
+    for (const id of solved) this.solvedGates.add(id);
+    for (const id of clues) { this.clueIds.add(id); this.clueList.push(clueById.get(id) as Clue); }
+    for (const id of taken) this.taken.push(id as ItemId);
+    for (const [i, n] of hintPairs) this.hintStage.set(i, n);
+    for (const [id, m] of markPairs) this.markMap.set(id, m);
+    this.searches = searches;
+    this.hintsUsed = hintsUsed;
+    this.completeEmitted = this.isComplete();
+    return true;
   }
 
   on(ev: EventName, cb: Listener): () => void {
