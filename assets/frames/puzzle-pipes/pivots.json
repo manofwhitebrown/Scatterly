@@ -22,47 +22,5 @@
 8,
 8
 ]
-},
-"puzzle/pipes/pipe_tee": {
-"pivot": [
-8,
-8
-]
-},
-"puzzle/pipes/pipe_end": {
-"pivot": [
-8,
-8
-]
-},
-"puzzle/pipes/pipe_source": {
-"pivot": [
-8,
-8
-]
-},
-"puzzle/pipes/pipe_straight_on": {
-"pivot": [
-8,
-8
-]
-},
-"puzzle/pipes/pipe_elbow_on": {
-"pivot": [
-8,
-8
-]
-},
-"puzzle/pipes/pipe_tee_on": {
-"pivot": [
-8,
-8
-]
-},
-"puzzle/pipes/pipe_end_on": {
-"pivot": [
-8,
-8
-]
 }
 }

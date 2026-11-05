@@ -24,4 +24,6 @@
 
 - Task 2, pipes: pipe_tee, pipe_end, pipe_source (all drawn pointing up; scene rotates in 90 deg steps), plus _on water versions of straight, elbow, tee, end. Evidence puzzle-pipes-3x.png. Weak: source valve is a tiny yellow square; the old elbow channel is a pixel wider than the new pieces.
 
-Task 2 next: slide, sort (one per commit, add to KINDS in puzzle2.py). Then atlas repack request -> AI-4 and name list -> AI-7.
+- Task 2, slide: tile_ok (star), tile_down. sort: token_0..3 now carry shapes (square, diamond, triangle, circle) so colour is not the only cue; new bin, bin_ok. Evidence puzzle-slide-sort-3x.png. Weak: slide tile numbers still come from scene text; bin is a blank well.
+
+Task 2 left: panel trims per kind (still near-identical), lights glow, mastermind feedback pegs, sequence pad shapes, untangle rope, target. Then Task 3 check, repack request (one per commit, add to KINDS in puzzle2.py). Then atlas repack request -> AI-4 and name list -> AI-7.

@@ -34,5 +34,17 @@
 8,
 8
 ]
+},
+"puzzle/sort/bin": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sort/bin_ok": {
+"pivot": [
+8,
+8
+]
 }
 }
