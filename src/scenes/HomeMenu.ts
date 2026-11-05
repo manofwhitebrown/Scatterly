@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { commitProfile } from '../core/save';
 import { LAYOUT } from '../core/layout';
 import { Button } from '../ui/Button';
+import { titleBox } from '../ui/hudLayout';
 import { COLOR, DEPTH, SAFE, drawPlate, getProfile, go, makeText } from '../ui/theme';
 import { GAME_H, SCENE } from '../shared/types';
 import type { GameMode, SessionLength } from '../shared/types';
@@ -24,8 +25,8 @@ export class HomeMenu {
       new Button(scene, xs[1], y, bw, 'Journal', () => go(scene, SCENE.Journal), { height: BH }),
       new Button(scene, xs[2], y, bw, 'Settings', () => go(scene, SCENE.Settings), { height: BH }),
     );
-    const title = makeText(scene, LAYOUT.w - SAFE - 8, SAFE - 4, 'Scatterly', { fontSize: '64px', fontStyle: 'bold', stroke: '#16252a', strokeThickness: 8 }).setOrigin(1, 0);
-    const sub = makeText(scene, LAYOUT.w - SAFE - 12, SAFE + 62, "Where'd I put it?", { fontSize: '28px', stroke: '#16252a', strokeThickness: 5 }).setOrigin(1, 0);
+    const title = makeText(scene, titleBox(LAYOUT.w).x + titleBox(LAYOUT.w).w, titleBox(LAYOUT.w).y, 'Scatterly', { fontSize: '64px', fontStyle: 'bold', stroke: '#16252a', strokeThickness: 8 }).setOrigin(1, 0);
+    const sub = makeText(scene, titleBox(LAYOUT.w).x + titleBox(LAYOUT.w).w - 4, titleBox(LAYOUT.w).y + 66, "Where'd I put it?", { fontSize: '28px', stroke: '#16252a', strokeThickness: 5 }).setOrigin(1, 0);
     this.items.push(title, sub);
     for (const it of this.items) (it as Phaser.GameObjects.Container).setDepth(DEPTH.hud);
   }

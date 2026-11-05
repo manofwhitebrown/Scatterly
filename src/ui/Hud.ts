@@ -28,6 +28,8 @@ export interface HudConfig {
 
 interface Slot {
   img: Phaser.GameObjects.Image;
+  /** Real item art to swap in when found (set when the slot shows a baked `_sil` silhouette). */
+  real?: { atlas: string; frame: string };
   outline: Phaser.GameObjects.Image[];
   check: Phaser.GameObjects.Text;
   x: number;
@@ -209,6 +211,7 @@ export class Hud {
     s.done = true;
     s.img.clearTint();
     s.img.setAlpha(1);
+    if (s.real) s.img.setTexture(s.real.atlas, s.real.frame);
     for (const o of s.outline) o.setVisible(false);
     s.check.setVisible(true);
     if (!isCalm(this.scene)) {
@@ -263,12 +266,15 @@ export class Hud {
     targets.forEach((item, i) => {
       const x = box.x + 12 + TRAY_STEP / 2 + i * TRAY_STEP;
       // Not found yet: a cream silhouette with a dark outline (readable on the dark plate), never a black blob.
-      const outline = [[-3, 0], [3, 0], [0, -3], [0, 3]].map(([dx, dy]) => this.itemImage(item, x + dx, y + dy).setTintFill(COLOR.plateEdge));
-      const img = this.itemImage(item, x, y).setTintFill(COLOR.cream).setAlpha(0.75);
+      const sil = frame(`icon/${item}_sil`);
+      const realArt = frame(`icon/${item}`);
+      // Baked silhouette art when it exists; otherwise the real icon as a cream fill with a dark outline.
+      const outline = sil ? [] : [[-3, 0], [3, 0], [0, -3], [0, 3]].map(([dx, dy]) => this.itemImage(item, x + dx, y + dy).setTintFill(COLOR.plateEdge));
+      const img = sil ? this.scene.add.image(x, y, sil.atlas, sil.frame).setScale(64 / Math.max(sil.w, sil.h)) : this.itemImage(item, x, y).setTintFill(COLOR.cream).setAlpha(0.75);
       const check = makeText(this.scene, x + 26, y - 28, '✓', { fontSize: '30px', fontStyle: 'bold', color: CSS.green }).setOrigin(0.5);
       check.setVisible(false);
       this.root.add([...outline, img, check]);
-      this.slots.set(item, { img, outline, check, x, y, done: false });
+      this.slots.set(item, { img, outline, check, x, y, done: false, real: sil && realArt ? { atlas: realArt.atlas, frame: realArt.frame } : undefined });
     });
   }
 

@@ -57,3 +57,9 @@ export const centre = (b: Box): { x: number; y: number } => ({ x: b.x + b.w / 2,
 export function overlaps(a: Box, b: Box): boolean {
   return a.w > 0 && b.w > 0 && a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
+
+/** The Scatterly title block on the Overview menu: top-right, right-aligned to the edge margin (game px, generous). */
+export function titleBox(w: number): Box {
+  const width = 480;
+  return { x: w - HUD_EDGE - 8 - width, y: HUD_EDGE - 4, w: width, h: 112 };
+}
