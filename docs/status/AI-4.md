@@ -10,16 +10,19 @@
 - Task 1(e) part 1, contact shadows: tools/pack/pack.py now bakes a checker-dithered palette `shade` ellipse behind every floor-standing `prop/<kind>` frame in room-slice (kinds parsed from src/content/worldKinds.ts: not flat/top/mount); source PNGs stay clean, frames gain 2 px of canvas at the bottom, pivots unchanged. Shadow sits under the sprite's visible base, not the true footprint, so a few look a pixel or two off.
 - Task 2 spot frames: audit of every spot kind in src/content/house.ts showed all already had `spot/<kind>/closed|open` except `keyHook`; added it (wall key board, 3 hooks with keys; open state shows one empty hook). Added `ui/check`, `ui/hunch`, `ui/ruledOut` marks (12x12, core atlas) to replace the text glyphs in HomeSpots; `ui/padlock` already existed. Source: tools/pixelart/spots2.py <room-slice dir> <core dir>.
 - Task 3 avatar: existing outlined 12x22 figure (idle 2, walk 6, reach 3, se and mirrored sw) got a 3/4 pass: hair highlight and back-hair shade, ear, collar, terracotta satchel strap, shaded far arm and leg, shade on the sweater's far side. Same frame names, sizes and pivots, so nothing to wire. Cat unchanged (sleep, idle, walk, react, eat all exist). Source: tools/pixelart/chars.py.
+- Task 4 UI: font coverage checked with fontTools against every non-ASCII character in src strings: Silkscreen has full ASCII and Latin accents, only U+2713 (check) and U+2715 (cross) were missing, now added to both weights (tools/font/add_marks.py, licence line updated). Silhouette icons `icon/<item>_sil` for all 8 items (light stone fill, rim and outline; tools/pixelart/icons2.py). Nine-slice panels (panel9, panelDark9, paper9, tray9) and button states (sage/terracotta/wood up/hover/pressed) already existed; not re-drawn.
 ## Verified
 - `python3 tools/check-frames/check.py assets/frames/room-slice --max 96` -> "141 files, 0 problems".
 - `npm run art:sheet` -> "missing frames: none"; rugs checked by eye in docs/art/evidence/art-sheet.png; bed frames checked enlarged in isolation only (art-sheet does not draw spots).
 - Arrival baseline: `npm test` 458 passed, 1 suite red (tests/home-geometry.test.ts, "window is not defined", AI-3's to fix).
 ## Not verified
+- Silkscreen is capitals-only and its legibility at body size 28 game px is unchecked in game; nine-slice panels and buttons not looked at in a real screenshot.
 - Avatar and cat at Overview/phone size: only checked enlarged on a contact sheet.
 - `npm run shots` could not run: no browser in this sandbox (Chromium download blocked). No Focus or Overview screenshot checked this unit; only the browser-free art sheet. Phone feel: owner only.
 ## Weaknesses (honest, from art-sheet)
 - Same teal spiky plant still used 2-3 times per room; rooms still read 18-29 props with big empty floor; floor-level pieces like the small red tiles look like stray markers.
 ## Requests
+- AI-3: Hud.itemImage should use `icon/<item>_sil` for undiscovered items (today it shows the dark/tinted icon). Icons are drawn at 64 game px max side; the brief asks for 96, scale them up with no change to the frames.
 - AI-3: HomeSpots badges still draw text glyphs ('✕', '?'); frames `ui/ruledOut`, `ui/hunch`, `ui/check` (pivot bottom centre) now exist if you want to swap them in. Also confirm where `spot/keyHook` anchors (wall piece at gz 5): I used pivot bottom centre.
 - AI-2/AI-3 (needed to make 1c visible): add `pottedFern`, `pottedCactus`, `pottedFlower` to src/content/worldKinds.ts as `B(1, 1, 4, { sym: true })` (same as pottedPlant) and swap about half of the `pottedPlant` placements in worldPropsA/B.ts so no room repeats one plant more than once. Frames already exist.
 - AI-1: `npm run shots` needs a Chromium; none available to me.
