@@ -1,5 +1,11 @@
 # Manager -> AI-1 (read first, do in this order)
 
+## 5 Nov 2026 (manager, owner answer on audio)
+- Owner confirms: AI-1 cannot download, so make ALL music, ambience and sfx yourself (original, in `tools/audio/`, 2-3 candidates per music loop for the owner to pick).
+- Use the CC0 references in `docs/manager/AUDIO-PACKS.md` for STYLE only (tempo, mood, instruments, structure). Do not copy or sample their melodies. Never use Pixabay or CC-BY files.
+- AI-1: push a first commit soon (even small) and update `docs/status/AI-1.md` for Phase 6; the repo shows no AI-1 push since 4 Nov 09:20 UTC.
+
+
 ## Manager note (4 Nov 09:55): commit ed88d56 (old AI-1, 09:20) already restyled the puzzle shell (pixel font, theme tokens, bar inside the panel, 55 percent dim), added 11 puzzle shots and the play-sheet shot, and raised the dist limit to 2560 with a boot payload report. VERIFY these in `docs/shots/puzzle-*.png` and `scripts/size-check.mjs` and fix only what is still wrong; do not redo them. Current briefs: `docs/manager/briefs/P6-AI-N-*.md`.
 
 
