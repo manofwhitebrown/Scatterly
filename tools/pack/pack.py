@@ -8,13 +8,31 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 GROUPS = {'core': 'core', 'room-slice': 'room:slice', 'house': 'house'}
 for _k in ('untangle', 'lights', 'mastermind'): GROUPS['puzzle-' + _k] = 'puzzle:' + _k   # puzzle skin atlases
 for _r in ('entrance', 'living', 'kitchen', 'bathroom', 'bedroom', 'study'): GROUPS['room-' + _r] = 'room:' + _r   # one shell atlas per room
+def floor_kinds():
+    """Floor-standing prop kinds (not flat/top/mount) parsed from src/content/worldKinds.ts: these get a baked contact shadow."""
+    t = open(os.path.join(ROOT, 'src', 'content', 'worldKinds.ts')).read()
+    return {m.group(1) for m in re.finditer(r'(\w+): B\(([^)]*)\)', t) if not re.search(r'flat|top|mount', m.group(2))}
+SHADE = (0x3a, 0x2a, 0x4a, 255)
+def with_shadow(im):
+    """Checker-dithered palette 'shade' ellipse behind the sprite base (2 px extra canvas at the bottom, pivot unchanged). Source PNGs stay clean."""
+    bb = im.getbbox()
+    if not bb: return im
+    w = bb[2] - bb[0]; cx = (bb[0] + bb[2] - 1) / 2; rx = max(5, w * 0.5); ry = max(3, min(6, rx / 2.2)); cy = bb[3] - 2
+    out = Image.new('RGBA', (im.width, im.height + 2), (0, 0, 0, 0)); px = out.load()
+    for y in range(max(0, int(cy - ry)), min(out.height, int(cy + ry) + 1)):
+        for x in range(out.width):
+            if ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1 and (x + y) % 2 == 0: px[x, y] = SHADE
+    out.alpha_composite(im, (0, 0)); return out
 MS = {'walk': 100, 'idle': 400, 'sleep': 500, 'react': 150, 'eat': 200, 'reach': 120}
 def pack(d, group):
     src = os.path.join(ROOT, 'assets', 'frames', d); pv = {}
     if os.path.exists(os.path.join(src, 'pivots.json')): pv = json.load(open(os.path.join(src, 'pivots.json')))
-    items = []
+    items = []; fk = floor_kinds() if d == 'room-slice' else set()
     for fn in sorted(os.listdir(src)):
-        if fn.endswith('.png'): items.append((fn[:-4].replace('__', '/'), Image.open(os.path.join(src, fn)).convert('RGBA')))
+        if fn.endswith('.png'):
+            name = fn[:-4].replace('__', '/'); im = Image.open(os.path.join(src, fn)).convert('RGBA')
+            if name.startswith('prop/') and name[5:] in fk: im = with_shadow(im)
+            items.append((name, im))
     items.sort(key=lambda t: (-t[1].height, t[0]))
     x = y = rowh = 0; W = 1024; pos = {}
     for name, im in items:
