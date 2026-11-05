@@ -5,6 +5,7 @@
 ## Done (Phase 6)
 - Task 1(b) rugs: `prop/rugRect` (3x2 tile diamond, cream field, thin rose band, sparse butter dots) and `prop/rugRound` (2x2, sage ring on cream) are now hand-built, low contrast and thin. Both pivot = frame centre (homeProps anchors at footprint centre). Source: tools/pixelart/props2.py (rug_rect, rug_round).
 - Task 1(a) bed: `spot/bed/closed|open` hand-built (headboard, two pillows, terracotta blanket, footboard), 83x68, pivot = footprint top vertex (inferred from the old Kenney frame's pivot maths, not yet seen in game). Source: tools/pixelart/bed.py. Order to regenerate: props2.py, spots.py, bed.py, then tools/pack/pack.py.
+- Task 1(c) wiring check, then plants: new standing frames `prop/pottedFern`, `prop/pottedCactus`, `prop/pottedFlower` (1x1, pivot bottom centre, pot colours terracotta/stone/blue). NOT in game yet: they need registering as kinds (see Requests). Source: tools/pixelart/props2.py (dict T).
 ## Verified
 - `python3 tools/check-frames/check.py assets/frames/room-slice --max 96` -> "141 files, 0 problems".
 - `npm run art:sheet` -> "missing frames: none"; rugs checked by eye in docs/art/evidence/art-sheet.png; bed frames checked enlarged in isolation only (art-sheet does not draw spots).
@@ -14,7 +15,7 @@
 ## Weaknesses (honest, from art-sheet)
 - Same teal spiky plant still used 2-3 times per room; windows are flat yellow-striped squares (no curtains or floor light); rooms still read 18-29 props with big empty floor; no contact shadows; floor-level pieces like the small red tiles look like stray markers.
 ## Requests
-- AI-2: plant placements use one kind (`pottedPlant`) up to 3x per room; once I add `plantSmall`-style variants please vary by kind/id, or tell me the extra kind names to add.
+- AI-2/AI-3 (needed to make 1c visible): add `pottedFern`, `pottedCactus`, `pottedFlower` to src/content/worldKinds.ts as `B(1, 1, 4, { sym: true })` (same as pottedPlant) and swap about half of the `pottedPlant` placements in worldPropsA/B.ts so no room repeats one plant more than once. Frames already exist.
 - AI-1: `npm run shots` needs a Chromium; none available to me.
 ## Next
-- Owner or AI-1: confirm bed sits right on the bedroom wall in a real Focus shot. 1(c) plant variants, 1(d) windows with curtains + floor light patch, 1(e) contact shadows and wall decor density.
+- Owner or AI-1: confirm bed sits right on the bedroom wall in a real Focus shot. 1(c) wiring check, then plant variants, 1(d) windows with curtains + floor light patch, 1(e) contact shadows and wall decor density.

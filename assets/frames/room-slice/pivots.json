@@ -724,5 +724,23 @@
 13,
 14
 ]
+},
+"prop/pottedFern": {
+"pivot": [
+10,
+16
+]
+},
+"prop/pottedCactus": {
+"pivot": [
+8,
+17
+]
+},
+"prop/pottedFlower": {
+"pivot": [
+9,
+15
+]
 }
 }

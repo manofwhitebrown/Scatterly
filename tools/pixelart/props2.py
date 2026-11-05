@@ -10,6 +10,9 @@ from dsl import build, col
 from props import L
 from yard import outline, new
 T = {
+ 'pottedFern': ["......gG........", "..g..gGGg...g...", "..gG.gGgGg.gG...", ".ggGgGgGgGgGgg..", "gGgGGgGhGgGGgGg.", "gGgGhgGGgGhgGgG.", ".ggGgGhGgGgGgg..", "..gg.gGgGg.gg...", "....rrrrrrrr....", "...rRRRRRRRRr...", "...rrrrrrrrrr...", "...rRrRrRrRrr...", "....rrrrrrrr....", ".....qqqqqq....."],
+ 'pottedCactus': [".....pP.....", "....gGGg....", "....gGGg.g..", ".g..gGGg.gG.", ".gG.gGGggGGg", ".gGggGGGGGg.", ".gGgggGGgg..", "..ggggGGg...", "....gGGg....", "....gGGg....", "..kkkkkkkk..", ".kKKKKKKKKk.", ".kkkkkkkkkk.", "..kkkkkkkk..", "...jjjjjj..."],
+ 'pottedFlower': ["...yY....pP...", "...yy.g..pp...", "....gGg.gGg...", ".y..gGggGg.y..", "yY.gGgGgGgGyY.", ".y.gGgGGgGg.y.", "..gGgGgGgGgg..", "...gGgghgGg...", "....bbbbbb....", "...bBBBBBBb...", "...bbbbbbbb...", "....bbbbbb....", ".....uuuu....."],
  'teacup': ["..ww..", ".wwww.", "wcccwo", "wcccwo", ".ddd.."],
  'vase': ["..r..", ".rRr.", "..g..", ".bBb.", "bBBBb", "bBBBb", ".bbb."],
  'photoFrame1': ["nnnnnn", "nbBBbn", "nbggbn", "nbbbbn", "nnnnnn", "..mm.."],
