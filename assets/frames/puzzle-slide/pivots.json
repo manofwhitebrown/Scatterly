@@ -1,0 +1,26 @@
+{
+"puzzle/slide/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/slide/tile": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/slide/tile_blank": {
+"pivot": [
+8,
+8
+]
+}
+}

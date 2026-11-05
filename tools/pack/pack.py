@@ -6,7 +6,7 @@ import json, os, re, sys
 from PIL import Image
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 GROUPS = {'core': 'core', 'room-slice': 'room:slice', 'house': 'house'}
-for _k in ('untangle', 'lights', 'mastermind'): GROUPS['puzzle-' + _k] = 'puzzle:' + _k   # puzzle skin atlases
+for _k in ('untangle', 'lights', 'mastermind', 'sort', 'word', 'code', 'target', 'sequence', 'slide', 'pipes', 'memory'): GROUPS['puzzle-' + _k] = 'puzzle:' + _k   # puzzle skin atlases
 for _r in ('entrance', 'living', 'kitchen', 'bathroom', 'bedroom', 'study'): GROUPS['room-' + _r] = 'room:' + _r   # one shell atlas per room
 def floor_kinds():
     """Floor-standing prop kinds (not flat/top/mount) parsed from src/content/worldKinds.ts: these get a baked contact shadow."""

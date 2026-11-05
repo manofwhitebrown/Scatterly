@@ -1,0 +1,26 @@
+{
+"puzzle/target/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/target/ring": {
+"pivot": [
+9,
+9
+]
+},
+"puzzle/target/ring_hit": {
+"pivot": [
+7,
+7
+]
+}
+}

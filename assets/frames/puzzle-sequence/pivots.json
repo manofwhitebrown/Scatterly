@@ -1,0 +1,62 @@
+{
+"puzzle/sequence/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/sequence/pad_0": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sequence/pad_lit_0": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sequence/pad_1": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sequence/pad_lit_1": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sequence/pad_2": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sequence/pad_lit_2": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sequence/pad_3": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sequence/pad_lit_3": {
+"pivot": [
+8,
+8
+]
+}
+}

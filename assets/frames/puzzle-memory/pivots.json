@@ -1,0 +1,26 @@
+{
+"puzzle/memory/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/memory/card_back": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/memory/card_face": {
+"pivot": [
+8,
+8
+]
+}
+}

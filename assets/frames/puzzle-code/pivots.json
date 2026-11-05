@@ -1,0 +1,26 @@
+{
+"puzzle/code/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/code/key": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/code/slot": {
+"pivot": [
+8,
+8
+]
+}
+}

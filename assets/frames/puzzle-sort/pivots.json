@@ -1,0 +1,38 @@
+{
+"puzzle/sort/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/sort/token_0": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sort/token_1": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sort/token_2": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/sort/token_3": {
+"pivot": [
+8,
+8
+]
+}
+}

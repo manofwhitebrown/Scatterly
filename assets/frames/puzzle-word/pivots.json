@@ -1,0 +1,38 @@
+{
+"puzzle/word/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/word/tile": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/word/tile_ok": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/word/tile_near": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/word/tile_miss": {
+"pivot": [
+8,
+8
+]
+}
+}

@@ -1,0 +1,26 @@
+{
+"puzzle/pipes/panel": {
+"pivot": [
+0,
+0
+],
+"slice": [
+8,
+8,
+8,
+8
+]
+},
+"puzzle/pipes/pipe_straight": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/pipes/pipe_elbow": {
+"pivot": [
+8,
+8
+]
+}
+}
