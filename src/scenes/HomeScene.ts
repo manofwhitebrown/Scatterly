@@ -13,6 +13,9 @@ import type { RunView } from './RoomRun';
 import { drawRoomShell } from './homeDraw';
 import { drawRoomProps } from './homeProps';
 import { buildHomeChrome } from './homeChrome';
+import { HomeLight } from './homeLight';
+import { shellPart } from '../art/light';
+import type { LightTime } from '../art/light';
 import { LAYOUT } from '../core/layout';
 import { LAYOUT_EVENT } from '../core/screen';
 import { hudBoxes } from '../ui/hudLayout';
@@ -42,7 +45,7 @@ const TAP_SLOP = 14;
 
 const LONG_MS = 450;
 
-interface HomeHooks { spots(): Array<{ spotId: string; x: number; y: number }>; hotspots(): Array<{ room: RoomId; x: number; y: number }>; focus(room: RoomId): void; overview(): void; focused(): RoomId | null; hud(): HudRect[] }
+interface HomeHooks { spots(): Array<{ spotId: string; x: number; y: number }>; hotspots(): Array<{ room: RoomId; x: number; y: number }>; focus(room: RoomId): void; overview(): void; focused(): RoomId | null; hud(): HudRect[]; setLight(t: LightTime): void }
 interface HudRect { id: string; x: number; y: number; w: number; h: number }
 
 /**
@@ -54,6 +57,7 @@ export class HomeScene extends Phaser.Scene {
   private world!: Phaser.GameObjects.Container;
   private shells = new Map<RoomId, Phaser.GameObjects.Container>();
   private veil!: Phaser.GameObjects.Graphics;
+  private light!: HomeLight;
   private lifted: { room: RoomId; at: number } | null = null;
   private rooms!: Phaser.GameObjects.Container;
   private sky: HomeSky | null = null;
@@ -111,6 +115,7 @@ export class HomeScene extends Phaser.Scene {
     this.veil = this.add.graphics().setVisible(false);
     this.veil.fillStyle(COLOR.plateEdge, FOCUS_DIM).fillRect(-5000, -4000, 10000, 8000);
     this.world.add(this.veil);
+    this.light = new HomeLight(this, this.world);
     this.actors = new HomeActors(this, this.world, () => isCalm(this) || this.run?.mode === 'rush' || this.run?.profile.settings.walkAnim === false, 'living', () => isCalm(this));
     void Promise.all([ensureGroup(this, 'room:slice'), ensureGroup(this, 'house'), ...WORLD_ROOMS.map((r) => ensureGroup(this, `room:${r}`))]).then(() => { if (this.sys.isActive() && this.rooms.active) this.rebuildRooms(); });
     void ensureGroup(this, 'house').then(() => { if (this.sys.isActive() && this.rooms.active) this.world.addAt(bakeYard(this), 0); });
@@ -139,7 +144,7 @@ export class HomeScene extends Phaser.Scene {
   /** (Re)builds one room's static layer: shell, then decor in painter order (baked `prop/<kind>` art where a frame exists, a box otherwise). */
   private buildRoom(c: Phaser.GameObjects.Container, room: RoomId): void {
     c.removeAll(true);
-    const shell = frame(`shell/${room}/full`);
+    const shell = frame(`shell/${room}/${shellPart(this.light.time)}`) ?? frame(`shell/${room}/full`);
     const slot = HOUSE_WORLD.find((s) => s.room === room);
     if (shell && slot) {
       // Baked shell (walls, floor, windows, door) at ROOM_SIZE; pivot is the back corner of the floor diamond.
@@ -150,7 +155,7 @@ export class HomeScene extends Phaser.Scene {
       drawRoomShell(g, room);
       c.add(g);
     }
-    addWindowGlow(this, c, room as WorldRoom);
+    addWindowGlow(this, c, room as WorldRoom, this.light.time === 'dusk' || this.light.time === 'night');
     // Always draw the props (the Overview needs them too); `decor` only exists during a run, and `a?.f(g())` would skip g().
     const targets = drawRoomProps(this, c, room as WorldRoom);
     this.decor?.setTargets(room, targets);
@@ -176,6 +181,7 @@ export class HomeScene extends Phaser.Scene {
     const spots = new HomeSpots(this, this.world, allSpots(run.profile).filter((sp) => run.rooms.includes(sp.room)), run.session, () => this.cam, { gated: (id) => run.scenario.gates[id] !== undefined, early: () => run.profile.settings.showLockIcons });
     this.spots = spots;
     this.hints = new SpotHints(this, this.world, spots);
+    this.light.raise(this.world);
     this.decor = new DecorFeel(this, () => this.hints?.outline(), (a) => this.toScreen(a));
     for (const [r, c] of this.shells) this.buildRoom(c, r);
     const view: RunView = {
@@ -213,6 +219,7 @@ export class HomeScene extends Phaser.Scene {
       overview: () => this.focusOn(null),
       focused: () => this.focusRoom,
       hud: () => this.hudRects(),
+      setLight: (t) => { this.light.set(t); this.sky?.setTime(t); this.rebuildRooms(); },
     };
   }
 

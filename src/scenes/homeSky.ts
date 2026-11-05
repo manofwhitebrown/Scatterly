@@ -73,6 +73,12 @@ export class HomeSky {
     this.veil.clear().fillStyle(color, alpha).fillRect(-SKY_W, -SKY_H, SKY_W * 2, SKY_H * 2).setVisible(on);
   }
 
+  /** Re-tints the backdrop for another time of day. */
+  setTime(time: SkyTime): void {
+    this.tex.setTint(SKY_TIMES[time]);
+    for (const c of this.clouds) c.setTint(SKY_TIMES[time]);
+  }
+
   private drift(): void {
     for (const c of this.clouds) { c.x += 1; if (c.x > SKY_W / 2 + 100) c.x = -SKY_W / 2 - 100; }
   }
