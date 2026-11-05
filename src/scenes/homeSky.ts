@@ -49,6 +49,7 @@ export class HomeSky {
   private readonly tex: Phaser.GameObjects.RenderTexture;
   private readonly clouds: Phaser.GameObjects.Image[] = [];
   private readonly timer: Phaser.Time.TimerEvent | null;
+  private readonly veil: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene, calm: boolean, time: SkyTime = 'morning') {
     this.tex = bakeSky(scene);
@@ -61,7 +62,14 @@ export class HomeSky {
       this.clouds.push(c);
       this.root.add(c);
     }
+    this.veil = scene.add.graphics().setVisible(false);
+    this.root.add(this.veil);
     this.timer = calm ? null : scene.time.addEvent({ delay: 1000, loop: true, callback: () => this.drift() });
+  }
+
+  /** Darkens the whole backdrop by the same veil the world gets while a room is focused. */
+  setDim(on: boolean, color: number, alpha: number): void {
+    this.veil.clear().fillStyle(color, alpha).fillRect(-SKY_W, -SKY_H, SKY_W * 2, SKY_H * 2).setVisible(on);
   }
 
   private drift(): void {

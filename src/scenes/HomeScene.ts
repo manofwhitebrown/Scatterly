@@ -36,6 +36,7 @@ import type { CameraState } from './homeWorld';
 
 const TWEEN_MS = 300;
 const BTN = 96;
+const FOCUS_DIM = 0.72;
 const TAP_SLOP = 14;
 
 const LONG_MS = 450;
@@ -51,7 +52,8 @@ export class HomeScene extends Phaser.Scene {
   __e2e?: HomeHooks;
   private world!: Phaser.GameObjects.Container;
   private shells = new Map<RoomId, Phaser.GameObjects.Container>();
-  private dimmers = new Map<RoomId, Phaser.GameObjects.Graphics>();
+  private veil!: Phaser.GameObjects.Graphics;
+  private lifted: { room: RoomId; at: number } | null = null;
   private rooms!: Phaser.GameObjects.Container;
   private sky: HomeSky | null = null;
   private hints: SpotHints | null = null;
@@ -83,7 +85,6 @@ export class HomeScene extends Phaser.Scene {
     this.longTimer = null;
     this.longFired = false;
     this.shells.clear();
-    this.dimmers.clear();
     this.sky = null;
     this.hints = null;
     this.actors = null;
@@ -106,17 +107,17 @@ export class HomeScene extends Phaser.Scene {
     this.actors = new HomeActors(this, this.world, () => isCalm(this) || this.run?.mode === 'rush' || this.run?.profile.settings.walkAnim === false, 'living', () => isCalm(this));
     this.rooms = this.add.container(0, 0);
     this.world.add(this.rooms);
+    this.veil = this.add.graphics().setVisible(false);
+    this.veil.fillStyle(COLOR.plateEdge, FOCUS_DIM).fillRect(-5000, -4000, 10000, 8000);
+    this.world.add(this.veil);
     this.actors = new HomeActors(this, this.world, () => isCalm(this) || this.run?.mode === 'rush' || this.run?.profile.settings.walkAnim === false, 'living', () => isCalm(this));
     void Promise.all([ensureGroup(this, 'room:slice'), ensureGroup(this, 'house'), ...WORLD_ROOMS.map((r) => ensureGroup(this, `room:${r}`))]).then(() => { if (this.sys.isActive() && this.rooms.active) this.rebuildRooms(); });
     void ensureGroup(this, 'house').then(() => { if (this.sys.isActive() && this.rooms.active) this.world.addAt(bakeYard(this), 0); });
     for (const s of HOUSE_WORLD) {
       const g = this.add.container(0, 0);
       this.buildRoom(g, s.room);
-      const dim = this.add.graphics().setVisible(false);
-      dim.fillStyle(COLOR.plateEdge, 0.75).fillPoints(roomPolygon(s.room), true);
-      this.rooms.add([g, dim]);
+      this.rooms.add(g);
       this.shells.set(s.room, g);
-      this.dimmers.set(s.room, dim);
     }
     if (new URLSearchParams(window.location.search).get('debug') === '1') {
       this.debugText = makeText(this, 12, 8, artStatsText(artStats(hasFrame)), { fontSize: '20px' }).setOrigin(0, 0).setDepth(DEPTH.toast + 5).setScrollFactor(0);
@@ -326,11 +327,20 @@ export class HomeScene extends Phaser.Scene {
     if (this.focusRoom) this.tweenTo(focusCamera(this.focusRoom, GAME_W, GAME_H), 240);
   }
 
+  /**
+   * Focus: ONE veil darkens everything alike (all other rooms, their props, the yard, the sky) and the focused room is
+   * lifted above it, so nothing from a neighbouring room can show over the focused floor. Overview: no veil, rooms back in order.
+   */
   private refreshDim(): void {
-    // Neighbours stay opaque but darkened (~25% brightness) and sit BEHIND the focused room, never over it.
-    for (const [room, dim] of this.dimmers) dim.setVisible(!!this.focusRoom && room !== this.focusRoom);
-    const f = this.focusRoom ? this.shells.get(this.focusRoom) : undefined;
-    if (f) this.rooms.bringToTop(f);
+    if (this.lifted) { this.rooms.addAt(this.shells.get(this.lifted.room) as Phaser.GameObjects.Container, this.lifted.at); this.lifted = null; }
+    const room = this.focusRoom;
+    this.veil.setVisible(!!room);
+    this.sky?.setDim(!!room, COLOR.plateEdge, FOCUS_DIM);
+    const f = room ? this.shells.get(room) : undefined;
+    if (!room || !f) return;
+    this.lifted = { room, at: this.rooms.getIndex(f) };
+    this.rooms.remove(f);
+    this.world.addAt(f, this.world.getIndex(this.veil) + 1);
   }
 
   private buildChrome(): void {
@@ -361,7 +371,7 @@ export class HomeScene extends Phaser.Scene {
     this.actors = null;
     this.doors = [];
     this.shells.clear();
-    this.dimmers.clear();
+    this.lifted = null;
     this.__e2e = undefined;
   }
 }
