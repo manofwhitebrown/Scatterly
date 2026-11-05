@@ -36,7 +36,7 @@ export class MastermindScene extends PuzzleShell {
   }
 
   protected build(): void {
-    const spec = PUZZLES.mastermind.generate(this.req.seed, this.req.difficulty);
+    const spec = PUZZLES.mastermind.generate(this.req.seed, this.level);
     this.spec = spec;
     this.guess = [];
     this.guesses = [];

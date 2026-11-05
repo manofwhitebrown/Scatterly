@@ -49,7 +49,7 @@ export class CodeScene extends PuzzleShell {
     this.typed = '';
     this.wrongCount = 0;
     this.cells = [];
-    const spec = PUZZLES.code.generate(this.req.seed, this.req.difficulty, { facts: this.gatherFacts() });
+    const spec = PUZZLES.code.generate(this.req.seed, this.level, { facts: this.gatherFacts() });
     this.spec = spec;
     const left = PX + 16; // keypad column, clear of the notes drawer
     const cx = left + KEYPAD_W / 2;

@@ -1,5 +1,5 @@
 import { Rng, deriveSeed } from '../rng';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type PuzzleDef, at, isIntArray, popcount } from './types';
 
 /** Lights Out: pressing a cell toggles it and its 4 neighbours. Goal: every light off. */
@@ -66,14 +66,14 @@ export function minSolution(n: number, board: number): number {
 
 function generate(seed: number, d: Difficulty): LightsSpec {
   const rng = new Rng(deriveSeed(seed, 404));
-  const n = d + 2;
+  const n = Math.min(5, d + 2);
   for (let tries = 0; tries < 200; tries++) {
     const k = rng.int(d + 2, d * 2 + 3);
     const presses = rng.shuffle(Array.from({ length: n * n }, (_, i) => i)).slice(0, k);
     const board = apply(n, presses);
     if (board === 0) continue;
     const min = popcount(minSolution(n, board));
-    if (min < 3) continue;
+    if (min < (d >= 4 ? 6 : 3)) continue;
     return { n, cells: Array.from({ length: n * n }, (_, i) => ((board >> i) & 1) === 1), minPresses: min };
   }
   const board = apply(3, [0, 4, 8]);
@@ -97,5 +97,5 @@ export const lightsPuzzle: PuzzleDef<LightsSpec, number[]> = {
     const c = at(cells, Math.min(progress, cells.length - 1));
     return `Press the cell in row ${Math.floor(c / spec.n) + 1}, column ${(c % spec.n) + 1}.`;
   },
-  parSeconds: (d) => (d === 1 ? 20 : d === 2 ? 40 : 70),
+  parSeconds: (d) => [0, 20, 40, 70, 90, 110][d] ?? 70,
 };

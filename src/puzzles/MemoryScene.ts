@@ -34,7 +34,7 @@ export class MemoryScene extends PuzzleShell {
   }
 
   protected build(): void {
-    const spec = PUZZLES.memory.generate(this.req.seed, this.req.difficulty);
+    const spec = PUZZLES.memory.generate(this.req.seed, this.level);
     this.spec = spec;
     this.pads = [];
     this.round = 1;

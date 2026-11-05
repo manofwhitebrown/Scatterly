@@ -29,7 +29,7 @@ export class SlideScene extends PuzzleShell {
   }
 
   protected build(): void {
-    const spec = PUZZLES.slide.generate(this.req.seed, this.req.difficulty);
+    const spec = PUZZLES.slide.generate(this.req.seed, this.level);
     this.spec = spec;
     this.cells = [];
     const size = N * CELL + (N - 1) * GAP;

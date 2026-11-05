@@ -1,4 +1,4 @@
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 
 /** A numeric fact carried by a clue (e.g. receipt total). Structurally identical to Clue.facts entries. */
 export interface Fact { key: string; label: string; value: number }

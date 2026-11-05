@@ -1,5 +1,5 @@
 import { Rng, deriveSeed } from '../rng';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type PuzzleDef, at, isIntArray } from './types';
 
 /** Sides as bit flags: N=1 E=2 S=4 W=8. A tile's open sides = base mask rotated clockwise `rot` times. */
@@ -75,8 +75,8 @@ const solvedBy = (spec: Pick<PipesSpec, 'n' | 'source' | 'sinks' | 'base'>, rots
 
 function generate(seed: number, d: Difficulty): PipesSpec {
   const rng = new Rng(deriveSeed(seed, 606));
-  const n = d + 2, size = n * n;
-  const wrongMin = d === 1 ? 3 : d === 2 ? 5 : 8;
+  const n = Math.min(5, d + 2), size = n * n;
+  const wrongMin = [0, 3, 5, 8, 11, 13][d] ?? 8;
   for (let tries = 0; tries < 200; tries++) {
     const source = rng.int(0, size - 1);
     const masks = spanningTree(rng, n, source);
@@ -105,5 +105,5 @@ export const pipesPuzzle: PuzzleDef<PipesSpec, number[]> = {
     const c = at(wrong, Math.min(progress, wrong.length - 1));
     return `The pipe in row ${Math.floor(c / spec.n) + 1}, column ${(c % spec.n) + 1} needs turning.`;
   },
-  parSeconds: (d) => (d === 1 ? 25 : d === 2 ? 45 : 80),
+  parSeconds: (d) => [0, 25, 45, 80, 100, 125][d] ?? 80,
 };

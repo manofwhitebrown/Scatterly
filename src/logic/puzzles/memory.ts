@@ -1,11 +1,11 @@
 import { Rng, deriveSeed } from '../rng';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type PuzzleDef, isIntArray } from './types';
 
 /** Simon-style: the scene replays a growing prefix of `sequence`; the full answer is the whole sequence. */
 export interface MemorySpec { pads: number; sequence: number[] }
 
-const SETUP: Record<Difficulty, { pads: number; length: number }> = { 1: { pads: 4, length: 3 }, 2: { pads: 6, length: 5 }, 3: { pads: 9, length: 7 } };
+const SETUP: Record<Difficulty, { pads: number; length: number }> = { 1: { pads: 4, length: 3 }, 2: { pads: 6, length: 5 }, 3: { pads: 9, length: 7 }, 4: { pads: 9, length: 9 }, 5: { pads: 9, length: 11 } };
 
 function generate(seed: number, d: Difficulty): MemorySpec {
   const rng = new Rng(deriveSeed(seed, 808));
@@ -28,5 +28,5 @@ export const memoryPuzzle: PuzzleDef<MemorySpec, number[]> = {
     const n = Math.min(progress + 2, spec.sequence.length);
     return `The first ${n} pads were: ${spec.sequence.slice(0, n).map((v) => v + 1).join(', ')}.`;
   },
-  parSeconds: (d) => (d === 1 ? 12 : d === 2 ? 25 : 45),
+  parSeconds: (d) => [0, 12, 25, 45, 60, 80][d] ?? 45,
 };

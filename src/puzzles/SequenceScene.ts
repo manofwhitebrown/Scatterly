@@ -30,11 +30,11 @@ export class SequenceScene extends PuzzleShell {
   }
 
   private get keypadMode(): boolean {
-    return this.req.difficulty === 3;
+    return this.level >= 3;
   }
 
   protected build(): void {
-    const spec = PUZZLES.sequence.generate(this.req.seed, this.req.difficulty);
+    const spec = PUZZLES.sequence.generate(this.req.seed, this.level);
     this.spec = spec;
     this.typed = '';
     this.choices = [];

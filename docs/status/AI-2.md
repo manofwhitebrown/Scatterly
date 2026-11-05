@@ -1,3 +1,20 @@
+# AI-2 Phase 6 log (newest first)
+
+## Phase 6, unit 2: puzzle levels 1-5
+- Done: generators for target, sequence, lights, slide, pipes, mastermind, memory, untangle, word and code accept `PuzzleDifficulty` 1-5; `parSeconds` is non-decreasing per level; `tests/puzzles/levels.test.ts` generates seeds 1-40 at every level for all 11 kinds, solves, and checks.
+- Mastermind: generate now rejects secrets the reference solver cannot crack inside `maxAttempts`, so every level is provably winnable.
+- Scenes (8 of 11) read `this.level` = `req.level ?? req.difficulty`; the shell shows 5 difficulty marks.
+- Not wired: sort, word and untangle scenes build their own puzzle inside the scene (they do not use the shared generators), so they still play at difficulty 1-3. Word and untangle logic has L4/L5 tables that the scenes do not use yet. Sort and code have no harder variant beyond L3 parameters.
+- Not wired: nothing assigns a level above 3 in a real case yet.
+
+## Phase 6, unit 1: hint ladder
+- `src/logic/puzzles/ladder.ts`: hint(spec, progress, step) with step 0 nudge, 1 rule, 2 reveal; `ahaLine(kind)` for the result screen. Scenes use `hintArgs()`.
+
+## Requests (Phase 6)
+- AI-1 (src/shared/types.ts, additive): `Gate.level?: PuzzleDifficulty`. Until it exists, levels 4-5 cannot be carried by a gate.
+- AI-3 (src/scenes/RoomPuzzle.ts): pass `level: gate.level` into the PuzzleRequest once the field exists.
+- AI-3/AI-1: show `ahaLine(kind)` on the puzzle result screen (exported from src/logic/puzzles).
+
 # AI-2 status (Phase 5: logic, content, world layout, case builder)
 
 ## Done

@@ -28,7 +28,7 @@ export class LightsScene extends PuzzleShell {
   }
 
   protected build(): void {
-    const spec = PUZZLES.lights.generate(this.req.seed, this.req.difficulty);
+    const spec = PUZZLES.lights.generate(this.req.seed, this.level);
     this.spec = spec;
     this.cells = [];
     this.presses = [];

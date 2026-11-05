@@ -37,7 +37,7 @@ export class TargetScene extends PuzzleShell {
   }
 
   protected build(): void {
-    const spec = PUZZLES.target.generate(this.req.seed, this.req.difficulty);
+    const spec = PUZZLES.target.generate(this.req.seed, this.level);
     this.spec = spec;
     this.history = [];
     this.tiles = [];

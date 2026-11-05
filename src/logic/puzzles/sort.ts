@@ -1,5 +1,5 @@
 import { Rng, deriveSeed } from '../rng';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type PuzzleDef, at, isIntArray } from './types';
 
 export type SortMode = 'colour' | 'shape' | 'type' | 'combo';
@@ -57,5 +57,5 @@ export const sortPuzzle: PuzzleDef<SortSpec, number[]> = {
     const p = at(spec.pieces, i);
     return `"${p.label}" goes in "${at(spec.bins, p.bin)}".`;
   },
-  parSeconds: (d) => (d === 1 ? 14 : d === 2 ? 25 : 50),
+  parSeconds: (d) => [0, 14, 25, 50, 60, 70][d] ?? 50,
 };

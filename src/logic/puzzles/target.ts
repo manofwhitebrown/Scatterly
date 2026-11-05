@@ -1,5 +1,5 @@
 import { Rng, deriveSeed } from '../rng';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type PuzzleDef, at } from './types';
 
 export type Op = '+' | '-' | '*' | '/';
@@ -50,9 +50,9 @@ function build(rng: Rng, count: number, steps: number, lo: number, hi: number): 
 
 function generate(seed: number, d: Difficulty): TargetSpec {
   const rng = new Rng(deriveSeed(seed, 202));
-  const count = d === 1 ? 4 : d === 2 ? 5 : 6;
-  const steps = d === 1 ? 2 : d === 2 ? 3 : 4;
-  const hi = d === 1 ? 9 : d === 2 ? 12 : 25;
+  const count = Math.min(6, d + 3);
+  const steps = Math.min(5, d + 1);
+  const hi = [0, 9, 12, 25, 30, 40][d] ?? 25;
   for (let i = 0; i < 400; i++) {
     const spec = build(rng, count, steps, 1, hi);
     if (spec) return spec;

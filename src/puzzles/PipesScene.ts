@@ -30,7 +30,7 @@ export class PipesScene extends PuzzleShell {
   }
 
   protected build(): void {
-    const spec = PUZZLES.pipes.generate(this.req.seed, this.req.difficulty);
+    const spec = PUZZLES.pipes.generate(this.req.seed, this.level);
     this.spec = spec;
     this.cells = [];
     const n = spec.n;

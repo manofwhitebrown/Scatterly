@@ -1,5 +1,5 @@
 import { Rng, deriveSeed } from '../rng';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type PuzzleCtx, type PuzzleDef, at } from './types';
 
 /** Positions are normalised to 0..1 inside the play area. */
@@ -19,6 +19,8 @@ const LAYOUT: Record<Difficulty, { cols: number; rows: number; drop: number; min
   1: { cols: 3, rows: 2, drop: 0, minCross: 2 },
   2: { cols: 3, rows: 3, drop: 0, minCross: 4 },
   3: { cols: 4, rows: 4, drop: 3, minCross: 6 },
+  4: { cols: 4, rows: 4, drop: 2, minCross: 9 },
+  5: { cols: 5, rows: 4, drop: 3, minCross: 12 },
 };
 
 function themeOf(context: string | undefined): UntangleSpec['theme'] {
@@ -104,5 +106,5 @@ export const untanglePuzzle: PuzzleDef<UntangleSpec, Pt[]> = {
   hint(spec, progress = 0) {
     return progress <= 0 ? 'Move the knots so no cords cross. Start with the ones tangled the most.' : `Aim for ${spec.cols} columns and ${spec.rows} rows, like a net.`;
   },
-  parSeconds: (d) => (d === 1 ? 15 : d === 2 ? 35 : 70),
+  parSeconds: (d) => [0, 15, 35, 70, 95, 120][d] ?? 70,
 };

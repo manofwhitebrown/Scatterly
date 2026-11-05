@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_H, GAME_W } from '../shared/types';
-import type { Clue, PuzzleLaunchData, PuzzleRequest, PuzzleResult } from '../shared/types';
+import type { Clue, PuzzleDifficulty, PuzzleLaunchData, PuzzleRequest, PuzzleResult } from '../shared/types';
 import { isLowFx } from '../core/perf';
 import { flags } from '../core/flags';
 import { playFx } from '../fx';
@@ -155,13 +155,18 @@ export abstract class PuzzleShell extends Phaser.Scene {
     }
   }
 
+  /** Effective level 1-5: a request without `level` plays at its difficulty (1-3). */
+  protected get level(): PuzzleDifficulty {
+    return this.req.level ?? this.req.difficulty;
+  }
+
   /** Filled marks = difficulty, outlined = remaining: readable without colour. */
   private drawDifficulty(): void {
     const g = this.add.graphics();
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
       const cx = PX + 52 + i * 40;
       const cy = PY + 30;
-      if (i < this.req.difficulty) {
+      if (i < this.level) {
         g.fillStyle(PAL.terracotta, 1);
         g.fillCircle(cx, cy, 14);
       } else {

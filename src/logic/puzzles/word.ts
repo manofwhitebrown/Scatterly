@@ -1,6 +1,6 @@
 import { Rng, deriveSeed } from '../rng';
 import { CIPHER_NOTES, WORDS } from '../../content/puzzleWords';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type PuzzleCtx, type PuzzleDef, at } from './types';
 
 export type WordMode = 'unscramble' | 'decoy' | 'cipher';
@@ -29,7 +29,7 @@ function generate(seed: number, d: Difficulty, ctx?: PuzzleCtx): WordSpec {
   const rng = new Rng(deriveSeed(seed, 1111));
   const payload = (ctx?.payload ?? '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 12);
   const custom = payload.length >= 2;
-  const [lo, hi] = d === 1 ? [4, 5] : d === 2 ? [6, 7] : [4, 6];
+  const [lo, hi] = d === 1 ? [4, 5] : d === 2 ? [6, 7] : d === 3 ? [4, 6] : d === 4 ? [6, 8] : [7, 9];
   const word = custom ? payload : rng.pick(WORDS.filter((w) => w.length >= lo && w.length <= hi));
   const mode: WordMode = d === 3 ? 'cipher' : d === 2 ? 'decoy' : 'unscramble';
   const defaultHint = mode === 'cipher' ? 'Each letter was shifted. The last word is your answer.' : mode === 'decoy' ? 'Find the word. One tile is a decoy.' : 'Unscramble the word.';
@@ -66,5 +66,5 @@ export const wordPuzzle: PuzzleDef<WordSpec, string> = {
     const n = Math.min(progress + 1, spec.word.length - 1);
     return `The word starts with "${spec.word.slice(0, n)}" and has ${spec.word.length} letters.`;
   },
-  parSeconds: (d) => (d === 1 ? 12 : d === 2 ? 25 : 50),
+  parSeconds: (d) => [0, 12, 25, 50, 65, 85][d] ?? 50,
 };

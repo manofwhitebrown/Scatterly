@@ -1,5 +1,5 @@
 import { Rng, deriveSeed } from '../rng';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type Fact, type PuzzleCtx, type PuzzleDef, at } from './types';
 
 export interface CodeSpec {
@@ -55,15 +55,15 @@ const OWN_LABELS: ReadonlyArray<readonly [string, string]> = [
 ];
 
 function ownFacts(rng: Rng, d: Difficulty): Fact[] {
-  const n = d === 3 ? 3 : 2;
+  const n = d >= 3 ? 3 : 2;
   const picks = rng.shuffle(OWN_LABELS).slice(0, n);
-  const hi = d === 1 ? 99 : d === 2 ? 140 : 30;
-  const lo = d === 1 ? 10 : d === 2 ? 55 : 3;
+  const hi = d === 1 ? 99 : d === 2 ? 140 : d === 3 ? 30 : d === 4 ? 40 : 55;
+  const lo = d === 1 ? 10 : d === 2 ? 55 : d === 3 ? 3 : d === 4 ? 6 : 9;
   return picks.map(([key, label]) => ({ key, label, value: rng.int(lo, hi) }));
 }
 
 function candidates(facts: readonly Fact[], d: Difficulty): Cand[] {
-  const base = d === 3 ? triples(facts) : pairs(facts, d);
+  const base = d >= 3 ? triples(facts) : pairs(facts, d);
   return base.filter((c) => ok(c.value));
 }
 
@@ -95,7 +95,7 @@ export const codePuzzle: PuzzleDef<CodeSpec, string> = {
     if (progress === 1) return `The code has ${spec.digits} digits.`;
     return `The first digit is ${at(spec.expected.split(''), 0)}.`;
   },
-  parSeconds: (d) => (d === 1 ? 18 : d === 2 ? 35 : 65),
+  parSeconds: (d) => [0, 18, 35, 65, 80, 95][d] ?? 65,
 };
 
 /** True when these facts can produce a valid 3-4 digit code at this difficulty (seed independent). */

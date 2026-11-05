@@ -1,5 +1,5 @@
 import { Rng, deriveSeed } from '../rng';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type PuzzleDef, at, isIntArray } from './types';
 
 /** 3x3 sliding tiles. tiles[i] is the tile in cell i (0 = blank). Goal: 1..8 then blank. */
@@ -7,7 +7,7 @@ export interface SlideSpec { n: 3; tiles: number[]; depth: number; solution: num
 
 const N = 3;
 const GOAL = [1, 2, 3, 4, 5, 6, 7, 8, 0];
-const DEPTH: Record<Difficulty, readonly [number, number]> = { 1: [8, 10], 2: [11, 14], 3: [15, 18] };
+const DEPTH: Record<Difficulty, readonly [number, number]> = { 1: [8, 10], 2: [11, 14], 3: [15, 18], 4: [19, 22], 5: [23, 26] };
 
 function neighbours(cell: number): number[] {
   const r = Math.floor(cell / N), c = cell % N, out: number[] = [];
@@ -103,5 +103,5 @@ export const slidePuzzle: PuzzleDef<SlideSpec, number[]> = {
     const c = at(spec.solution, Math.min(progress, spec.solution.length - 1));
     return `Slide the tile in row ${Math.floor(c / N) + 1}, column ${(c % N) + 1} into the gap.`;
   },
-  parSeconds: (d) => (d === 1 ? 25 : d === 2 ? 45 : 80),
+  parSeconds: (d) => [0, 25, 45, 80, 105, 130][d] ?? 80,
 };

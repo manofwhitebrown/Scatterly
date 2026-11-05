@@ -1,5 +1,5 @@
 import { Rng, deriveSeed } from '../rng';
-import type { Difficulty } from '../../shared/types';
+import type { PuzzleDifficulty as Difficulty } from '../../shared/types';
 import { type PuzzleDef, at } from './types';
 
 export type SeqFamily = 'arithmetic' | 'geometric' | 'alternating' | 'powers' | 'fibonacci' | 'secondOrder';
@@ -17,6 +17,8 @@ const FAMILIES: Record<Difficulty, readonly SeqFamily[]> = {
   1: ['arithmetic', 'arithmetic', 'geometric', 'powers'],
   2: ['arithmetic', 'geometric', 'alternating', 'powers', 'fibonacci'],
   3: ['geometric', 'alternating', 'powers', 'fibonacci', 'secondOrder'],
+  4: ['alternating', 'fibonacci', 'secondOrder', 'secondOrder'],
+  5: ['fibonacci', 'secondOrder', 'secondOrder'],
 };
 
 interface Built { all: number[]; rule: string; wrong: (missing: number) => number[] }
@@ -88,5 +90,5 @@ export const sequencePuzzle: PuzzleDef<SequenceSpec, number> = {
     if (progress <= 0) return `Look at how much each term changes: the pattern is "${spec.rule.split(' ')[0]}...".`;
     return `The rule: ${spec.rule}.`;
   },
-  parSeconds: (d) => (d === 1 ? 12 : d === 2 ? 25 : 45),
+  parSeconds: (d) => [0, 12, 25, 45, 60, 75][d] ?? 45,
 };
