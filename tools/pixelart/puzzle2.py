@@ -5,7 +5,7 @@ import json, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 from dsl import col
 from yard import new
-from puzzles import tilec, put_all
+from puzzles import tilec, put_all, disc, blob
 CHECK = [(4, 8), (5, 9), (6, 10), (7, 9), (8, 8), (9, 7), (10, 6), (11, 5)]
 CROSS = [(x, x) for x in range(4, 12)] + [(x, 15 - x) for x in range(4, 12)]
 def check(c='paper'):
@@ -46,15 +46,27 @@ def pipes():
 def slide():
     star = lambda px: put_all(px, [(7, 4), (6, 5), (7, 5), (8, 5), (5, 6), (6, 6), (7, 6), (8, 6), (9, 6), (6, 7), (7, 7), (8, 7), (6, 8), (8, 8)], 'butter.4')
     return {'tile_ok': (tilec('woodWarm', star), (7, 7)), 'tile_down': (tilec('woodWarm', lambda px: put_all(px, [(x, 12) for x in range(2, 12)], 'woodWarm.1')), (7, 7))}
-SHAPES = [lambda px: put_all(px, [(x, y) for x in range(5, 9) for y in range(5, 9)], 'paper'),
-          lambda px: put_all(px, [(7, 4), (6, 5), (7, 5), (8, 5), (5, 6), (6, 6), (7, 6), (8, 6), (9, 6), (5, 7), (6, 7), (7, 7), (8, 7), (9, 7), (6, 8), (7, 8), (8, 8), (7, 9)], 'paper'),
-          lambda px: put_all(px, [(7, 4), (6, 5), (7, 5), (8, 5), (5, 6), (6, 6), (7, 6), (8, 6), (9, 6), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7), (9, 7), (10, 7)], 'paper'),
-          lambda px: put_all(px, [(x, y) for x in range(4, 11) for y in range(4, 11) if (x - 7) ** 2 + (y - 7) ** 2 <= 9], 'paper')]
+SHAPES = [lambda px, c='paper': put_all(px, [(x, y) for x in range(5, 9) for y in range(5, 9)], c),
+          lambda px, c='paper': put_all(px, [(7, 4), (6, 5), (7, 5), (8, 5), (5, 6), (6, 6), (7, 6), (8, 6), (9, 6), (5, 7), (6, 7), (7, 7), (8, 7), (9, 7), (6, 8), (7, 8), (8, 8), (7, 9)], c),
+          lambda px, c='paper': put_all(px, [(7, 4), (6, 5), (7, 5), (8, 5), (5, 6), (6, 6), (7, 6), (8, 6), (9, 6), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7), (9, 7), (10, 7)], c),
+          lambda px, c='paper': put_all(px, [(x, y) for x in range(4, 11) for y in range(4, 11) if (x - 7) ** 2 + (y - 7) ** 2 <= 9], c)]
 def sort():
     out = {f'token_{i}': (tilec(r, SHAPES[i]), (7, 7)) for i, r in enumerate(('terracotta', 'sky', 'butter', 'sage'))}
     out['bin'] = (tilec('plaster', well('plaster.1')), (7, 7)); out['bin_ok'] = (tilec('sage', well('sage.3')), (7, 7))
     return out
-KINDS = {'code': code, 'memory': memory, 'pipes': pipes, 'slide': slide, 'sort': sort}
+def lights():
+    return {'tile_on_glow': (tilec('butter', lambda px: put_all(px, [(x, y) for x in range(2, 12) for y in range(2, 12) if x in (2, 11) or y in (2, 11)], 'butter.4')), (7, 7))}
+def mastermind():
+    return {'fb_exact': (disc(8, 'woodDark.2', 'woodDark.3', 'woodDark.1'), (4, 4)), 'fb_near': (disc(8, 'plaster.1', 'paper', 'plaster.3'), (4, 4))}
+def sequence():
+    out = {}
+    for i, r in enumerate(('terracotta', 'sky', 'butter', 'sage')):
+        out[f'pad_{i}'] = (tilec('stone', lambda px, i=i: SHAPES[i](px, 'stone.3')), (7, 7)); out[f'pad_lit_{i}'] = (tilec(r, SHAPES[i]), (7, 7))
+    return out
+def untangle():
+    link = blob(16, lambda x, y: col('woodWarm.2') if y in (5, 6, 7) and x < 14 else (0, 0, 0, 0))
+    return {'link': (link, (8, 8))}
+KINDS = {'code': code, 'memory': memory, 'pipes': pipes, 'slide': slide, 'sort': sort, 'lights': lights, 'mastermind': mastermind, 'sequence': sequence, 'untangle': untangle}
 def save(d, kind, name, im, pv, piv):
     pd = new(im.width + 2, im.height + 2); pd.alpha_composite(im, (1, 1))
     pd.save(os.path.join(d, f'puzzle__{kind}__{name}.png')); piv[f'puzzle/{kind}/{name}'] = {'pivot': [pv[0] + 1, pv[1] + 1]}

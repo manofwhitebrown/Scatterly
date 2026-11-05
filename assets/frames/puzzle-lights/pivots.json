@@ -22,5 +22,11 @@
 9,
 9
 ]
+},
+"puzzle/lights/tile_on_glow": {
+"pivot": [
+8,
+8
+]
 }
 }

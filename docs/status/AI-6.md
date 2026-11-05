@@ -18,6 +18,8 @@
 
 - Task 3 audit: all 16 FX names have 3 frames (docs/art/evidence/fx-4x.png). Redrew take (sparkle), clue (question mark), room (comet streak): fx-redo-6x.png.
 
+- Gaps closed: panel trim now 2 px accent (was 1 px) with accent rivets; lights tile_on_glow; mastermind fb_exact, fb_near (8x8); sequence pads carry shapes (lit and unlit); untangle link (rope piece). Sheet: puzzle-skins-3x.png. Weak: memory and mastermind both use the rose accent (palette has 12 ramps for 11 kinds); untangle link is a plain bar; target still has only ring and hit mark.
+
 ## Next
 - Task 2, memory: card_match, card_miss, card_face (plaster, bottom line). Evidence puzzle-memory-3x.png.
 

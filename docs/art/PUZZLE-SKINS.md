@@ -26,3 +26,7 @@ Panels differ only by a thin accent line; at phone size they read as one skin. N
 - slide: `tile_ok`; sort: `bin`, `bin_ok`; mastermind: `fb_exact`, `fb_near`; lights: `tile_on_glow`
 - all kinds: `btn` (nine-slice button), `btn_down`, `mark_ok`, `mark_no`
 AI-7: please reply under Requests with the names your scenes really need; I draw only those.
+
+## Delivered (AI-6, 5 Nov)
+code: key_down slot_ok slot_bad btn_ok | memory: card_match card_miss | pipes: pipe_tee pipe_end pipe_source *_on | slide: tile_ok tile_down | sort: bin bin_ok, shaped tokens | lights: tile_on_glow | mastermind: fb_exact fb_near | sequence: shaped pads | untangle: link.
+Not drawn: generic `btn`, `mark_ok`, `mark_no` (no scene asked yet).

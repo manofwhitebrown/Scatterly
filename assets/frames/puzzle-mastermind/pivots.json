@@ -52,5 +52,17 @@
 7,
 7
 ]
+},
+"puzzle/mastermind/fb_exact": {
+"pivot": [
+5,
+5
+]
+},
+"puzzle/mastermind/fb_near": {
+"pivot": [
+5,
+5
+]
 }
 }

@@ -17,10 +17,10 @@ def panel(accent):
             elif d == 1: c = col('woodWarm.4') if (x < n / 2 and y < n / 2) or d == 1 and (x == 1 or y == 1) else col('woodWarm.2')
             elif d == 2: c = col('woodWarm.3')
             elif d == 3: c = col(f'{accent}.2') if True else col('woodWarm.3')
-            elif d == 4: c = col('plaster.1')
+            elif d == 4: c = col(f'{accent}.3')
             else: c = col('paper')
             px[x, y] = c
-    for cx, cy in ((3, 3), (n - 4, 3), (3, n - 4), (n - 4, n - 4)): px[cx, cy] = col('woodWarm.1')
+    for cx, cy in ((3, 3), (n - 4, 3), (3, n - 4), (n - 4, n - 4)): px[cx, cy] = col(f'{accent}.4')
     return im
 def blob(w, fn):
     return outline(Image.frombytes('RGBA', (w - 2, w - 2), bytes(sum(([*fn(x, y)] for y in range(w - 2) for x in range(w - 2)), []))))

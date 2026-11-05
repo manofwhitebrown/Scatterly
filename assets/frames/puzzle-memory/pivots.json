@@ -22,5 +22,17 @@
 8,
 8
 ]
+},
+"puzzle/memory/card_match": {
+"pivot": [
+8,
+8
+]
+},
+"puzzle/memory/card_miss": {
+"pivot": [
+8,
+8
+]
 }
 }
