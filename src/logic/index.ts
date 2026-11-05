@@ -17,3 +17,5 @@ export type { ReplayStep } from './replay';
 export { captureSnapshot, restoreSnapshot, scenarioFingerprint, SNAPSHOT_REV } from './snapshot';
 export type { SessionSnapshot, SnapshotState, Restored } from './snapshot';
 export type { SessionState } from './session';
+export { puzzleBook, achievements, resultSummary } from './book';
+export type { PuzzleBookEntry, AchievementView, ResultSummary } from './book';

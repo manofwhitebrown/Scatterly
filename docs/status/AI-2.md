@@ -1,5 +1,15 @@
 # AI-2 Phase 6 log (newest first)
 
+## Phase 6, unit 5: data for AI-3's screens
+All pure, in `src/logic/book.ts`, exported from `src/logic` (index). They read; they never change the profile or the session.
+
+### Notes for AI-3
+- `puzzleBook(profile, enabled = ENABLED): PuzzleBookEntry[]` one entry per kind in `PUZZLE_KINDS` order: `{ kind, name, unlocked, seen, solved, skipped, bestMs: number | null, parMs: number | null, beatPar: boolean, skipPct: number | null }`. `parMs` is a pro's time for a standard (level 2) puzzle, null for kinds without a generator. `src/scenes/puzzleBook.ts` can now be a thin wrapper (or removed); its `PUZZLE_NAME` moved to `src/content/puzzleNames.ts`.
+- `achievements(profile): AchievementView[]` in display order: `{ id, name, desc, earned, n, m }`. `n === m` when earned; run-based ones (Sharp Eye, Habit Keeper, Quick Fingers) are 0/1 until earned; counters show real progress capped below `m`. Corrupt numbers give 0, never NaN.
+- `resultSummary(session, timeMs, timedOut = false): ResultSummary` = `{ mode, complete, timedOut, stars, coins, searches, parSearches, hintsUsed, timeMs, found: [{id,label}], missed: [{id,label}] }`. Safe to call before `session.finish(...)`; both agree. Puzzle-time bonuses and newly earned achievements are NOT in it (they come from the run/profile step in core).
+- `replayScript(scenario, { found })` checked for relaxed, rush and daily on days 1-12 incl. the guided day-1 case and the fallback: 5-14 steps, 8-30 s, ordered, ends where every target ended up.
+- Also for AI-3: new `PUZZLE_NAME` and `ahaLine(kind)` (shown on a solved puzzle) are available from content/logic.
+
 ## Phase 6, unit 4: Resume
 - `src/logic/snapshot.ts`: `captureSnapshot(session, seed, profile, elapsedMs)` and `restoreSnapshot(raw, profile)`; `GameSession.exportState()` / `importState()` (all or nothing). `SessionSnapshot` outer shape unchanged (`v: 1`), so `sanitizeResume` and save v4 need no change; `state.rev` = 1 is the revision of the inside.
 - The scenario is never stored: it is regenerated from seed + mode + saved day and session length, then compared with a fingerprint (targets, placement, gates, clues). Mismatch (new app version, other day) means null and a fresh case. Tries `generateCase`, then `generateScenario`, so it works with either generator.
